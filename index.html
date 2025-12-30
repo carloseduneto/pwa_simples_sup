@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Supabase Edge PWA</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      input,
+      button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 10px;
+        overflow-x: auto;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Supabase Edge Connector</h2>
+
+    <div id="auth-section">
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Senha" />
+      <button onclick="signUp()">Criar Conta (Teste)</button>
+      <button onclick="signIn()">Entrar</button>
+    </div>
+
+    <div id="app-section" class="hidden">
+      <p>Logado como: <span id="user-email"></span></p>
+      <button onclick="callEdgeFunction()">Consultar via Edge Function</button>
+      <button onclick="signOut()">Sair</button>
+
+      <h3>Resultado:</h3>
+      <pre id="result">...</pre>
+    </div>
+
+<script>
+        // CONFIGURAÇÃO: Substitua pelas suas chaves REAIS
+        const SUPABASE_URL = 'https://zmagogzkopaidsknopoz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptYWdvZ3prb3BhaWRza25vcG96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDEyOTgsImV4cCI6MjA3NjA3NzI5OH0.2uAm-cyg6DKUOaaJoOHktJPhegdeMQopliUhFvmT5s4';
+        
+        // CORREÇÃO AQUI: Mudei o nome de 'supabase' para 'client' para não conflitar
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Verifica sessão ao abrir
+        client.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+                document.getElementById('user-email').innerText = session.user.email;
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('app-section').classList.add('hidden');
+            }
+        });
+
+        async function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            // Use 'client' em vez de 'supabase'
+            const { error } = await client.auth.signUp({ email, password });
+            if (error) alert(error.message);
+            else alert('Verifique seu email!');
+        }
+
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await client.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message);
+        }
+
+        async function signOut() {
+            await client.auth.signOut();
+        }
+
+        async function callEdgeFunction() {
+            const output = document.getElementById('result');
+            output.innerText = 'Carregando...';
+
+            // DICA: No .invoke, você só precisa passar o NOME da função, 
+            // não precisa da URL inteira se configurou o cliente corretamente.
+            const { data, error } = await client.functions.invoke('get-examples', {
+                method: 'GET'
+            });
+
+            if (error) {
+                output.innerText = 'Erro: ' + JSON.stringify(error, null, 2);
+            } else {
+                output.innerText = JSON.stringify(data, null, 2);
+            }
+        }
+    </script>
+  </body>
+</html>
