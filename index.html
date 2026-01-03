@@ -12,8 +12,7 @@
         max-width: 600px;
         margin: 0 auto;
       }
-      input,
-      button {
+      input, button {
         display: block;
         width: 100%;
         margin-bottom: 10px;
@@ -26,6 +25,11 @@
       }
       .hidden {
         display: none;
+      }
+      /* Estilo simples para a lista */
+      .exercicio-item {
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
       }
     </style>
   </head>
@@ -41,69 +45,23 @@
 
     <div id="app-section" class="hidden">
       <p>Logado como: <span id="user-email"></span></p>
+      
       <button onclick="callEdgeFunction()">Consultar via Edge Function</button>
+      
       <button onclick="signOut()">Sair</button>
-
-      <h3>Resultado:</h3>
+      
+      <h3>Resultado da Edge Function:</h3>
       <pre id="result">...</pre>
-    </div>
+      
+      <!-- <button onclick="buscarExercicios()">Consultar Exercícios</button>
+      <h3>Lista de Exercícios (Front-end):</h3>
+      <div id="lista-exercicios"></div>
+    </div> -->
 
-<script>
-        // CONFIGURAÇÃO: Substitua pelas suas chaves REAIS
-        const SUPABASE_URL = 'https://zmagogzkopaidsknopoz.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptYWdvZ3prb3BhaWRza25vcG96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDEyOTgsImV4cCI6MjA3NjA3NzI5OH0.2uAm-cyg6DKUOaaJoOHktJPhegdeMQopliUhFvmT5s4';
-        
-        // CORREÇÃO AQUI: Mudei o nome de 'supabase' para 'client' para não conflitar
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <h3>Lista de Templates (Front-end):</h3>
+    <div id="lista-templates"></div>
 
-        // Verifica sessão ao abrir
-        client.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('app-section').classList.remove('hidden');
-                document.getElementById('user-email').innerText = session.user.email;
-            } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('app-section').classList.add('hidden');
-            }
-        });
-
-        async function signUp() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            // Use 'client' em vez de 'supabase'
-            const { error } = await client.auth.signUp({ email, password });
-            if (error) alert(error.message);
-            else alert('Verifique seu email!');
-        }
-
-        async function signIn() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { error } = await client.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
-        }
-
-        async function signOut() {
-            await client.auth.signOut();
-        }
-
-        async function callEdgeFunction() {
-            const output = document.getElementById('result');
-            output.innerText = 'Carregando...';
-
-            // DICA: No .invoke, você só precisa passar o NOME da função, 
-            // não precisa da URL inteira se configurou o cliente corretamente.
-            const { data, error } = await client.functions.invoke('get-examples', {
-                method: 'GET'
-            });
-
-            if (error) {
-                output.innerText = 'Erro: ' + JSON.stringify(error, null, 2);
-            } else {
-                output.innerText = JSON.stringify(data, null, 2);
-            }
-        }
-    </script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>
