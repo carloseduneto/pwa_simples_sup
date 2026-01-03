@@ -149,26 +149,183 @@ function renderizarTemplates(lista) {
 
 // === 6. CONSULTA ITENS DE TEMPLATE (SEM CACHE, POR ENQUANTO) ===
 async function buscarItensDeTemplate(templateId) {
-  const { data, error } = await client
+  // 1. Busca Itens (seu código atual)
+  const itensPromise = client
     .from("template_itens")
-    .select("id, exercicio_id, treino_recomendacoes")
+    .select(
+      "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes), templates(nome), series_alvo"
+    )
     .eq("template_id", templateId)
     .order("ordem");
-  if (error) {
-    console.error("Erro ao buscar itens de template:", error);
-    return;
+
+  // 2. Busca Contexto (seu código atual)
+  const contextoPromise = client
+    .from("user_context")
+    .select("series_repeticoes(nome, week, series, min_reps, max_reps)")
+    .single();
+
+  // 3. (NOVO) Busca a ÚLTIMA sessão realizada e já traz as séries dela
+  // Ordenamos por created_at decrescente e pegamos apenas 1 (.single())
+  const ultimaSessaoPromise = client
+    .from("sessao_treino")
+    .select(
+      `
+    id, 
+    created_at,
+    sessao_series_realizadas (
+      exercicio_id,
+      carga,
+      repeticoes,
+      ordem,
+      tipo,
+      created_at  
+    )
+  `
+    )
+    // 1. Ordena a SESSÃO (Pai) do mais recente para o mais antigo
+    .order("created_at", { ascending: false })
+
+    // 2. Ordena os ITENS (Filhos) dentro daquela sessão
+    // Nota: Geralmente queremos as séries na ordem que foram feitas (Ascendente)
+    .order("id", {
+      foreignTable: "sessao_series_realizadas",
+      ascending: true,
+    })
+
+    .limit(1)
+    .single();
+
+  // 4. Executa as três ao mesmo tempo
+  const [resItens, resContexto, resUltimaSessao] = await Promise.all([
+    itensPromise,
+    contextoPromise,
+    ultimaSessaoPromise,
+  ]);
+
+  // Tratamento de erros
+  if (resItens.error) {
+    console.error("Erro itens:", resItens.error);
+    return null;
   }
-  console.log("Itens do template", templateId, data);
-  return data;
+
+  // Nota: É normal não ter última sessão (usuário novo), então não trate erro 404 aqui como fatal
+  const historico = resUltimaSessao.data
+    ? resUltimaSessao.data.sessao_series_realizadas
+    : [];
+
+  console.log("Histórico recuperado:", historico);
+
+  return {
+    itens: resItens.data,
+    contexto: resContexto.data,
+    historico: historico,
+  };
 }
 
 async function renderizarItensDeTemplate(templateId) {
-  const itens = await buscarItensDeTemplate(templateId);
+  const { itens, contexto, historico } = await buscarItensDeTemplate(
+    templateId
+  );
+  const container = document.querySelector(".itensTemplate");
+
+  // Templates do HTML
+  const templateInputExercise = document.querySelector(
+    ".template-input-exercise"
+  );
+  const templateHeaderExercise = document.querySelector(
+    ".template-header-exercise"
+  );
+
+  container.innerHTML = ""; // 1. Limpa tudo
   if (!itens) return;
 
-  let detalhes = "Itens do Template:\n";
+  // --- O TRUQUE COMEÇA AQUI ---
+  // Não crie uma variável 'detalhes'. Jogue direto no container.
+
+  // Parte 1: Título Principal (String é mais fácil aqui)
+  container.insertAdjacentHTML(
+    "beforeend",
+    `<h3>${itens[0].templates.nome}</h3>`
+  );
+
+  console.log(historico);
+
+  // Início do loop pelos itens do template
   for (const item of itens) {
-    detalhes += `- Exercício ID: ${item.exercicio_id}, Recomendações: ${item.treino_recomendacoes}\n`;
+    // Cria uma lista temporária só com as séries DESTE exercício (item.exercicios.id)
+    const seriesPassadas = historico.filter(
+      h => h.exercicio_id === item.exercicios.id
+    );
+
+    console.log(
+      "Séries passadas para o exercício",
+      item.exercicios.nome,
+      seriesPassadas
+    );
+
+    // Parte 2: Título do Exercício + Header (String)
+    // O 'beforeend' significa: adicione no final do que já existe dentro do container
+    container.insertAdjacentHTML(
+      "beforeend",
+      `<h4>${item.exercicios.nome}</h4>`
+    );
+
+    // Nota: templateHeaderExercise.innerHTML retorna uma string, então usamos insertAdjacentHTML
+    container.insertAdjacentHTML("beforeend", templateHeaderExercise.innerHTML);
+
+    // Parte 3: A Lógica Complexa (Nodes / Clones)
+    if (item.treino_recomendacoes !== null) {
+      // Aqui usamos o DOM Node, pois você quer usar querySelector e cloneNode
+
+      // Parte 3a: Itens vindos do treino_recomendacoes (valor e detalhes)
+      for (let i = 0; i < item.treino_recomendacoes.valor; i++) {
+        const cloneInputSeries = templateInputExercise.content.cloneNode(true);
+
+        // Manipula o clone à vontade
+        cloneInputSeries.querySelector(".seriesExercise").value =
+          item.treino_recomendacoes.detalhes[i].label;
+        // cloneInputSeries.querySelector(".anteriorExercise").value =
+        //   historico[0].sessao_series_realizadas[i].repeticoes + " x " +
+        //   historico[0].sessao_series_realizadas[i].carga ||
+        //   " - ";
+        if (seriesPassadas[i] != undefined) {
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            seriesPassadas[i]?.repeticoes + " x " + seriesPassadas[i]?.carga ||
+            " - ";
+          console.log(
+            "Série passada para preencher o anterior:",
+            seriesPassadas[i]
+          );
+        }
+        // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
+        container.appendChild(cloneInputSeries);
+      }
+      // Parte 3b: Itens das séries TOPs do contexto
+      for (let i = 0; i < contexto.series_repeticoes.series; i++) {
+        let lastPrepareSerie =
+          item.treino_recomendacoes.detalhes.at(-1).label + i + 1;
+
+        const cloneInputSeries = templateInputExercise.content.cloneNode(true);
+
+        // Manipula o clone à vontade
+        cloneInputSeries.querySelector(".seriesExercise").value =
+          lastPrepareSerie;
+
+        // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
+        container.appendChild(cloneInputSeries);
+      }
+      // Parte 3c: Itens vindos do contexto (séries e repetições padrão)
+    } else {
+      for (let i = 0; i < item.series_alvo; i++) {
+        const cloneInputSeries = templateInputExercise.content.cloneNode(true);
+
+        // Manipula o clone à vontade
+        cloneInputSeries.querySelector(".seriesExercise").value =
+          i + 1 + " Série Padrão";
+
+        // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
+        container.appendChild(cloneInputSeries);
+      }
+    }
   }
-  alert(detalhes);
 }

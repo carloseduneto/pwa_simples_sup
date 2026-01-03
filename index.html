@@ -12,7 +12,8 @@
         max-width: 600px;
         margin: 0 auto;
       }
-      input, button {
+      input,
+      button {
         display: block;
         width: 100%;
         margin-bottom: 10px;
@@ -31,6 +32,23 @@
         padding: 10px;
         border-bottom: 1px solid #ccc;
       }
+
+      .headerExercise {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
+        gap: 50px;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+
+      .rowExercise {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
+        gap: 50px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
     </style>
   </head>
   <body>
@@ -45,22 +63,46 @@
 
     <div id="app-section" class="hidden">
       <p>Logado como: <span id="user-email"></span></p>
-      
+
       <button onclick="callEdgeFunction()">Consultar via Edge Function</button>
-      
+
       <button onclick="signOut()">Sair</button>
-      
+
       <h3>Resultado da Edge Function:</h3>
       <pre id="result">...</pre>
-      
+
       <!-- <button onclick="buscarExercicios()">Consultar Exercícios</button>
       <h3>Lista de Exercícios (Front-end):</h3>
       <div id="lista-exercicios"></div>
     </div> -->
 
-    <h3>Lista de Templates (Front-end):</h3>
-    <div id="lista-templates"></div>
+      <h3>Lista de Templates (Front-end):</h3>
+      <div id="lista-templates"></div>
 
+      <div class="itensTemplate"></div>
+
+      <template class="template-header-exercise">
+        <div class="headerExercise">
+          <span>SÉRIES</span>
+          <span>ANTERIOR</span>
+          <span>KG</span>
+          <span>REPS</span>
+          <span>✅</span>
+        </div>
+      </template>
+
+      <template class="template-input-exercise">
+        <div class="rowExercise">
+          <input type="text" class="seriesExercise" />
+          <button class="anteriorExercise"></button>
+          <input type="number" class="kgExercise" />
+          <input type="number" class="repsExercise" />
+          <button class="checkExercise">✔️</button>
+        </div>
+      </template>
+
+
+    </div>
     <script src="config.js"></script>
     <script src="script.js"></script>
   </body>
