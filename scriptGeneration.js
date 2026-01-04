@@ -228,6 +228,8 @@ async function renderizarItensDeTemplate(templateId) {
   );
   const container = document.querySelector(".itensTemplate");
 
+  
+
   // Templates do HTML
   const templateInputExercise = document.querySelector(
     ".template-input-exercise"
@@ -238,20 +240,25 @@ async function renderizarItensDeTemplate(templateId) {
 
   container.innerHTML = ""; // 1. Limpa tudo
   if (!itens) return;
-
+  
   // --- O TRUQUE COMEÇA AQUI ---
   // Não crie uma variável 'detalhes'. Jogue direto no container.
-
+  
   // Parte 1: Título Principal (String é mais fácil aqui)
   container.insertAdjacentHTML(
     "beforeend",
     `<h3>${itens[0].templates.nome}</h3>`
   );
-
+  
   console.log(historico);
-
+  
   // Início do loop pelos itens do template
   for (const item of itens) {
+    // 1. CRIA A "CAIXA" DO EXERCÍCIO
+    const wrapperExercises = document.createElement("div");
+    wrapperExercises.className = "container-exercicio";
+    wrapperExercises.innerHTML = ""; // 1. Limpa tudo
+
     // Cria uma lista temporária só com as séries DESTE exercício (item.exercicios.id)
     const seriesPassadas = historico.filter(
       h => h.exercicio_id === item.exercicios.id
@@ -265,13 +272,16 @@ async function renderizarItensDeTemplate(templateId) {
 
     // Parte 2: Título do Exercício + Header (String)
     // O 'beforeend' significa: adicione no final do que já existe dentro do container
-    container.insertAdjacentHTML(
+    wrapperExercises.insertAdjacentHTML(
       "beforeend",
       `<h4>${item.exercicios.nome}</h4>`
     );
 
     // Nota: templateHeaderExercise.innerHTML retorna uma string, então usamos insertAdjacentHTML
-    container.insertAdjacentHTML("beforeend", templateHeaderExercise.innerHTML);
+    wrapperExercises.insertAdjacentHTML(
+      "beforeend",
+      templateHeaderExercise.innerHTML
+    );
 
     // Parte 3: A Lógica Complexa (Nodes / Clones)
     if (item.treino_recomendacoes !== null) {
@@ -284,21 +294,18 @@ async function renderizarItensDeTemplate(templateId) {
         // Manipula o clone à vontade
         cloneInputSeries.querySelector(".seriesExercise").value =
           item.treino_recomendacoes.detalhes[i].label;
-        // cloneInputSeries.querySelector(".anteriorExercise").value =
-        //   historico[0].sessao_series_realizadas[i].repeticoes + " x " +
-        //   historico[0].sessao_series_realizadas[i].carga ||
-        //   " - ";
+
         if (seriesPassadas[i] != undefined) {
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
             seriesPassadas[i]?.repeticoes + " x " + seriesPassadas[i]?.carga ||
             " - ";
-          console.log(
-            "Série passada para preencher o anterior:",
-            seriesPassadas[i]
-          );
+          cloneInputSeries.querySelector(".kgExercise").value =
+            seriesPassadas[i]?.carga || "";
+          cloneInputSeries.querySelector(".repsExercise").value =
+            seriesPassadas[i]?.repeticoes || "";
         }
         // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
-        container.appendChild(cloneInputSeries);
+        wrapperExercises.appendChild(cloneInputSeries);
       }
 
       // Parte 3b: Itens das séries TOPs do contexto
@@ -341,6 +348,12 @@ async function renderizarItensDeTemplate(templateId) {
             " x " +
             (dadoHistorico.carga || 0);
 
+          // Preenche os campos de carga e repetições
+          cloneInputSeries.querySelector(".kgExercise").value =
+            dadoHistorico.carga || "";
+          cloneInputSeries.querySelector(".repsExercise").value =
+            dadoHistorico.repeticoes || "";
+
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
             textoAnterior;
         } else {
@@ -350,7 +363,7 @@ async function renderizarItensDeTemplate(templateId) {
 
         cloneInputSeries.querySelector(".seriesExercise").value =
           lastPrepareSerie;
-        container.appendChild(cloneInputSeries);
+        wrapperExercises.appendChild(cloneInputSeries);
       }
 
       // Parte 3c: Itens vindos do contexto (séries e repetições padrão)
@@ -362,6 +375,10 @@ async function renderizarItensDeTemplate(templateId) {
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
             seriesPassadas[i]?.repeticoes + " x " + seriesPassadas[i]?.carga ||
             " - ";
+          cloneInputSeries.querySelector(".kgExercise").value =
+            seriesPassadas[i]?.carga || "";
+          cloneInputSeries.querySelector(".repsExercise").value =
+            seriesPassadas[i]?.repeticoes || "";
           console.log(
             "Série passada para preencher o anterior:",
             seriesPassadas[i]
@@ -373,8 +390,10 @@ async function renderizarItensDeTemplate(templateId) {
           i + 1 + " Série Padrão";
 
         // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
-        container.appendChild(cloneInputSeries);
+        wrapperExercises.appendChild(cloneInputSeries);
       }
     }
+
+    container.appendChild(wrapperExercises);
   }
 }
