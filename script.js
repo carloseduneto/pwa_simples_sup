@@ -300,24 +300,73 @@ async function renderizarItensDeTemplate(templateId) {
         // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
         container.appendChild(cloneInputSeries);
       }
+
       // Parte 3b: Itens das séries TOPs do contexto
       for (let i = 0; i < contexto.series_repeticoes.series; i++) {
+        // Seu cálculo de índice atual
         let lastPrepareSerie =
           item.treino_recomendacoes.detalhes.at(-1).label + i + 1;
 
         const cloneInputSeries = templateInputExercise.content.cloneNode(true);
 
-        // Manipula o clone à vontade
+        // --- A MÁGICA ATUALIZADA AQUI ---
+
+        let dadoHistorico;
+
+        // NOVO: Verifica se é o cenário "Semana Pesada -> Semana Leve"
+        // Se for a ÚLTIMA série de hoje E o histórico tiver MAIS séries que hoje...
+        if (
+          i === contexto.series_repeticoes.series - 1 &&
+          seriesPassadas.length > contexto.series_repeticoes.series
+        ) {
+          // ...Ignora a sequência e pega a ÚLTIMA série do histórico (o pico de carga)
+          dadoHistorico = seriesPassadas[seriesPassadas.length - 1];
+        } else {
+          // Senão, segue o fluxo normal (índice com índice)
+          dadoHistorico = seriesPassadas[lastPrepareSerie];
+        }
+
+        // 2. Lógica antiga (Mantida para o inverso: Semana Leve -> Pesada)
+        // Se for undefined (ex: aumentou de 1 para 2 séries), usa a ÚLTIMA disponível
+        if (!dadoHistorico && seriesPassadas.length > 0) {
+          dadoHistorico = seriesPassadas[seriesPassadas.length - 1];
+        }
+
+        // -----------------------------
+
+        // Agora usamos 'dadoHistorico' em vez de acessar o array direto
+        if (dadoHistorico) {
+          const textoAnterior =
+            (dadoHistorico.repeticoes || 0) +
+            " x " +
+            (dadoHistorico.carga || 0);
+
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            textoAnterior;
+        } else {
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            " - ";
+        }
+
         cloneInputSeries.querySelector(".seriesExercise").value =
           lastPrepareSerie;
-
-        // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
         container.appendChild(cloneInputSeries);
       }
+
       // Parte 3c: Itens vindos do contexto (séries e repetições padrão)
     } else {
       for (let i = 0; i < item.series_alvo; i++) {
         const cloneInputSeries = templateInputExercise.content.cloneNode(true);
+
+        if (seriesPassadas[i] != undefined) {
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            seriesPassadas[i]?.repeticoes + " x " + seriesPassadas[i]?.carga ||
+            " - ";
+          console.log(
+            "Série passada para preencher o anterior:",
+            seriesPassadas[i]
+          );
+        }
 
         // Manipula o clone à vontade
         cloneInputSeries.querySelector(".seriesExercise").value =
