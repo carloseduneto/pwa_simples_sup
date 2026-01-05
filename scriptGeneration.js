@@ -249,6 +249,13 @@ async function renderizarItensDeTemplate(templateId) {
     "beforeend",
     `<h3>${itens[0].templates.nome}</h3>`
   );
+
+
+  // Botão marcar como concluído
+  container.insertAdjacentHTML(
+    "beforeend",
+    `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()">Marcar Treino como Concluído</button>`
+  );
   
   console.log(historico);
   
