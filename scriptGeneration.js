@@ -97,7 +97,7 @@ function renderizarExercicios(lista) {
     return;
   }
 
-  lista.forEach(item => {
+  lista.forEach((item) => {
     const div = document.createElement("div");
     div.className = "exercicio-item";
     div.textContent = item.nome;
@@ -134,7 +134,7 @@ function renderizarTemplates(lista) {
     container.innerHTML = "<p>Nenhum template encontrado.</p>";
     return;
   }
-  lista.forEach(item => {
+  lista.forEach((item) => {
     const div = document.createElement("div");
     div.className = "template-item";
     div.textContent = item.nome + " - " + item.descricao;
@@ -226,9 +226,10 @@ async function renderizarItensDeTemplate(templateId) {
   const { itens, contexto, historico } = await buscarItensDeTemplate(
     templateId
   );
-  const container = document.querySelector(".itensTemplate");
 
-  
+  const wrapperTraining = document.createElement("div");
+  wrapperTraining.className = "container-treino";
+  const container = document.querySelector(".itensTemplate");
 
   // Templates do HTML
   const templateInputExercise = document.querySelector(
@@ -240,35 +241,35 @@ async function renderizarItensDeTemplate(templateId) {
 
   container.innerHTML = ""; // 1. Limpa tudo
   if (!itens) return;
-  
+
   // --- O TRUQUE COMEÇA AQUI ---
   // Não crie uma variável 'detalhes'. Jogue direto no container.
-  
+
   // Parte 1: Título Principal (String é mais fácil aqui)
-  container.insertAdjacentHTML(
+  wrapperTraining.insertAdjacentHTML(
     "beforeend",
-    `<h3>${itens[0].templates.nome}</h3>`
+    `<h3 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h3>`
   );
 
-
   // Botão marcar como concluído
-  container.insertAdjacentHTML(
+  wrapperTraining.insertAdjacentHTML(
     "beforeend",
     `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()">Marcar Treino como Concluído</button>`
   );
-  
+
   console.log(historico);
-  
+
   // Início do loop pelos itens do template
   for (const item of itens) {
     // 1. CRIA A "CAIXA" DO EXERCÍCIO
     const wrapperExercises = document.createElement("div");
     wrapperExercises.className = "container-exercicio";
+    wrapperExercises.dataset.exercicioId = item.exercicios.id;
     wrapperExercises.innerHTML = ""; // 1. Limpa tudo
 
     // Cria uma lista temporária só com as séries DESTE exercício (item.exercicios.id)
     const seriesPassadas = historico.filter(
-      h => h.exercicio_id === item.exercicios.id
+      (h) => h.exercicio_id === item.exercicios.id
     );
 
     console.log(
@@ -373,7 +374,57 @@ async function renderizarItensDeTemplate(templateId) {
         wrapperExercises.appendChild(cloneInputSeries);
       }
 
-      // Parte 3c: Itens vindos do contexto (séries e repetições padrão)
+      // Parte 3c: Apenas recomendações semanias
+    } else if (
+      item.treino_recomendacoes === null &&
+      item.series_alvo === null
+    ) {
+      console.log(
+        "Número de séries para preencher:",
+        contexto.series_repeticoes.series
+      );
+
+      for (let i = 0; i < contexto.series_repeticoes.series; i++) {
+        // --- CORREÇÃO: O clone deve ser criado AQUI, para cada nova série ---
+        const cloneInputSeries = templateInputExercise.content.cloneNode(true);
+
+        // Manipula o clone à vontade
+        cloneInputSeries.querySelector(".seriesExercise").value =
+          i + 1 + " Série Alternativa";
+
+        // Verifica se existe histórico, mas cria o input de qualquer forma (ou ajuste conforme sua lógica)
+        const serieAnterior =
+          seriesPassadas && seriesPassadas[i] ? seriesPassadas[i] : null;
+
+        if (serieAnterior) {
+          console.log("Série passada encontrada:", serieAnterior);
+
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            serieAnterior.repeticoes + " x " + serieAnterior.carga || " - ";
+
+          cloneInputSeries.querySelector(".kgExercise").value =
+            serieAnterior.carga || "";
+          cloneInputSeries.querySelector(".repsExercise").value =
+            serieAnterior.repeticoes || "";
+        } else {
+          // Lógica opcional: O que fazer se não tiver série anterior?
+          // Deixar em branco ou colocar um traço?
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            " - ";
+          cloneInputSeries.querySelector(".kgExercise").value = "";
+          cloneInputSeries.querySelector(".repsExercise").value = "";
+        }
+
+        // Configura o label da série atual
+        const inputSerieLabel =
+          cloneInputSeries.querySelector(".seriesExercise");
+        if (inputSerieLabel) {
+          inputSerieLabel.textContent = i + 1 + "ª Série"; // Ex: 1ª Série, 2ª Série...
+        }
+
+        // Adiciona ao DOM
+        wrapperExercises.appendChild(cloneInputSeries);
+      }
     } else {
       for (let i = 0; i < item.series_alvo; i++) {
         const cloneInputSeries = templateInputExercise.content.cloneNode(true);
@@ -401,6 +452,8 @@ async function renderizarItensDeTemplate(templateId) {
       }
     }
 
-    container.appendChild(wrapperExercises);
+    wrapperTraining.appendChild(wrapperExercises);
+    container.appendChild(wrapperTraining);
+
   }
 }
