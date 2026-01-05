@@ -78,3 +78,27 @@ document.addEventListener("focusin", function (event) {
     event.target.select();
   }
 });
+
+// OUVINTE DE CLIQUES (Para os botões de Check)
+document.addEventListener("click", function (event) {
+  // 1. Verifica se o clique foi no botão de check
+  if (event.target.classList.contains("checkExercise")) {
+    const botao = event.target;
+
+    // 2. Encontra a linha inteira (o pai do botão)
+    const linha = botao.closest(".rowExercise");
+
+    if (linha) {
+      // 3. A MÁGICA: 'toggle' adiciona a classe se não tiver, e remove se tiver
+      linha.classList.toggle("concluido");
+
+      // 4. LÓGICA DE DADOS (Para você salvar no banco depois)
+      // Se tem a classe 'concluido', o atributo vira "true", senão "false"
+      const estaConcluido = linha.classList.contains("concluido");
+      linha.dataset.realizado = estaConcluido ? "true" : "false";
+
+      // (Opcional) Feedback no Console para você ver acontecendo
+      console.log(`Série concluída? ${linha.dataset.realizado}`);
+    }
+  }
+});

@@ -49,6 +49,24 @@
         align-items: center;
         margin-bottom: 10px;
       }
+
+      /* Quando a linha tiver a classe 'concluido', ela fica cinza */
+      .rowExercise.concluido {
+        background-color: #e0e0e0; /* Cinza claro */
+        opacity: 0.6; /* Deixa meio transparente para indicar inatividade */
+        transition: all 0.3s ease; /* Animação suave */
+      }
+
+      /* Quando a linha estiver concluída, muda a cor do botão */
+      .rowExercise.concluido .checkExercise {
+        background-color: #4caf50; /* Verde */
+        color: white;
+        /* border: 1px solid; */
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px;
+      }
     </style>
   </head>
   <body>
@@ -91,14 +109,14 @@
         </div>
       </template>
 
-      <template class="template-input-exercise">   
-          <div class="rowExercise">
-            <input type="text" class="seriesExercise" />
-            <button class="anteriorExercise"></button>
-            <input type="number" class="repsExercise" />
-            <input type="number" class="kgExercise" />
-            <button class="checkExercise">✔️</button>
-          </div>
+      <template class="template-input-exercise">
+        <div class="rowExercise">
+          <input type="text" class="seriesExercise" />
+          <button class="anteriorExercise"></button>
+          <input type="number" class="repsExercise" />
+          <input type="number" class="kgExercise" />
+          <button class="checkExercise">✔️</button>
+        </div>
       </template>
     </div>
     <script src="config.js"></script>
