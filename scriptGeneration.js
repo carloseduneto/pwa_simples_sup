@@ -135,7 +135,7 @@ function renderizarTemplates(lista) {
     return;
   }
   lista.forEach((item) => {
-    const div = document.createElement("div");
+    const div = document.createElement("button");
     div.className = "template-item";
     div.textContent = item.nome + " - " + item.descricao;
 
