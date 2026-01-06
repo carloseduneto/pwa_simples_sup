@@ -153,7 +153,7 @@ async function buscarItensDeTemplate(templateId) {
   const itensPromise = client
     .from("template_itens")
     .select(
-      "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes), templates(nome), series_alvo"
+      "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome), series_alvo, tecnica_intensificacao"
     )
     .eq("template_id", templateId)
     .order("ordem");
@@ -178,7 +178,7 @@ async function buscarItensDeTemplate(templateId) {
       repeticoes,
       ordem,
       tipo,
-      created_at  
+      created_at
     )
   `
     )
@@ -254,6 +254,8 @@ async function renderizarItensDeTemplate(templateId) {
     `<h3 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h3>`
   );
 
+
+
   // Botão marcar como concluído
   wrapperTraining.insertAdjacentHTML(
     "beforeend",
@@ -283,10 +285,30 @@ async function renderizarItensDeTemplate(templateId) {
 
     // Parte 2: Título do Exercício + Header (String)
     // O 'beforeend' significa: adicione no final do que já existe dentro do container
-    wrapperExercises.insertAdjacentHTML(
-      "beforeend",
-      `<h4>${item.exercicios.nome}</h4>`
-    );
+
+    
+    if (item.tecnica_intensificacao) {
+      wrapperExercises.insertAdjacentHTML(
+        "beforeend",
+        `<h4>${item.exercicios.nome} - <em>${item.tecnica_intensificacao}</em></h4>`
+      );
+    } else {
+
+      wrapperExercises.insertAdjacentHTML(
+        "beforeend",
+        `<h4>${item.exercicios.nome}</h4>`
+      );
+    }
+
+
+    if (item.treino_recomendacoes !== null){
+      wrapperExercises.insertAdjacentHTML(
+        "beforeend",
+        `<details class="detalhes-exercicio"> 
+        <summary>Recomendações:</summary>
+        ${item.treino_recomendacoes.description} </details>`
+      );
+    }
 
     // Nota: templateHeaderExercise.innerHTML retorna uma string, então usamos insertAdjacentHTML
     wrapperExercises.insertAdjacentHTML(
