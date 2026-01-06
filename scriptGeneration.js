@@ -222,10 +222,7 @@ async function buscarItensDeTemplate(templateId) {
   };
 }
 
-
-
 async function renderizarItensDeTemplate(templateId) {
-
   const { itens, contexto, historico } = await buscarItensDeTemplate(
     templateId
   );
@@ -254,12 +251,10 @@ async function renderizarItensDeTemplate(templateId) {
     `<h3 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h3>`
   );
 
-
-
-  // Botão marcar como concluído
+  // Botão reiniciar treino
   wrapperTraining.insertAdjacentHTML(
     "beforeend",
-    `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()">Marcar Treino como Concluído</button>`
+    `<button id="concluir-treino-btn" onclick="limparDadosLocais()">Reiniciar/zerar treino</button>`
   );
 
   console.log(historico);
@@ -286,22 +281,19 @@ async function renderizarItensDeTemplate(templateId) {
     // Parte 2: Título do Exercício + Header (String)
     // O 'beforeend' significa: adicione no final do que já existe dentro do container
 
-    
     if (item.tecnica_intensificacao) {
       wrapperExercises.insertAdjacentHTML(
         "beforeend",
         `<h4>${item.exercicios.nome} - <em>${item.tecnica_intensificacao}</em></h4>`
       );
     } else {
-
       wrapperExercises.insertAdjacentHTML(
         "beforeend",
         `<h4>${item.exercicios.nome}</h4>`
       );
     }
 
-
-    if (item.treino_recomendacoes !== null){
+    if (item.treino_recomendacoes !== null) {
       wrapperExercises.insertAdjacentHTML(
         "beforeend",
         `<details class="detalhes-exercicio"> 
@@ -479,9 +471,14 @@ async function renderizarItensDeTemplate(templateId) {
 
     wrapperTraining.appendChild(wrapperExercises);
     container.appendChild(wrapperTraining);
-
   }
-  
+
+  // Botão marcar como concluído
+  wrapperTraining.insertAdjacentHTML(
+    "beforeend",
+    `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()">Marcar Treino como Concluído</button>
+    `
+  );
 
   if (typeof restaurarDadosLocais === "function") {
     restaurarDadosLocais();
@@ -498,5 +495,4 @@ async function renderizarItensDeTemplate(templateId) {
       }
     });
   }
-
 }

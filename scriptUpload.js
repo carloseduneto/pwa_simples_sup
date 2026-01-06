@@ -127,11 +127,12 @@ async function enviarParaSupabase(listaSeries) {
 
     // PASSO A: Criar a Sessão
     const sessaoPayload = {
-      data_inicio: cacheDadosTreino.data_inicio,
+      data_inicio: horarioInicioUTC || cacheDadosTreino.data_inicio,
       data_fim: cacheDadosTreino.data_fim,
       semana_base: cacheDadosTreino.semana_base,
       owner_id: userId, // Usa o ID recuperado acima
     };
+    // data_fim: cacheDadosTreino.data_fim,
 
     const { data: sessaoData, error: sessaoError } = await client
       .from("sessao_treino")
@@ -170,7 +171,7 @@ async function enviarParaSupabase(listaSeries) {
 
     // Opcional: Recarregar a página ou limpar os inputs visualmente
     window.location.reload();
-
+    
   } catch (error) {
     console.error("Erro fatal:", error);
     alert("Erro ao salvar: " + error.message);
@@ -180,12 +181,44 @@ async function enviarParaSupabase(listaSeries) {
 
 // 3. Chamada APENAS quando salvar no Supabase com sucesso
 function limparDadosLocais() {
-    // Remove apenas as chaves que começam com nosso prefixo
-    Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('treino_cache_')) {
-            localStorage.removeItem(key);
-        }
-    });
+  // Remove apenas as chaves que começam com nosso prefixo
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('treino_cache_')) {
+      localStorage.removeItem(key);
+    }
+  });
+  window.location.reload();
 }
 
 // limparDadosLocais();
+
+
+
+// variável global (fica nula até o primeiro clique)
+const CACHE_KEY = "treino_cache_conclusao_utc";
+
+// carrega do cache ao iniciar
+let horarioInicioUTC = localStorage.getItem(CACHE_KEY);
+
+// listener único
+document.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("checkExercise")) return;
+  if (horarioInicioUTC !== null) return;
+
+  const now = new Date();
+  const pad = (n, z = 2) => String(n).padStart(z, "0");
+
+  horarioInicioUTC =
+    `${now.getUTCFullYear()}-` +
+    `${pad(now.getUTCMonth() + 1)}-` +
+    `${pad(now.getUTCDate())} ` +
+    `${pad(now.getUTCHours())}:` +
+    `${pad(now.getUTCMinutes())}:` +
+    `${pad(now.getUTCSeconds())}.` +
+    `${pad(now.getUTCMilliseconds(), 6)}+00`;
+
+  localStorage.setItem(CACHE_KEY, horarioInicioUTC);
+
+  console.log("Registrado:", horarioInicioUTC);
+});
+
