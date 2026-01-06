@@ -100,5 +100,109 @@ document.addEventListener("click", function (event) {
       // (Opcional) Feedback no Console para você ver acontecendo
       console.log(`Série concluída? ${linha.dataset.realizado}`);
     }
+    // 5. Salva o status localmente
+    salvarStatusLocalmente(linha);
   }
 });
+
+// --- Lógica de Persistência (Salvar rascunho) ---
+
+// Gera uma chave única para cada campo: ex: "treino_cache_12_0_kgExercise"
+// (ID do exercicio + indice da linha + classe do input)
+function gerarChaveCache(exercicioId, linhaIndex, classeInput) {
+  return `treino_cache_${exercicioId}_${linhaIndex}_${classeInput}`;
+}
+
+// 1. Chamada a cada tecla digitada
+function salvarInputLocalmente(input) {
+  const row = input.closest(".rowExercise");
+  const container = input.closest(".container-exercicio");
+
+  if (!row || !container) return;
+
+  const exercicioId = container.dataset.exercicioId;
+  // Descobre qual é o índice dessa linha (0, 1, 2, 3...)
+  const rowsDoExercicio = Array.from(
+    container.querySelectorAll(".rowExercise")
+  );
+  const linhaIndex = rowsDoExercicio.indexOf(row);
+
+  // Pega a classe principal para identificar o tipo (kgExercise, repsExercise, etc)
+  // Assumindo que a classe relevante é a primeira ou segunda. Vamos usar o name ou a classe específica.
+  let tipo = "generic";
+  if (input.classList.contains("kgExercise")) tipo = "kgExercise";
+  else if (input.classList.contains("repsExercise")) tipo = "repsExercise";
+  else if (input.classList.contains("seriesExercise")) tipo = "seriesExercise";
+
+  const chave = gerarChaveCache(exercicioId, linhaIndex, tipo);
+  localStorage.setItem(chave, input.value);
+}
+
+// 2. Chamada logo após renderizar o HTML do treino
+// No arquivo scriptManipulation.js
+
+function restaurarDadosLocais() {
+  const containers = document.querySelectorAll(".container-exercicio");
+
+  containers.forEach((container) => {
+    const exercicioId = container.dataset.exercicioId;
+    const rows = container.querySelectorAll(".rowExercise");
+
+    rows.forEach((row, index) => {
+      // 1. Restaura Inputs (Código que já funcionava)
+      const inputKg = row.querySelector(".kgExercise");
+      const cacheKg = localStorage.getItem(
+        gerarChaveCache(exercicioId, index, "kgExercise")
+      );
+      if (cacheKg !== null && inputKg) inputKg.value = cacheKg;
+
+      const inputReps = row.querySelector(".repsExercise");
+      const cacheReps = localStorage.getItem(
+        gerarChaveCache(exercicioId, index, "repsExercise")
+      );
+      if (cacheReps !== null && inputReps) inputReps.value = cacheReps;
+
+      const inputSeries = row.querySelector(".seriesExercise");
+      const cacheSeries = localStorage.getItem(
+        gerarChaveCache(exercicioId, index, "seriesExercise")
+      );
+      if (cacheSeries !== null && inputSeries) inputSeries.value = cacheSeries;
+
+      // 2. NOVO: Restaura o Status (Check ✔️)
+      const cacheStatus = localStorage.getItem(
+        gerarChaveCache(exercicioId, index, "status")
+      );
+
+      // Se no cache diz "true", marcamos a linha visualmente
+      if (cacheStatus === "true") {
+        row.classList.add("concluido");
+        row.dataset.realizado = "true";
+      } else {
+        // Garante que está limpo caso contrário
+        row.classList.remove("concluido");
+        row.dataset.realizado = "false";
+      }
+    });
+  });
+}
+
+// No arquivo scriptManipulation.js
+function salvarStatusLocalmente(row) {
+  const container = row.closest(".container-exercicio");
+  if (!container) return;
+
+  const exercicioId = container.dataset.exercicioId;
+
+  // Descobre o índice da linha
+  const rowsDoExercicio = Array.from(
+    container.querySelectorAll(".rowExercise")
+  );
+  const linhaIndex = rowsDoExercicio.indexOf(row);
+
+  // Verifica se a linha acabou de ficar realizada
+  const isRealizado = row.dataset.realizado === "true";
+
+  // Salva "true" ou "false" no localStorage
+  const chave = gerarChaveCache(exercicioId, linhaIndex, "status");
+  localStorage.setItem(chave, isRealizado);
+}

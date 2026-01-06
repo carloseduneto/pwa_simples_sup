@@ -222,7 +222,10 @@ async function buscarItensDeTemplate(templateId) {
   };
 }
 
+
+
 async function renderizarItensDeTemplate(templateId) {
+
   const { itens, contexto, historico } = await buscarItensDeTemplate(
     templateId
   );
@@ -456,4 +459,22 @@ async function renderizarItensDeTemplate(templateId) {
     container.appendChild(wrapperTraining);
 
   }
+  
+
+  if (typeof restaurarDadosLocais === "function") {
+    restaurarDadosLocais();
+  }
+
+  // 2. Adiciona o evento para salvar automaticamente a cada digitação
+  // Usamos "Event Delegation": adicionamos no container pai para não travar a memória
+  const containerPrincipal = document.querySelector(".container-treino"); // Ou onde você injeta o HTML
+  if (containerPrincipal) {
+    containerPrincipal.addEventListener("input", (event) => {
+      // Verifica se quem foi digitado é um dos nossos inputs
+      if (event.target.matches(".kgExercise, .repsExercise, .seriesExercise")) {
+        salvarInputLocalmente(event.target);
+      }
+    });
+  }
+
 }

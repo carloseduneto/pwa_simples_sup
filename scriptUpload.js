@@ -162,8 +162,30 @@ async function enviarParaSupabase(listaSeries) {
     if (seriesError) throw seriesError;
 
     alert("Treino salvo com sucesso!");
+
+    // === ADICIONE ISSO AQUI ===
+    if (typeof limparDadosLocais === "function") {
+      limparDadosLocais(); // Limpa o cache pois já salvou no banco
+    }
+
+    // Opcional: Recarregar a página ou limpar os inputs visualmente
+    window.location.reload();
+
   } catch (error) {
     console.error("Erro fatal:", error);
     alert("Erro ao salvar: " + error.message);
   }
 }
+
+
+// 3. Chamada APENAS quando salvar no Supabase com sucesso
+function limparDadosLocais() {
+    // Remove apenas as chaves que começam com nosso prefixo
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('treino_cache_')) {
+            localStorage.removeItem(key);
+        }
+    });
+}
+
+// limparDadosLocais();
