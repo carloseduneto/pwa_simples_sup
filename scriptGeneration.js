@@ -147,9 +147,25 @@ function renderizarTemplates(lista) {
   });
 }
 
+//
+//
+//
+// No topo do seu arquivo JS principal
+let templateAtualId = null;
+
+// Atualize sua função de clique (onde você chama o renderizar)
+function aoClicarNoTemplate(id) {
+  templateAtualId = id; // <--- Guarda o ID na memória
+  renderizarItensDeTemplate(id);
+}
+
 // === 6. CONSULTA ITENS DE TEMPLATE (SEM CACHE, POR ENQUANTO) ===
 async function buscarItensDeTemplate(templateId) {
-  // 1. Busca Itens (seu código atual)
+  
+  // Atualiza a variável global por segurança
+  templateAtualId = templateId; 
+
+  // 1. Busca Itens (Igual)
   const itensPromise = client
     .from("template_itens")
     .select(
@@ -158,62 +174,52 @@ async function buscarItensDeTemplate(templateId) {
     .eq("template_id", templateId)
     .order("ordem");
 
-  // 2. Busca Contexto (seu código atual)
+  // 2. Busca Contexto (Igual)
   const contextoPromise = client
     .from("user_context")
     .select("series_repeticoes(nome, week, series, min_reps, max_reps)")
     .single();
 
-  // 3. (NOVO) Busca a ÚLTIMA sessão realizada e já traz as séries dela
-  // Ordenamos por created_at decrescente e pegamos apenas 1 (.single())
+  // 3. (ATUALIZADO) Busca a ÚLTIMA sessão DESTE TEMPLATE ESPECÍFICO
   const ultimaSessaoPromise = client
     .from("sessao_treino")
-    .select(
-      `
-    id, 
-    created_at,
-    sessao_series_realizadas (
-      exercicio_id,
-      carga,
-      repeticoes,
-      ordem,
-      tipo,
-      created_at
-    )
-  `
-    )
-    // 1. Ordena a SESSÃO (Pai) do mais recente para o mais antigo
+    .select(`
+      id, 
+      created_at,
+      sessao_series_realizadas (
+        exercicio_id,
+        carga,
+        repeticoes,
+        ordem,
+        tipo
+      )
+    `)
+    // FILTRO MÁGICO AQUI:
+    .eq("template_id", templateId) 
+    // Ordena do mais recente
     .order("created_at", { ascending: false })
-
-    // 2. Ordena os ITENS (Filhos) dentro daquela sessão
-    // Nota: Geralmente queremos as séries na ordem que foram feitas (Ascendente)
-    .order("id", {
-      foreignTable: "sessao_series_realizadas",
-      ascending: true,
-    })
-
     .limit(1)
-    .single();
+    // .maybeSingle() é melhor que .single() pois não dá erro se não existir nenhum treino anterior
+    .maybeSingle(); 
 
-  // 4. Executa as três ao mesmo tempo
+  // 4. Executa
   const [resItens, resContexto, resUltimaSessao] = await Promise.all([
     itensPromise,
     contextoPromise,
     ultimaSessaoPromise,
   ]);
 
-  // Tratamento de erros
   if (resItens.error) {
     console.error("Erro itens:", resItens.error);
     return null;
   }
 
-  // Nota: É normal não ter última sessão (usuário novo), então não trate erro 404 aqui como fatal
+  // Se não tiver treino anterior (resUltimaSessao.data for null), retorna array vazio
   const historico = resUltimaSessao.data
     ? resUltimaSessao.data.sessao_series_realizadas
     : [];
 
-  console.log("Histórico recuperado:", historico);
+  console.log("Histórico deste template recuperado:", historico);
 
   return {
     itens: resItens.data,
@@ -294,11 +300,12 @@ async function renderizarItensDeTemplate(templateId) {
     }
 
     if (item.treino_recomendacoes !== null) {
+      // Adiciona as recomendações uma única vez
       wrapperExercises.insertAdjacentHTML(
         "beforeend",
         `<details class="detalhes-exercicio"> 
         <summary>Recomendações:</summary>
-        ${item.treino_recomendacoes.description} </details>`
+        ${item.treino_recomendacoes.description} ${contexto.series_repeticoes.nome}</details>`
       );
     }
 
@@ -391,7 +398,7 @@ async function renderizarItensDeTemplate(templateId) {
         wrapperExercises.appendChild(cloneInputSeries);
       }
 
-      // Parte 3c: Apenas recomendações semanias
+      // Parte 3c: Apenas recomendações semanais
     } else if (
       item.treino_recomendacoes === null &&
       item.series_alvo === null

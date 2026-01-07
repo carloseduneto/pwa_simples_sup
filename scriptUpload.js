@@ -131,6 +131,7 @@ async function enviarParaSupabase(listaSeries) {
       data_fim: cacheDadosTreino.data_fim,
       semana_base: cacheDadosTreino.semana_base,
       owner_id: userId, // Usa o ID recuperado acima
+      template_id: templateAtualId, // Pega da variável global que definimos no passo 2
     };
     // data_fim: cacheDadosTreino.data_fim,
 
