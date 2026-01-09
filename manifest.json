@@ -17,7 +17,7 @@
       "src": "./assets/images/icon512x512.png",
       "sizes": "512x512",
       "type": "image/png"
-    },
+    }
   ],
   "lang": "pt",
   "orientation": "natural"
