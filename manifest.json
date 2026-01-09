@@ -9,14 +9,20 @@
   "theme_color": "#ff6314",
   "icons": [
     {
-      "src": "./assets/images/icon192x192.jpg",
+      "src": "./assets/images/icon192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "./assets/images/icon512x512.jpg",
+      "src": "./assets/images/icon512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "./assets/images/icon-maskable-512.png", // Uma imagem com margem de segurança
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "lang": "pt",
