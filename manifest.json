@@ -18,12 +18,6 @@
       "sizes": "512x512",
       "type": "image/png"
     },
-    {
-      "src": "./assets/images/icon-maskable-512.png", // Uma imagem com margem de segurança
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
   ],
   "lang": "pt",
   "orientation": "natural"
