@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Supabase Edge PWA</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#ff6314" />
+
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -87,16 +91,13 @@
         margin-bottom: 10px;
         padding: 10px;
       }
-      
-      .rowExercise button.checkExercise{
+
+      .rowExercise button.checkExercise {
         display: block;
         width: 100%;
         margin-bottom: 10px;
         padding: 10px;
-        
       }
-
-
 
       .detalhes-exercicio {
         opacity: 0.6;
@@ -220,9 +221,9 @@
         </div>
       </div>
     </div>
-    <script src="config.js"></script>
-    <script src="scriptGeneration.js"></script>
-    <script src="scriptManipulation.js"></script>
-    <script src="scriptUpload.js"></script>
+    <script src="./assets/js/config.js"></script>
+    <script src="./assets/js/scriptGeneration.js"></script>
+    <script src="./assets/js/scriptManipulation.js"></script>
+    <script src="./assets/js/scriptUpload.js"></script>
   </body>
 </html>
