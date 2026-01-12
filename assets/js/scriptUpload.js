@@ -223,3 +223,42 @@ document.addEventListener("click", (e) => {
   console.log("Registrado:", horarioInicioUTC);
 });
 
+// ======================================================
+// 3. ATUALIZAR NO SUPABASE (UPSERT)
+// ======================================================
+async function atualizarSupabaseContextRecomendacoes(novoId) {
+  if (!novoId) return;
+
+  try {
+    const userId = await getUserId();
+    console.log(`Atualizando contexto para Semana ID: ${novoId}...`);
+
+    // UPSERT: Se já existe um registro para esse owner_id, atualiza.
+    // Se não existe, cria um novo.
+    const { data, error } = await client
+      .from("user_context")
+      .upsert(
+        { 
+          owner_id: userId, 
+          current_modifier_id_series: parseInt(novoId) 
+        },
+        { onConflict: 'owner_id' } // Garante que usa a coluna unique para decidir
+      );
+
+    if (error) throw error;
+
+    console.log("Contexto atualizado com sucesso!", data);
+    
+    // Opcional: Feedback visual (ex: mudar cor da borda rapidinho)
+    const selectEl = document.getElementById("select-semana");
+    selectEl.style.borderColor = "green";
+    setTimeout(() => selectEl.style.borderColor = "", 1000);
+
+    // Opcional: Se precisar recarregar algo na tela que dependa disso:
+    // window.location.reload(); 
+
+  } catch (error) {
+    console.error("Erro ao atualizar contexto:", error);
+    alert("Erro ao mudar semana: " + error.message);
+  }
+}

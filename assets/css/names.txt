@@ -1,0 +1,47 @@
+Regras gerais (quase universais)
+    main.css
+    reset.css
+    header.css
+    login-form.css
+
+base.css        → estilos globais
+layout.css      → estrutura da página
+components.css  → botões, cards, modais
+utilities.css   → classes utilitárias
+
+
+Padrões populares (se quiser ir além)
+- BEM (nome do conteúdo, não do arquivo)
+    O arquivo costuma seguir o bloco principal:
+    card.css
+    header.css
+    menu.css
+
+- Atomic / Utility-first
+    Arquivos menores e bem específicos:
+        spacing.css
+        colors.css
+        typography.css
+
+
+Padrão por responsabilidade (o mais comum)
+
+    Arquivos nomeados de acordo com o papel que exercem:
+
+    base.css        → estilos globais
+    layout.css      → estrutura da página
+    components.css  → botões, cards, modais
+    utilities.css   → classes utilitárias
+
+    Muito usado em projetos médios e grandes.
+
+Padrão por componente (moderno e escalável)
+
+    Cada arquivo representa um componente específico:
+
+    button.css
+    navbar.css
+    modal.css
+    card-product.css
+    
+    Excelente para design systems, React, Vue, etc.

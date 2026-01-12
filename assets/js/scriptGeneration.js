@@ -1,5 +1,7 @@
 // script.js
 
+const MEXENDO_NO_CSS = false; // Ative para usar cache local durante desenvolvimento
+
 // === 1. MONITORAMENTO DE SESSÃO ===
 // Variável de controle fora do evento
 let templatesJaCarregados = false;
@@ -73,7 +75,16 @@ async function buscarExercicios() {
   const container = document.getElementById("lista-exercicios");
   container.innerHTML = "Carregando exercícios...";
 
-  // Vai direto no banco buscar os dados
+  // [CACHE - LEITURA]
+  if (MEXENDO_NO_CSS) {
+    const cache = localStorage.getItem("cache_exercicios");
+    if (cache) {
+      console.log("📦 Usando cache local (Exercícios)");
+      renderizarExercicios(JSON.parse(cache));
+      return;
+    }
+  }
+
   const { data, error } = await client
     .from("exercicios")
     .select("id, nome, grupo_muscular")
@@ -84,7 +95,10 @@ async function buscarExercicios() {
     return;
   }
 
-  // Renderiza na tela
+  // [CACHE - GRAVAÇÃO]
+  if (MEXENDO_NO_CSS)
+    localStorage.setItem("cache_exercicios", JSON.stringify(data));
+
   renderizarExercicios(data);
 }
 
@@ -110,7 +124,16 @@ async function buscarTemplates() {
   const container = document.getElementById("lista-templates");
   container.innerHTML = "Carregando templates...";
 
-  // Vai direto no banco buscar os dados
+  // [CACHE - LEITURA]
+  if (MEXENDO_NO_CSS) {
+    const cache = localStorage.getItem("cache_templates");
+    if (cache) {
+      console.log("📦 Usando cache local (Templates)");
+      renderizarTemplates(JSON.parse(cache));
+      return;
+    }
+  }
+
   const { data, error } = await client
     .from("templates")
     .select("id, nome, descricao")
@@ -120,10 +143,12 @@ async function buscarTemplates() {
     container.innerHTML = "Erro ao buscar: " + error.message;
     return;
   }
-  // Renderiza na tela
 
-  console.log("Templates encontrados:");
-  console.log(data);
+  // [CACHE - GRAVAÇÃO]
+  if (MEXENDO_NO_CSS)
+    localStorage.setItem("cache_templates", JSON.stringify(data));
+
+  console.log("Templates encontrados:", data);
   renderizarTemplates(data);
 }
 
@@ -171,10 +196,19 @@ function aoClicarNoTemplate(id) {
 
 // === 6. CONSULTA ITENS DE TEMPLATE (SEM CACHE, POR ENQUANTO) ===
 async function buscarItensDeTemplate(templateId) {
-  // Atualiza a variável global por segurança
-  templateAtualId = templateId;
+  templateAtualId = templateId; // Mantive sua lógica global
 
-  // 1. Busca Itens (Igual)
+  // [CACHE - LEITURA] - Usamos o ID na chave para não misturar templates
+  const cacheKey = `cache_template_full_${templateId}`;
+  if (MEXENDO_NO_CSS) {
+    const cache = localStorage.getItem(cacheKey);
+    if (cache) {
+      console.log(`📦 Usando cache local (Itens do Template ${templateId})`);
+      return JSON.parse(cache);
+    }
+  }
+
+  // --- Lógica Original ---
   const itensPromise = client
     .from("template_itens")
     .select(
@@ -183,37 +217,24 @@ async function buscarItensDeTemplate(templateId) {
     .eq("template_id", templateId)
     .order("ordem");
 
-  // 2. Busca Contexto (Igual)
   const contextoPromise = client
     .from("user_context")
     .select("series_repeticoes(nome, week, series, min_reps, max_reps)")
     .single();
 
-  // 3. (ATUALIZADO) Busca a ÚLTIMA sessão DESTE TEMPLATE ESPECÍFICO
   const ultimaSessaoPromise = client
     .from("sessao_treino")
     .select(
       `
-      id, 
-      created_at,
-      sessao_series_realizadas (
-        exercicio_id,
-        carga,
-        repeticoes,
-        ordem,
-        tipo
-      )
+      id, created_at,
+      sessao_series_realizadas (exercicio_id, carga, repeticoes, ordem, tipo)
     `
     )
-    // FILTRO MÁGICO AQUI:
     .eq("template_id", templateId)
-    // Ordena do mais recente
     .order("created_at", { ascending: false })
     .limit(1)
-    // .maybeSingle() é melhor que .single() pois não dá erro se não existir nenhum treino anterior
     .maybeSingle();
 
-  // 4. Executa
   const [resItens, resContexto, resUltimaSessao] = await Promise.all([
     itensPromise,
     contextoPromise,
@@ -225,18 +246,22 @@ async function buscarItensDeTemplate(templateId) {
     return null;
   }
 
-  // Se não tiver treino anterior (resUltimaSessao.data for null), retorna array vazio
   const historico = resUltimaSessao.data
     ? resUltimaSessao.data.sessao_series_realizadas
     : [];
 
-  console.log("Histórico deste template recuperado:", historico);
-
-  return {
+  // Montamos o objeto final
+  const resultadoFinal = {
     itens: resItens.data,
     contexto: resContexto.data,
     historico: historico,
   };
+
+  // [CACHE - GRAVAÇÃO]
+  if (MEXENDO_NO_CSS)
+    localStorage.setItem(cacheKey, JSON.stringify(resultadoFinal));
+
+  return resultadoFinal;
 }
 
 async function renderizarItensDeTemplate(templateId) {
@@ -263,6 +288,7 @@ async function renderizarItensDeTemplate(templateId) {
   // Não crie uma variável 'detalhes'. Jogue direto no container.
 
   // Parte 1: Título Principal (String é mais fácil aqui)
+  
   wrapperTraining.insertAdjacentHTML(
     "beforeend",
     `<h3 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h3>`
@@ -527,3 +553,93 @@ window.addEventListener("load", () => {
     buscarTemplates();
   }
 });
+
+
+
+// ======================================================
+// UTILITÁRIO: PEGAR ID DO USUÁRIO
+// ======================================================
+async function getUserId() {
+  const { data: { user } } = await client.auth.getUser();
+  if (user) return user.id;
+  
+  const userV1 = client.auth.user && client.auth.user();
+  return userV1 ? userV1.id : "usuario_anonimo_ou_teste";
+}
+
+// ======================================================
+// 1. BUSCAR DADOS (Opções + Seleção Atual)
+// ======================================================
+async function buscarContextRecomendacoes() {
+  const container = document.getElementById("container-recomendacoes");
+  if(!container) return; // Segurança caso não tenha o elemento na tela
+
+  try {
+    const userId = await getUserId();
+
+    // A. Busca as opções disponíveis (Semanas)
+    const promiseOpcoes = client
+      .from("series_repeticoes")
+      .select("id, nome, week")
+      // A forma correta de dizer "IS NOT NULL"
+      .not("week", "is", null)
+      .order("week", { ascending: true }); // ou order('week')
+      
+
+    // B. Busca qual está selecionada atualmente pelo usuário
+    const promiseContexto = client
+      .from("user_context")
+      .select("current_modifier_id_series")
+      .eq("owner_id", userId)
+      .maybeSingle(); // maybeSingle não dá erro se não existir (usuário novo)
+
+    // Executa as duas buscas ao mesmo tempo
+    const [resOpcoes, resContexto] = await Promise.all([promiseOpcoes, promiseContexto]);
+
+    if (resOpcoes.error) throw resOpcoes.error;
+
+    const listaOpcoes = resOpcoes.data;
+    // Se tiver contexto salvo, pega o ID, senão null
+    const idSelecionado = resContexto.data ? resContexto.data.current_modifier_id_series : null;
+
+    // Chama a renderização passando os dados
+    renderizarContextRecomendacoes(listaOpcoes, idSelecionado);
+
+  } catch (error) {
+    console.error("Erro ao buscar contexto:", error);
+    container.innerHTML = "Erro ao carregar opções.";
+  }
+}
+
+// ======================================================
+// 2. RENDERIZAR O SELECT
+// ======================================================
+function renderizarContextRecomendacoes(opcoes, idSelecionado) {
+  const container = document.getElementById("container-recomendacoes");
+  
+  
+  // Cria o HTML do select
+  // Note o evento onchange: assim que mudar, já salva no banco!
+  // <label for="select-semana">Semana do Treino:</label>
+  let html = `
+    <select id="select-semana" onchange="atualizarSupabaseContextRecomendacoes(this.value)" style="padding: 8px; width: 100%;" class="input-select-context-recomendacoes">
+      <option value="" disabled ${!idSelecionado ? 'selected' : ''}>Selecione uma semana...</option>
+  `;
+
+  opcoes.forEach(opcao => {
+    // Verifica se essa é a opção que estava salva no banco
+    const isSelected = (opcao.id === idSelecionado) ? "selected" : "";
+    
+    html += `
+      <option value="${opcao.id}" ${isSelected}> Semana ${opcao.week} -
+        ${opcao.nome}
+      </option>
+    `;
+  });
+
+  html += `</select>`;
+  
+  container.innerHTML = html;
+}
+
+buscarContextRecomendacoes();

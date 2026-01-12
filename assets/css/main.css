@@ -1,0 +1,25 @@
+:root {
+  --primary-color: #ff6314;
+  --secondary-color: #2ecc71;
+  --font-color-dark: #333333;
+  --font-color-light: #ffffff;
+  --background-color: #f5f5f5;
+}
+
+* {
+  font-family: "Montserrat", sans-serif;
+}
+
+.titleFont,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Montserrat Alternates", sans-serif;
+}
+
+.titleLoginFont {
+  font-family: "Anton", sans-serif;
+  font-size: 60px;
+}

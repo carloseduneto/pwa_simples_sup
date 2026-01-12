@@ -9,8 +9,29 @@
     <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#ff6314" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link rel="shortcut icon" href="assets/images/logo.png" type="image/x-icon">
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="stylesheet" href="assets/css/header.css" />
+    <link rel="stylesheet" href="assets/css/login.css" />
+    <link rel="stylesheet" href="assets/css/templates.css">
+
+    <link
+      rel="shortcut icon"
+      href="assets/images/logo.png"
+      type="image/x-icon"
+    />
 
     <style>
       body {
@@ -159,31 +180,49 @@
     </style>
   </head>
   <body>
-    <h2>Supabase Edge Connector</h2>
-
     <div id="auth-section">
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Senha" />
-      <button onclick="signUp()">Criar Conta (Teste)</button>
+      <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
+      <input type="email" id="email" placeholder="Email" class="login" />
+      <input type="password" id="password" placeholder="Senha" class="login" />
       <button onclick="signIn()">Entrar</button>
+      <button onclick="signUp()" disabled>Criar Conta (Teste)</button>
     </div>
 
     <div id="app-section" class="hidden">
-      <p>Logado como: <span id="user-email"></span></p>
+      <div class="headerPage">
+        <div>
+          <h2>Gestão de treino</h2>
+        </div>
+        <div class="userPlace">
+          <p>Logado como: <span id="user-email"></span></p>
+          <button onclick="signOut()" class="signOut">Sair</button>
+        </div>
+      </div>
 
-      <button onclick="callEdgeFunction()">Consultar via Edge Function</button>
+      <!-- <button onclick="callEdgeFunction()">Consultar via Edge Function</button> -->
 
-      <button onclick="signOut()">Sair</button>
-
-      <h3>Resultado da Edge Function:</h3>
-      <pre id="result">...</pre>
+      <!-- <h3>Resultado da Edge Function:</h3>
+      <pre id="result">...</pre> -->
 
       <!-- <button onclick="buscarExercicios()">Consultar Exercícios</button>
       <h3>Lista de Exercícios (Front-end):</h3>
       <div id="lista-exercicios"></div>
     </div> -->
 
-      <h3>Lista de Templates (Front-end):</h3>
+      <h3>Templates</h3>
+      <!-- <label for="cars">Choose a car:</label> -->
+      <!-- <select id="cars">
+        <option value="volvo">Semana 1</option>
+        <option value="volvo">Semana 2</option>
+        <option value="volvo">Semana 3</option>
+        <option value="volvo">Semana 4</option>
+        <option value="volvo">Semana 5</option>
+        <option value="volvo">Semana 6</option>
+    
+      </select> -->
+
+      <div id="container-recomendacoes">Carregando semanas...</div>
+
       <div id="lista-templates"></div>
 
       <div class="itensTemplate"></div>
