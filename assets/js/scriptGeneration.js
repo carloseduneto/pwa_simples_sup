@@ -129,19 +129,29 @@ async function buscarTemplates() {
 
 function renderizarTemplates(lista) {
   const container = document.getElementById("lista-templates");
-  container.innerHTML = ""; // Limpa a mensagem de "carregando"
+  container.innerHTML = "";
+
   if (lista.length === 0) {
     container.innerHTML = "<p>Nenhum template encontrado.</p>";
     return;
   }
+
   lista.forEach((item) => {
     const div = document.createElement("button");
     div.className = "template-item";
     div.textContent = item.nome + " - " + item.descricao;
 
-    // ADICIONE AQUI
-    // O "() =>" serve para a função não rodar sozinha, só no clique
-    div.onclick = () => renderizarItensDeTemplate(item.id);
+    // --- AQUI ESTÁ A MUDANÇA ---
+    div.onclick = () => {
+      // 1. Atualiza a URL sem recarregar a página (Fica: seunome.com/?template=123)
+      const novaUrl = new URL(window.location);
+      novaUrl.searchParams.set("template", item.id);
+      window.history.pushState({}, "", novaUrl);
+
+      // 2. Chama sua função normal
+      renderizarItensDeTemplate(item.id);
+    };
+    // ---------------------------
 
     container.appendChild(div);
   });
@@ -161,9 +171,8 @@ function aoClicarNoTemplate(id) {
 
 // === 6. CONSULTA ITENS DE TEMPLATE (SEM CACHE, POR ENQUANTO) ===
 async function buscarItensDeTemplate(templateId) {
-  
   // Atualiza a variável global por segurança
-  templateAtualId = templateId; 
+  templateAtualId = templateId;
 
   // 1. Busca Itens (Igual)
   const itensPromise = client
@@ -183,7 +192,8 @@ async function buscarItensDeTemplate(templateId) {
   // 3. (ATUALIZADO) Busca a ÚLTIMA sessão DESTE TEMPLATE ESPECÍFICO
   const ultimaSessaoPromise = client
     .from("sessao_treino")
-    .select(`
+    .select(
+      `
       id, 
       created_at,
       sessao_series_realizadas (
@@ -193,14 +203,15 @@ async function buscarItensDeTemplate(templateId) {
         ordem,
         tipo
       )
-    `)
+    `
+    )
     // FILTRO MÁGICO AQUI:
-    .eq("template_id", templateId) 
+    .eq("template_id", templateId)
     // Ordena do mais recente
     .order("created_at", { ascending: false })
     .limit(1)
     // .maybeSingle() é melhor que .single() pois não dá erro se não existir nenhum treino anterior
-    .maybeSingle(); 
+    .maybeSingle();
 
   // 4. Executa
   const [resItens, resContexto, resUltimaSessao] = await Promise.all([
@@ -503,3 +514,16 @@ async function renderizarItensDeTemplate(templateId) {
     });
   }
 }
+
+// Verifica se já tem algo na URL quando abre o app
+window.addEventListener("load", () => {
+  const params = new URLSearchParams(window.location.search);
+  const idSalvo = params.get("template"); // Pega o número da URL
+
+  if (idSalvo) {
+    // Se tiver ID na URL, abre direto a tela dele
+    renderizarItensDeTemplate(idSalvo);
+  } else {
+    buscarTemplates();
+  }
+});
