@@ -23,3 +23,15 @@ Mantenha um padrão. O mais usado hoje em dia é o kebab-case (tudo minúsculo s
     lista-templates.css ✅
 
     ListaTemplates.css ❌
+
+O que fazer com o "misturado"?
+
+Se suas variáveis e funções já estão em camelCase, você já está seguindo a boa prática mundial do JavaScript. Não mude nada nelas!
+
+O que vale a pena organizar aos poucos:
+
+    Nomes de arquivos: Se tiver um meuTreino.js, mude para meu-treino.js.
+
+    Classes CSS: Se tiver um .inputLogin, mude para .input-login.
+
+    Dica: O VS Code tem uma extensão chamada "Rename Symbol" (F2). Se você mudar o nome de uma função usando a tecla F2, ele muda automaticamente em todos os outros arquivos que usam essa função, evitando que você esqueça algum lugar.
