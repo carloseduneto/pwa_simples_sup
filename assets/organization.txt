@@ -1,0 +1,25 @@
+meu-app-treino/
+├── index.html           # Página principal (Login ou Home)
+├── assets/              # Coisas estáticas
+│   ├── img/             # Fotos e ícones
+│   └── fonts/           # Fontes personalizadas
+├── css/                 # Estilos (CSS)
+│   ├── global.css       # Variáveis de cores e reset
+│   ├── components.css   # Estilos dos cards, botões e header
+│   └── auth.css         # Estilos específicos do login
+└── js/                  # Lógica do sistema
+    ├── services/        # Conexão com Dados (Supabase/API)
+    │   └── supabase.js  # Só as funções de buscar/salvar
+    ├── ui/              # Manipulação da tela (DOM)
+    │   ├── render.js    # Funções de renderizar (como a sua renderizarTemplates)
+    │   └── animations.js# Lógica do header que some/aparece
+    └── auth/            # Lógica de login e cadastro
+        └── auth.js
+
+        Dica de Ouro: Nomenclatura
+
+Mantenha um padrão. O mais usado hoje em dia é o kebab-case (tudo minúsculo separado por traço):
+
+    lista-templates.css ✅
+
+    ListaTemplates.css ❌
