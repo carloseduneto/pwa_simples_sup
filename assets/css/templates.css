@@ -1,5 +1,90 @@
 .input-select-context-recomendacoes {
- 	padding: 8px;
- 	width: 100%;
-    margin-bottom: 10px;
- }
+  /* Layout e Alinhamento */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Texto na esquerda, ícone na direita */
+
+  /* Espaçamento e Tamanho */
+  padding: 12px 20px;
+  width: 100%; /* Ou o tamanho fixo que você desejar */
+  max-width: 220px;
+
+  /* Estilo Visual */
+  background-color: #f0f0f0; /* Cinza claro da imagem */
+  border-radius: 15px; /* Bordas arredondadas */
+  border: none;
+
+  /* Tipografia */
+  color: #000;
+  font-weight: bold;
+  font-family: var(--font-title);
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+
+  cursor: pointer;
+}
+
+.input-select-context-recomendacoes:active {
+  transform: scale(0.98); /* Dá um leve efeito de "afundar" ao clicar */
+  background-color: #e5e5e5;
+}
+
+.lista-opcoes {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+}
+
+#lista-templates {
+  /* display: none; */
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Cria 2 colunas de tamanhos iguais (frações) */
+  gap: 10px; /* Espaço entre os cards */
+  /* padding: 15px; */
+  margin-top: 10px;
+  margin-bottom: 15px;
+  align-items: center;
+  justify-items: center;
+}
+
+@media (min-width: 600px) {
+  #lista-templates {
+    grid-template-columns: 1fr 1fr 1fr; /* 3 colunas em telas maiores */
+  }
+}
+
+.template-item {
+  background-color: var(--secondary-color);
+  width: 170px;
+  height: 130px;
+  border-radius: 25px; /* Cantos arredondados como na imagem */
+  padding: 20px;
+  color: var(--font-color-light);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Garante o espaço entre texto e pontos */
+  box-sizing: border-box;
+  transition: transform 0.2s;
+}
+
+.template-item:hover {
+  transform: scale(1.03);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.card-subtitle {
+  margin: 5px 0 0 0;
+  font-weight: 300;
+  opacity: 0.9;
+}
+
+.card-dots {
+  align-self: flex-end; /* Joga os três pontos para a direita */
+  font-size: 1.5rem;
+  line-height: 1;
+}

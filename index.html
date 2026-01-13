@@ -24,11 +24,20 @@
       rel="stylesheet"
     />
 
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/main.css" />
     <link rel="stylesheet" href="assets/css/header.css" />
     <link rel="stylesheet" href="assets/css/login.css" />
     <link rel="stylesheet" href="assets/css/templates.css" />
+    <link rel="stylesheet" href="assets/css/app_section.css" />
+    <link rel="stylesheet" href="assets/css/buttons.css" />
+    <link rel="stylesheet" href="assets/css/bottom-navbar.css" />
+    <link rel="stylesheet" href="assets/css/test-smart-header.css">
 
     <link
       rel="shortcut icon"
@@ -39,7 +48,7 @@
     <style>
       body {
         font-family: system-ui, sans-serif;
-        padding: 20px;
+        /* padding: 20px; */
         max-width: 600px;
         margin: 0 auto;
       }
@@ -184,22 +193,38 @@
   </head>
   <body>
     <div id="auth-section">
-      <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
-      <input type="email" id="email" placeholder="Email" class="login" />
-      <input type="password" id="password" placeholder="Senha" class="login" />
-      <button onclick="signIn()">Entrar</button>
-      <button onclick="signUp()" disabled>Criar Conta (Teste)</button>
+      <div class="loginContainer">
+        <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
+
+        <div class="loginInput">
+          <input type="email" id="email" placeholder="Email" class="login" />
+          <input
+            type="password"
+            id="password"
+            placeholder="Senha"
+            class="login"
+          />
+        </div>
+
+        <button onclick="signIn()" class="botaoLargo">
+          Entrar
+          <span class="material-symbols-rounded"> arrow_forward </span>
+        </button>
+        <button onclick="signUp()" disabled class="botaoLargo desativado">
+          Criar Conta (Teste)
+          <span class="material-symbols-rounded"> add </span>
+        </button>
+      </div>
     </div>
 
     <div id="app-section" class="hidden">
       <div class="headerPage">
         <div>
-          <h2>Gestão de treino - Experimental SPA Routes</h2>
+          <h2>Templates SPA R</h2>
         </div>
         <div class="userPlace">
           <p>Logado como: <span id="user-email"></span></p>
           <button onclick="signOut()" class="signOut">Sair</button>
-
         </div>
       </div>
 
@@ -210,9 +235,43 @@
 
         <div id="lista-templates"></div>
         <button onclick="roteador('config')">⚙️ Configurações</button>
+
+        <!-- <nav class="bottom-nav">
+          <div class="nav-item active">
+            <svg viewBox="0 0 24 24" class="nav-icon">
+              <path
+                d="M20.57 14.86L22 13.43L20.57 12L17 15.57L8.43 7L12 3.43L10.57 2L9.14 3.43L7.71 2L5.57 4.14L4.14 2.71L2.71 4.14L4.14 5.57L2 7.71L3.43 9.14L2 10.57L3.43 12L7 8.43L15.57 17L12 20.57L13.43 22L14.86 20.57L16.29 22L18.43 19.86L19.86 21.29L21.29 19.86L19.86 18.43L22 16.29L20.57 14.86Z"
+                fill="currentColor"
+              />
+            </svg>
+            <span>Treino</span>
+          </div>
+
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24" class="nav-icon">
+              <path
+                d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3M12,8V13L16.28,15.54L17,14.33L13.5,12.25V8H12Z"
+                fill="currentColor"
+              />
+            </svg>
+            <span>Histórico</span>
+          </div>
+        </nav> -->
       </div>
 
       <div id="screen-workout-details" class="hidden">
+        <!-- Remover se não usar -->
+        <section>
+          <header id="main-header" class="smart-header">
+            <div class="header-content">
+              <span class="logo">MEU TREINO</span>
+        <button onclick="voltarParaLista()" style="margin-bottom: 15px">
+          ⬅ Voltar para Treinos
+        </button>
+            </div>
+          </header>
+        </section>
+
         <button onclick="voltarParaLista()" style="margin-bottom: 15px">
           ⬅ Voltar para Treinos
         </button>
@@ -228,7 +287,6 @@
         <p class="testConfig">Aqui você pode editar seus dados...</p>
         <div class="testConfig">Um teste de config</div>
       </div>
-
 
       <template class="template-header-exercise">
         <div class="headerExercise">
@@ -271,5 +329,6 @@
     <script src="./assets/js/scriptGeneration.js"></script>
     <script src="./assets/js/scriptManipulation.js"></script>
     <script src="./assets/js/scriptUpload.js"></script>
+    <script src="assets/js/test-smart-header.js"></script>
   </body>
 </html>

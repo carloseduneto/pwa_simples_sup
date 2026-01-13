@@ -209,17 +209,23 @@ function renderizarTemplates(lista) {
   }
 
   lista.forEach((item) => {
-    const div = document.createElement("button");
-    div.className = "template-item";
-    div.textContent = item.nome + " - " + item.descricao;
+    const articleExercicio = document.createElement("article");
+    articleExercicio.className = "template-item";
 
-    div.onclick = () => {
-      // A função abrirTemplate já cuida do roteador, da URL nova e de carregar os itens
+    // Criamos a estrutura interna do card
+    articleExercicio.innerHTML = `
+      <div class="card-info">
+        <h3 class="card-title">${item.nome}</h3>
+        <p class="card-subtitle">${item.descricao}</p>
+      </div>
+      <span class="card-dots">&#8942;</span>
+    `;
+
+    articleExercicio.onclick = () => {
       abrirTemplate(item.id);
     };
-    // ---------------------------
 
-    container.appendChild(div);
+    container.appendChild(articleExercicio);
   });
 }
 
@@ -705,7 +711,7 @@ function renderizarContextRecomendacoes(opcoes, idSelecionado) {
     const isSelected = opcao.id === idSelecionado ? "selected" : "";
 
     html += `
-      <option value="${opcao.id}" ${isSelected}> Semana ${opcao.week} -
+      <option value="${opcao.id}" ${isSelected} class="lista-opcoes"> Semana ${opcao.week} -
         ${opcao.nome}
       </option>
     `;

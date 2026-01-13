@@ -1,13 +1,21 @@
 :root {
   --primary-color: #ff6314;
-  --secondary-color: #2ecc71;
+  --secondary-color: #eb611c;
+  --tertiary-color: #2ecc71;
+  --faded-color: #ffe0d0;
+  --disabled-color: #cccccc;
   --font-color-dark: #333333;
   --font-color-light: #ffffff;
   --background-color: #f5f5f5;
+  --font-title: "Montserrat Alternates", sans-serif;
+  --font-body: "Montserrat", sans-serif;
 }
 
 * {
   font-family: "Montserrat", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .titleFont,
