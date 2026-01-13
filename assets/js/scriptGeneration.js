@@ -18,6 +18,7 @@ client.auth.onAuthStateChange((event, session) => {
     // SÓ busca se ainda não tiver buscado
     if (!templatesJaCarregados) {
       buscarTemplates();
+      buscarContextRecomendacoes();
       templatesJaCarregados = true; // Marca como carregado
     }
   } else {
@@ -111,7 +112,7 @@ function renderizarExercicios(lista) {
     return;
   }
 
-  lista.forEach((item) => {
+  lista.forEach(item => {
     const div = document.createElement("div");
     div.className = "exercicio-item";
     div.textContent = item.nome;
@@ -161,7 +162,7 @@ function renderizarTemplates(lista) {
     return;
   }
 
-  lista.forEach((item) => {
+  lista.forEach(item => {
     const div = document.createElement("button");
     div.className = "template-item";
     div.textContent = item.nome + " - " + item.descricao;
@@ -288,7 +289,7 @@ async function renderizarItensDeTemplate(templateId) {
   // Não crie uma variável 'detalhes'. Jogue direto no container.
 
   // Parte 1: Título Principal (String é mais fácil aqui)
-  
+
   wrapperTraining.insertAdjacentHTML(
     "beforeend",
     `<h3 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h3>`
@@ -312,7 +313,7 @@ async function renderizarItensDeTemplate(templateId) {
 
     // Cria uma lista temporária só com as séries DESTE exercício (item.exercicios.id)
     const seriesPassadas = historico.filter(
-      (h) => h.exercicio_id === item.exercicios.id
+      h => h.exercicio_id === item.exercicios.id
     );
 
     console.log(
@@ -532,37 +533,47 @@ async function renderizarItensDeTemplate(templateId) {
   // Usamos "Event Delegation": adicionamos no container pai para não travar a memória
   const containerPrincipal = document.querySelector(".container-treino"); // Ou onde você injeta o HTML
   if (containerPrincipal) {
-    containerPrincipal.addEventListener("input", (event) => {
+    containerPrincipal.addEventListener("input", event => {
       // Verifica se quem foi digitado é um dos nossos inputs
       if (event.target.matches(".kgExercise, .repsExercise, .seriesExercise")) {
         salvarInputLocalmente(event.target);
       }
     });
   }
+
+  // 2. No final da função, force a troca de tela:
+  navegarPara("detalhes");
+
+  // 3. Atualiza a URL sem recarregar a página (Isso é mágica de SPA!)
+  // O usuário vê a URL mudar, mas o navegador não pisca.
+  const novaUrl = `?template=${idSalvo}`;
+  window.history.pushState({ template: idSalvo }, "", novaUrl);
 }
 
 // Verifica se já tem algo na URL quando abre o app
 window.addEventListener("load", () => {
   const params = new URLSearchParams(window.location.search);
-  const idSalvo = params.get("template"); // Pega o número da URL
+  const idSalvo = params.get("template");
 
   if (idSalvo) {
-    // Se tiver ID na URL, abre direto a tela dele
+    // Se tem ID, busca o template e o próprio renderizar vai trocar a tela
     renderizarItensDeTemplate(idSalvo);
   } else {
-    buscarTemplates();
+    // Se não tem ID, garante que estamos na lista
+    navegarPara("lista");
+    buscarTemplates(); // Sua função original
   }
 });
-
-
 
 // ======================================================
 // UTILITÁRIO: PEGAR ID DO USUÁRIO
 // ======================================================
 async function getUserId() {
-  const { data: { user } } = await client.auth.getUser();
+  const {
+    data: { user },
+  } = await client.auth.getUser();
   if (user) return user.id;
-  
+
   const userV1 = client.auth.user && client.auth.user();
   return userV1 ? userV1.id : "usuario_anonimo_ou_teste";
 }
@@ -572,7 +583,7 @@ async function getUserId() {
 // ======================================================
 async function buscarContextRecomendacoes() {
   const container = document.getElementById("container-recomendacoes");
-  if(!container) return; // Segurança caso não tenha o elemento na tela
+  if (!container) return; // Segurança caso não tenha o elemento na tela
 
   try {
     const userId = await getUserId();
@@ -584,7 +595,6 @@ async function buscarContextRecomendacoes() {
       // A forma correta de dizer "IS NOT NULL"
       .not("week", "is", null)
       .order("week", { ascending: true }); // ou order('week')
-      
 
     // B. Busca qual está selecionada atualmente pelo usuário
     const promiseContexto = client
@@ -594,17 +604,21 @@ async function buscarContextRecomendacoes() {
       .maybeSingle(); // maybeSingle não dá erro se não existir (usuário novo)
 
     // Executa as duas buscas ao mesmo tempo
-    const [resOpcoes, resContexto] = await Promise.all([promiseOpcoes, promiseContexto]);
+    const [resOpcoes, resContexto] = await Promise.all([
+      promiseOpcoes,
+      promiseContexto,
+    ]);
 
     if (resOpcoes.error) throw resOpcoes.error;
 
     const listaOpcoes = resOpcoes.data;
     // Se tiver contexto salvo, pega o ID, senão null
-    const idSelecionado = resContexto.data ? resContexto.data.current_modifier_id_series : null;
+    const idSelecionado = resContexto.data
+      ? resContexto.data.current_modifier_id_series
+      : null;
 
     // Chama a renderização passando os dados
     renderizarContextRecomendacoes(listaOpcoes, idSelecionado);
-
   } catch (error) {
     console.error("Erro ao buscar contexto:", error);
     container.innerHTML = "Erro ao carregar opções.";
@@ -616,20 +630,21 @@ async function buscarContextRecomendacoes() {
 // ======================================================
 function renderizarContextRecomendacoes(opcoes, idSelecionado) {
   const container = document.getElementById("container-recomendacoes");
-  
-  
+
   // Cria o HTML do select
   // Note o evento onchange: assim que mudar, já salva no banco!
   // <label for="select-semana">Semana do Treino:</label>
   let html = `
     <select id="select-semana" onchange="atualizarSupabaseContextRecomendacoes(this.value)" style="padding: 8px; width: 100%;" class="input-select-context-recomendacoes">
-      <option value="" disabled ${!idSelecionado ? 'selected' : ''}>Selecione uma semana...</option>
+      <option value="" disabled ${
+        !idSelecionado ? "selected" : ""
+      }>Selecione uma semana...</option>
   `;
 
   opcoes.forEach(opcao => {
     // Verifica se essa é a opção que estava salva no banco
-    const isSelected = (opcao.id === idSelecionado) ? "selected" : "";
-    
+    const isSelected = opcao.id === idSelecionado ? "selected" : "";
+
     html += `
       <option value="${opcao.id}" ${isSelected}> Semana ${opcao.week} -
         ${opcao.nome}
@@ -638,8 +653,7 @@ function renderizarContextRecomendacoes(opcoes, idSelecionado) {
   });
 
   html += `</select>`;
-  
+
   container.innerHTML = html;
 }
 
-buscarContextRecomendacoes();

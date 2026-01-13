@@ -19,13 +19,16 @@
       href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/main.css" />
     <link rel="stylesheet" href="assets/css/header.css" />
     <link rel="stylesheet" href="assets/css/login.css" />
-    <link rel="stylesheet" href="assets/css/templates.css">
+    <link rel="stylesheet" href="assets/css/templates.css" />
 
     <link
       rel="shortcut icon"
@@ -181,7 +184,7 @@
   </head>
   <body>
     <div id="auth-section">
-      <h1 class="titleLoginFont">TESTE FORK</h1>
+      <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
       <input type="email" id="email" placeholder="Email" class="login" />
       <input type="password" id="password" placeholder="Senha" class="login" />
       <button onclick="signIn()">Entrar</button>
@@ -191,7 +194,7 @@
     <div id="app-section" class="hidden">
       <div class="headerPage">
         <div>
-          <h2>Gestão de treino</h2>
+          <h2>Gestão de treino - Experimental SPA</h2>
         </div>
         <div class="userPlace">
           <p>Logado como: <span id="user-email"></span></p>
@@ -209,23 +212,19 @@
       <div id="lista-exercicios"></div>
     </div> -->
 
-      <h3>Templates</h3>
-      <!-- <label for="cars">Choose a car:</label> -->
-      <!-- <select id="cars">
-        <option value="volvo">Semana 1</option>
-        <option value="volvo">Semana 2</option>
-        <option value="volvo">Semana 3</option>
-        <option value="volvo">Semana 4</option>
-        <option value="volvo">Semana 5</option>
-        <option value="volvo">Semana 6</option>
-    
-      </select> -->
-
+    <div id="screen-templates-list">
+      <h3>Seus Treinos</h3>
+      
       <div id="container-recomendacoes">Carregando semanas...</div>
-
+      
       <div id="lista-templates"></div>
+  </div>
 
+  <div id="screen-workout-details" class="hidden">
+      <button onclick="voltarParaLista()" style="margin-bottom: 15px;">⬅ Voltar para Treinos</button>
+      
       <div class="itensTemplate"></div>
+  </div>
 
       <template class="template-header-exercise">
         <div class="headerExercise">
@@ -264,6 +263,7 @@
       </div>
     </div>
     <script src="./assets/js/config.js"></script>
+    <script src="assets/js/router.js"></script>
     <script src="./assets/js/scriptGeneration.js"></script>
     <script src="./assets/js/scriptManipulation.js"></script>
     <script src="./assets/js/scriptUpload.js"></script>

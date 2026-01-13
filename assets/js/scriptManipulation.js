@@ -206,3 +206,45 @@ function salvarStatusLocalmente(row) {
   const chave = gerarChaveCache(exercicioId, linhaIndex, "status");
   localStorage.setItem(chave, isRealizado);
 }
+
+
+// Função para alternar telas
+function navegarPara(tela) {
+  const screenList = document.getElementById("screen-templates-list");
+  const screenDetails = document.getElementById("screen-workout-details");
+
+  if (tela === 'lista') {
+    screenList.classList.remove("hidden");
+    screenDetails.classList.add("hidden");
+    
+    // Opcional: Limpar a URL para ficar limpa (sem ?template=3)
+    window.history.pushState({}, "", "/"); 
+  } 
+  else if (tela === 'detalhes') {
+    screenList.classList.add("hidden");
+    screenDetails.classList.remove("hidden");
+  }
+}
+
+// Função chamada pelo botão "Voltar"
+function voltarParaLista() {
+  navegarPara('lista');
+  // Se quiser limpar o conteúdo do treino anterior para não piscar dados velhos:
+  document.querySelector(".itensTemplate").innerHTML = "";
+  
+} 
+
+
+window.addEventListener("popstate", event => {
+  // O usuário apertou "Voltar" no navegador/celular
+  const params = new URLSearchParams(window.location.search);
+  const idSalvo = params.get("template");
+
+  if (idSalvo) {
+    // Se a URL voltou para uma que tem template (ex: avançou e voltou)
+    renderizarItensDeTemplate(idSalvo);
+  } else {
+    // Se a URL está limpa, mostra a lista
+    navegarPara("lista");
+  }
+});
