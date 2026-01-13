@@ -208,43 +208,47 @@ function salvarStatusLocalmente(row) {
 }
 
 
-// Função para alternar telas
-function navegarPara(tela) {
-  const screenList = document.getElementById("screen-templates-list");
-  const screenDetails = document.getElementById("screen-workout-details");
+// // Função para alternar telas
+// function navegarPara(tela) {
+//   const screenList = document.getElementById("screen-templates-list");
+//   const screenDetails = document.getElementById("screen-workout-details");
 
-  if (tela === 'lista') {
-    screenList.classList.remove("hidden");
-    screenDetails.classList.add("hidden");
+//   if (tela === 'lista') {
+//     screenList.classList.remove("hidden");
+//     screenDetails.classList.add("hidden");
     
-    // Opcional: Limpar a URL para ficar limpa (sem ?template=3)
-    window.history.pushState({}, "", "/"); 
-  } 
-  else if (tela === 'detalhes') {
-    screenList.classList.add("hidden");
-    screenDetails.classList.remove("hidden");
-  }
-}
+//     // Opcional: Limpar a URL para ficar limpa (sem ?template=3)
+//     window.history.pushState({}, "", "/"); 
+//   } 
+//   else if (tela === 'detalhes') {
+//     screenList.classList.add("hidden");
+//     screenDetails.classList.remove("hidden");
+//   }
+// }
 
-// Função chamada pelo botão "Voltar"
-function voltarParaLista() {
-  navegarPara('lista');
-  // Se quiser limpar o conteúdo do treino anterior para não piscar dados velhos:
-  document.querySelector(".itensTemplate").innerHTML = "";
+// // Função chamada pelo botão "Voltar"
+// function voltarParaLista() {
+//   navegarPara('lista');
+//   // Se quiser limpar o conteúdo do treino anterior para não piscar dados velhos:
+//   document.querySelector(".itensTemplate").innerHTML = "";
   
-} 
+// } 
 
 
-window.addEventListener("popstate", event => {
-  // O usuário apertou "Voltar" no navegador/celular
-  const params = new URLSearchParams(window.location.search);
-  const idSalvo = params.get("template");
+window.addEventListener("popstate", (event) => {
+  // Pega o estado salvo pelo pushState do roteador
+  const estado = event.state; // { rota: 'detalhes', id: '123' }
 
-  if (idSalvo) {
-    // Se a URL voltou para uma que tem template (ex: avançou e voltou)
-    renderizarItensDeTemplate(idSalvo);
+  if (estado && estado.rota) {
+    // Usa o roteador para trocar a tela visualmente (false para não criar histórico novo)
+    roteador(estado.rota, estado.id, false);
+
+    // Se for a tela de detalhes, precisamos recarregar os dados
+    if (estado.rota === "detalhes" && estado.id) {
+      renderizarItensDeTemplate(estado.id);
+    }
   } else {
-    // Se a URL está limpa, mostra a lista
-    navegarPara("lista");
+    // Se não tem estado (o usuário voltou até o início), vai para a home
+    roteador("templates", null, false);
   }
 });

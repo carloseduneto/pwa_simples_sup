@@ -2,43 +2,36 @@
 
 const MEXENDO_NO_CSS = false; // Ative para usar cache local durante desenvolvimento
 
-// === 1. MONITORAMENTO DE SESSÃO ===
-// Variável de controle fora do evento
+// ======================================================
+// 1. VARIÁVEIS DE CONTROLE E AUTH
+// ======================================================
 let templatesJaCarregados = false;
 
+// Escuta de Autenticação (O Chefe da Segurança)
 client.auth.onAuthStateChange((event, session) => {
-  // Console log para você ver o evento que está disparando (provavelmente TOKEN_REFRESHED)
-  console.log("Evento de Auth:", event);
-
   if (session) {
-    document.getElementById("auth-section").classList.add("hidden");
-    document.getElementById("app-section").classList.remove("hidden");
     document.getElementById("user-email").innerText = session.user.email;
 
-    // SÓ busca se ainda não tiver buscado
-    if (!templatesJaCarregados) {
-      buscarTemplates();
+    // Assim que logar, verifica para onde ir baseado na URL
+    verificarRotaInicial();
+
+    // Busca contexto (o select de semanas) se necessário
+    if (typeof buscarContextRecomendacoes === "function") {
       buscarContextRecomendacoes();
-      templatesJaCarregados = true; // Marca como carregado
     }
   } else {
-    document.getElementById("auth-section").classList.remove("hidden");
-    document.getElementById("app-section").classList.add("hidden");
-
-    // Reseta a flag quando deslogar, para que no próximo login busque de novo
+    roteador("login");
     templatesJaCarregados = false;
-
-    // Opcional: Limpar a lista visualmente também
-    document.getElementById("lista-templates").innerHTML = "";
   }
 });
 
-// === 2. FUNÇÕES DE AUTENTICAÇÃO ===
+// ======================================================
+// 2. FUNÇÕES DE LOGIN (RESTAURADAS)
+// ======================================================
 async function signUp() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const { error } = await client.auth.signUp({ email, password });
-
   if (error) alert(error.message);
   else alert("Verifique seu email!");
 }
@@ -47,12 +40,65 @@ async function signIn() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const { error } = await client.auth.signInWithPassword({ email, password });
-
   if (error) alert(error.message);
 }
 
 async function signOut() {
   await client.auth.signOut();
+
+  // Limpa visualmente a URL para a raiz do site (remove o ?page=...)
+  // replaceState substitui a entrada atual no histórico em vez de criar uma nova
+  window.history.replaceState(null, "", window.location.pathname);
+
+  // O seu listener onAuthStateChange vai perceber o logout e chamar o roteador('login')
+  // mas agora a URL já estará limpa.
+}
+
+// ======================================================
+// 3. SISTEMA DE ROTEAMENTO INTEGRADO
+// ======================================================
+
+// Lê a URL ao carregar e decide o que abrir
+function verificarRotaInicial() {
+  const params = new URLSearchParams(window.location.search);
+  const page = params.get("page");
+  const id = params.get("id");
+
+  if (page === "detalhes" && id) {
+    // URL pede detalhes -> Vai para detalhes e busca o template
+    abrirTemplate(id);
+
+    // Background: carrega a lista para quando voltar
+    if (!templatesJaCarregados) {
+      buscarTemplates();
+      templatesJaCarregados = true;
+    }
+  } else {
+    // Padrão -> Vai para lista
+    roteador("templates", null, false);
+
+    if (!templatesJaCarregados) {
+      buscarTemplates();
+      templatesJaCarregados = true;
+    }
+  }
+}
+
+// Função chamada pelo botão "Voltar" no HTML
+function voltarParaLista() {
+  // Limpa a tela de detalhes para economizar memória e evitar bugs visuais
+  const container = document.querySelector(".itensTemplate");
+  if (container) container.innerHTML = "";
+
+  roteador("templates");
+}
+
+// Função CLIQUE do Usuário (A Ponte entre o Clique e o Router)
+function abrirTemplate(idTemplate) {
+  // 1. Muda a tela e a URL
+  roteador("detalhes", idTemplate);
+  // 2. Busca os dados
+  renderizarItensDeTemplate(idTemplate);
 }
 
 // === 3. CONSULTA VIA EDGE FUNCTION (A parte robusta) ===
@@ -112,7 +158,7 @@ function renderizarExercicios(lista) {
     return;
   }
 
-  lista.forEach(item => {
+  lista.forEach((item) => {
     const div = document.createElement("div");
     div.className = "exercicio-item";
     div.textContent = item.nome;
@@ -162,20 +208,14 @@ function renderizarTemplates(lista) {
     return;
   }
 
-  lista.forEach(item => {
+  lista.forEach((item) => {
     const div = document.createElement("button");
     div.className = "template-item";
     div.textContent = item.nome + " - " + item.descricao;
 
-    // --- AQUI ESTÁ A MUDANÇA ---
     div.onclick = () => {
-      // 1. Atualiza a URL sem recarregar a página (Fica: seunome.com/?template=123)
-      const novaUrl = new URL(window.location);
-      novaUrl.searchParams.set("template", item.id);
-      window.history.pushState({}, "", novaUrl);
-
-      // 2. Chama sua função normal
-      renderizarItensDeTemplate(item.id);
+      // A função abrirTemplate já cuida do roteador, da URL nova e de carregar os itens
+      abrirTemplate(item.id);
     };
     // ---------------------------
 
@@ -313,7 +353,7 @@ async function renderizarItensDeTemplate(templateId) {
 
     // Cria uma lista temporária só com as séries DESTE exercício (item.exercicios.id)
     const seriesPassadas = historico.filter(
-      h => h.exercicio_id === item.exercicios.id
+      (h) => h.exercicio_id === item.exercicios.id
     );
 
     console.log(
@@ -529,41 +569,60 @@ async function renderizarItensDeTemplate(templateId) {
     restaurarDadosLocais();
   }
 
-  // 2. Adiciona o evento para salvar automaticamente a cada digitação
-  // Usamos "Event Delegation": adicionamos no container pai para não travar a memória
-  const containerPrincipal = document.querySelector(".container-treino"); // Ou onde você injeta o HTML
+  const containerPrincipal = document.querySelector(".container-treino");
   if (containerPrincipal) {
-    containerPrincipal.addEventListener("input", event => {
-      // Verifica se quem foi digitado é um dos nossos inputs
+    containerPrincipal.addEventListener("input", (event) => {
       if (event.target.matches(".kgExercise, .repsExercise, .seriesExercise")) {
         salvarInputLocalmente(event.target);
       }
     });
   }
-
-  // 2. No final da função, force a troca de tela:
-  navegarPara("detalhes");
-
-  // 3. Atualiza a URL sem recarregar a página (Isso é mágica de SPA!)
-  // O usuário vê a URL mudar, mas o navegador não pisca.
-  const novaUrl = `?template=${idSalvo}`;
-  window.history.pushState({ template: idSalvo }, "", novaUrl);
 }
 
-// Verifica se já tem algo na URL quando abre o app
-window.addEventListener("load", () => {
-  const params = new URLSearchParams(window.location.search);
-  const idSalvo = params.get("template");
+// // Verifica se já tem algo na URL quando abre o app
+// window.addEventListener("load", () => {
+//   const params = new URLSearchParams(window.location.search);
+//   const idSalvo = params.get("template");
 
-  if (idSalvo) {
-    // Se tem ID, busca o template e o próprio renderizar vai trocar a tela
-    renderizarItensDeTemplate(idSalvo);
-  } else {
-    // Se não tem ID, garante que estamos na lista
-    navegarPara("lista");
-    buscarTemplates(); // Sua função original
+//   if (idSalvo) {
+//     // Se tem ID, busca o template e o próprio renderizar vai trocar a tela
+//     renderizarItensDeTemplate(idSalvo);
+//   } else {
+//     // Se não tem ID, garante que estamos na lista
+//     navegarPara("lista");
+//     buscarTemplates(); // Sua função original
+//   }
+// });
+
+// No arquivo assets/js/scriptGeneration.js
+
+function verificarRotaInicial() {
+  const params = new URLSearchParams(window.location.search);
+
+  // Lemos apenas o padrão novo
+  const page = params.get("page");
+  const id = params.get("id");
+
+  // 1. Lógica principal: Rota de Detalhes com ID
+  if (page === "detalhes" && id) {
+    abrirTemplate(id);
   }
-});
+  // 2. Outras rotas genéricas (Config, Histórico, etc.)
+  // Verifica se 'page' existe e se está listada no nosso objeto 'rotas'
+  else if (page && typeof rotas !== "undefined" && rotas[page]) {
+    roteador(page, null, false);
+  }
+  // 3. Fallback: Se não tiver rota ou for inválida, vai para a Home
+  else {
+    roteador("templates", null, false);
+  }
+
+  // Carrega a lista em background se necessário (para garantir dados ao voltar)
+  if (!templatesJaCarregados) {
+    buscarTemplates();
+    templatesJaCarregados = true;
+  }
+}
 
 // ======================================================
 // UTILITÁRIO: PEGAR ID DO USUÁRIO
@@ -641,7 +700,7 @@ function renderizarContextRecomendacoes(opcoes, idSelecionado) {
       }>Selecione uma semana...</option>
   `;
 
-  opcoes.forEach(opcao => {
+  opcoes.forEach((opcao) => {
     // Verifica se essa é a opção que estava salva no banco
     const isSelected = opcao.id === idSelecionado ? "selected" : "";
 
@@ -656,4 +715,3 @@ function renderizarContextRecomendacoes(opcoes, idSelecionado) {
 
   container.innerHTML = html;
 }
-

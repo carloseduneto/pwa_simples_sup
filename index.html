@@ -194,37 +194,41 @@
     <div id="app-section" class="hidden">
       <div class="headerPage">
         <div>
-          <h2>Gestão de treino - Experimental SPA</h2>
+          <h2>Gestão de treino - Experimental SPA Routes</h2>
         </div>
         <div class="userPlace">
           <p>Logado como: <span id="user-email"></span></p>
           <button onclick="signOut()" class="signOut">Sair</button>
+
         </div>
       </div>
 
-      <!-- <button onclick="callEdgeFunction()">Consultar via Edge Function</button> -->
+      <div id="screen-templates-list">
+        <!-- <h3>Seus Treinos</h3> -->
 
-      <!-- <h3>Resultado da Edge Function:</h3>
-      <pre id="result">...</pre> -->
+        <div id="container-recomendacoes">.</div>
 
-      <!-- <button onclick="buscarExercicios()">Consultar Exercícios</button>
-      <h3>Lista de Exercícios (Front-end):</h3>
-      <div id="lista-exercicios"></div>
-    </div> -->
+        <div id="lista-templates"></div>
+        <button onclick="roteador('config')">⚙️ Configurações</button>
+      </div>
 
-    <div id="screen-templates-list">
-      <h3>Seus Treinos</h3>
-      
-      <div id="container-recomendacoes">Carregando semanas...</div>
-      
-      <div id="lista-templates"></div>
-  </div>
+      <div id="screen-workout-details" class="hidden">
+        <button onclick="voltarParaLista()" style="margin-bottom: 15px">
+          ⬅ Voltar para Treinos
+        </button>
+        <button onclick="roteador('templates')">Voltar</button>
 
-  <div id="screen-workout-details" class="hidden">
-      <button onclick="voltarParaLista()" style="margin-bottom: 15px;">⬅ Voltar para Treinos</button>
-      
-      <div class="itensTemplate"></div>
-  </div>
+        <div class="itensTemplate"></div>
+      </div>
+
+      <div id="screen-config" class="hidden">
+        <button onclick="roteador('templates')">⬅ Voltar ao Início</button>
+
+        <h2>Configurações</h2>
+        <p class="testConfig">Aqui você pode editar seus dados...</p>
+        <div class="testConfig">Um teste de config</div>
+      </div>
+
 
       <template class="template-header-exercise">
         <div class="headerExercise">

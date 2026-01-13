@@ -1,38 +1,71 @@
-// Mapeamento: Nome da Rota -> ID da Div
+// assets/js/router.js
+
 const rotas = {
-  templates: "screen-templates-list",
-  detalhes: "screen-workout-details",
-  config: "screen-configuracoes", // Nova tela
+  login: "auth-section", // Tela de Login
+  templates: "screen-templates-list", // Lista de Treinos
+  detalhes: "screen-workout-details", // Detalhes do Treino
+  config: "screen-config", // Futura tela
 };
 
-function roteador(nomeRota, params = null) {
-  // 1. Esconde todas as telas
-  Object.values(rotas).forEach(id => {
-    document.getElementById(id).classList.add("hidden");
+/**
+ * Função Central de Navegação
+ * @param {string} nomeRota - O nome da chave no objeto 'rotas'
+ * @param {string|null} paramId - (Opcional) ID do template/item
+ * @param {boolean} adicionarAoHistorico - Se true, cria entrada no histórico (padrão). Se false (botão voltar), só troca a tela.
+ */
+function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
+  // 1. Ocultar TUDO
+  // Primeiro, garante que estamos no modo "App" (oculta login), exceto se a rota for login
+  if (nomeRota === "login") {
+    document.getElementById("auth-section").classList.remove("hidden");
+    document.getElementById("app-section").classList.add("hidden");
+    return; // Para por aqui
+  } else {
+    document.getElementById("auth-section").classList.add("hidden");
+    document.getElementById("app-section").classList.remove("hidden");
+  }
+
+  // 2. Esconde todas as telas internas do App
+  Object.values(rotas).forEach((idDiv) => {
+    // Ignora a div de login que já tratamos acima
+    if (idDiv !== "auth-section") {
+      const el = document.getElementById(idDiv);
+      if (el) el.classList.add("hidden");
+    }
   });
 
-  // 2. Mostra a tela desejada
+  // 3. Mostra a tela desejada
   const idAlvo = rotas[nomeRota];
   if (idAlvo) {
     document.getElementById(idAlvo).classList.remove("hidden");
   }
 
-  // 3. Atualiza a URL (Magia da SPA)
-  let url = `?page=${nomeRota}`;
-  if (params) {
-    url += `&id=${params}`; // Ex: ?page=detalhes&id=3
+  // 4. Gerencia a URL (Somente se não for o botão voltar)
+  if (adicionarAoHistorico) {
+    let url = `?page=${nomeRota}`;
+    if (paramId) url += `&id=${paramId}`;
+
+    // pushState(dados, titulo, url)
+    window.history.pushState({ rota: nomeRota, id: paramId }, "", url);
   }
-  // pushState(dados, titulo, url) - muda a URL sem recarregar
-  window.history.pushState({ rota: nomeRota, params }, "", url);
 }
 
-// Escuta o botão "Voltar" do navegador para navegar de verdade
-window.addEventListener("popstate", event => {
+// Escuta o botão "Voltar" do navegador
+window.addEventListener("popstate", (event) => {
   const estado = event.state;
+
   if (estado && estado.rota) {
-    // Recupera a tela anterior sem dar pushState de novo
-    // A lógica aqui seria levemente diferente para apenas trocar a div
-    // simplificando: recarregar a página resolve ou precisa de refatoração leve
-    location.reload();
+    // Se temos estado salvo, recupera a tela (passando false para não duplicar histórico)
+    roteador(estado.rota, estado.id, false);
+
+    // Se voltou para detalhes, precisa recarregar os dados
+    if (estado.rota === "detalhes" && estado.id) {
+      if (typeof renderizarItensDeTemplate === "function") {
+        renderizarItensDeTemplate(estado.id);
+      }
+    }
+  } else {
+    // Se o histórico acabou ou está vazio, volta para o início
+    roteador("templates", null, false);
   }
 });

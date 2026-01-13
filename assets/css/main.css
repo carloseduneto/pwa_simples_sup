@@ -23,3 +23,9 @@ h6 {
   font-family: "Anton", sans-serif;
   font-size: 60px;
 }
+
+.testConfig{
+  background-color: yellow;
+  padding: 10px;
+  border-radius: 20px;
+}
