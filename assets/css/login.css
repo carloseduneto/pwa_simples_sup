@@ -19,6 +19,11 @@
   height: 100vh; /* 100% da altura da tela visível */
   /* width: 100vw;  100% da largura da tela visível */
   /* background-color: aquamarine; */
+  padding: 20px;
+}
+
+.titleLoginFont{
+  font-size: 280%;
 }
 
 .loginContainer{
