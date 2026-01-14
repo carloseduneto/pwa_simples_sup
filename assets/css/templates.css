@@ -18,7 +18,7 @@
   color: #000;
   font-weight: bold;
   font-family: var(--font-title);
-  font-size: 1.2rem;
+  font-size: 1.0rem;
   margin-bottom: 20px;
 
   cursor: pointer;
@@ -29,21 +29,21 @@
   background-color: #e5e5e5;
 }
 
+
+
 .lista-opcoes {
   font-family: var(--font-body);
   font-size: 1.2rem;
 }
 
 #lista-templates {
-  /* display: none; */
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Cria 2 colunas de tamanhos iguais (frações) */
-  gap: 10px; /* Espaço entre os cards */
-  /* padding: 15px; */
-  margin-top: 10px;
-  margin-bottom: 15px;
-  align-items: center;
-  justify-items: center;
+  /* A mágica: cria quantas colunas couberem de no mínimo 150px, preenchendo o resto */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+  gap: 12px;
+  padding: 10px; /* Padding nas bordas evita que os cards encostem na tela */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (min-width: 600px) {
@@ -54,15 +54,16 @@
 
 .template-item {
   background-color: var(--secondary-color);
-  width: 170px;
-  height: 130px;
-  border-radius: 25px; /* Cantos arredondados como na imagem */
-  padding: 20px;
+  /* REMOVA o width fixo de 170px */
+  width: 100%; 
+  aspect-ratio: 1.3 / 1; /* Mantém a proporção retangular independente da largura */
+  border-radius: 20px;
+  padding: 15px;
   color: var(--font-color-light);
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Garante o espaço entre texto e pontos */
+  justify-content: space-between;
   box-sizing: border-box;
   transition: transform 0.2s;
 }
@@ -73,12 +74,13 @@
 
 .card-title {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: bold;
 }
 
 .card-subtitle {
   margin: 5px 0 0 0;
+  font-size: 1.0rem;
   font-weight: 300;
   opacity: 0.9;
 }

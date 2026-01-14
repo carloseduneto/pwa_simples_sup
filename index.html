@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="assets/css/buttons.css" />
     <link rel="stylesheet" href="assets/css/bottom-navbar.css" />
     <link rel="stylesheet" href="assets/css/test-smart-header.css">
+    <link rel="stylesheet" href="assets/css/templates-itens.css">
 
     <link
       rel="shortcut icon"
@@ -218,9 +219,9 @@
     </div>
 
     <div id="app-section" class="hidden">
-      <div class="headerPage">
+      <div class="headerPage" id="app-header">
         <div>
-          <h2>Templates SPA R</h2>
+          <h2 id="header-title">Templates SPA R</h2>
         </div>
         <div class="userPlace">
           <p>Logado como: <span id="user-email"></span></p>
@@ -260,6 +261,9 @@
       </div>
 
       <div id="screen-workout-details" class="hidden">
+        <div class="screen-workout-details-style">
+
+
         <!-- Remover se não usar -->
         <section>
           <header id="main-header" class="smart-header">
@@ -278,12 +282,12 @@
         <button onclick="roteador('templates')">Voltar</button>
 
         <div class="itensTemplate"></div>
+        </div>
       </div>
 
       <div id="screen-config" class="hidden">
         <button onclick="roteador('templates')">⬅ Voltar ao Início</button>
 
-        <h2>Configurações</h2>
         <p class="testConfig">Aqui você pode editar seus dados...</p>
         <div class="testConfig">Um teste de config</div>
       </div>

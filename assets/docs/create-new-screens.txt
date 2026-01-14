@@ -1,0 +1,98 @@
+Excelente observação sobre o **GitHub Pages**. Como ele é um servidor estático simples, essa estratégia de usar `?page=` (Query Params) é, na verdade, a **mais recomendada** para ele. Se usássemos URLs limpas (`/login`), o GitHub Pages daria erro 404 ao recarregar a página. Então você está no caminho mais seguro.
+
+Vamos resolver o Logout e simplificar a criação de novas telas.
+
+---
+
+### 1. Arrumando a URL no Logout
+
+Você tem razão. Se a URL ficar suja (`?page=detalhes&id=5`) quando o usuário desloga, isso pode causar confusão se ele der F5 (o app vai tentar carregar o detalhe sem estar logado).
+
+O ideal no Logout não é só sair, mas **limpar o histórico** para que o botão "Voltar" do navegador não funcione para recuperar a sessão.
+
+Altere sua função `signOut` para isso:
+
+```javascript
+async function signOut() {
+  await client.auth.signOut();
+  
+  // Limpa visualmente a URL para a raiz do site (remove o ?page=...)
+  // replaceState substitui a entrada atual no histórico em vez de criar uma nova
+  window.history.replaceState(null, "", window.location.pathname);
+  
+  // O seu listener onAuthStateChange vai perceber o logout e chamar o roteador('login')
+  // mas agora a URL já estará limpa.
+}
+
+```
+
+---
+
+### 2. Como criar novas telas sem "Horrores de Código"
+
+Você **não** precisa criar uma função de voltar específica para cada tela. O segredo da escalabilidade é **reaproveitar o `roteador**`.
+
+O fluxo para criar qualquer tela nova (ex: Configurações) é sempre de 3 passos simples:
+
+#### Passo A: O HTML (O container)
+
+Crie a div da tela nova, escondida (`hidden`), dentro do `app-section`.
+
+```html
+<div id="screen-config" class="hidden">
+    <button onclick="roteador('templates')">⬅ Voltar ao Início</button>
+    
+    <h2>Configurações</h2>
+    <p>Aqui você pode editar seus dados...</p>
+</div>
+
+```
+
+#### Passo B: O Javascript (O Registro)
+
+Vá no seu `router.js` (ou onde ficou o objeto `rotas`) e adicione **uma linha**:
+
+```javascript
+const rotas = {
+  login: "auth-section",
+  templates: "screen-templates-list",
+  detalhes: "screen-workout-details",
+  // Nova tela aqui:
+  config: "screen-config" 
+};
+
+```
+
+#### Passo C: O Botão de Entrada (O Link)
+
+Em algum lugar (no Header, por exemplo), você coloca o botão para ir para lá:
+
+```html
+<button onclick="roteador('config')">⚙️ Configurações</button>
+
+```
+
+---
+
+### 3. Respondendo sua dúvida: "Preciso de função voltar para todas?"
+
+**Não.**
+
+A função `voltarParaLista()` que criamos antes só existia por um motivo especial: **Limpeza de Memória/DOM**.
+Como a tela de "Detalhes" injetava muito conteúdo (lista de exercícios, inputs, checkmarks) via Javascript, era uma boa prática limpar aquilo (`innerHTML = ""`) ao sair para não deixar o app pesado.
+
+Para telas simples (Configurações, Histórico, Sobre), onde o conteúdo é estático ou leve, você **não precisa** de função nenhuma.
+
+Use direto no HTML:
+
+```html
+<button onclick="roteador('templates')">Voltar</button>
+
+```
+
+**Resumo da Regra de Ouro:**
+
+1. **Telas Estáticas/Simples:** Use `onclick="roteador('templates')"` direto no HTML.
+2. **Telas Pesadas/Dinâmicas (que buscam dados):** Use uma funçãozinha `voltar()` apenas se você precisar limpar dados (zerar variáveis ou limpar divs) antes de sair.
+
+Isso mantém seu código limpo. Você só escreve JS quando realmente precisa manipular dados.

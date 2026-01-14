@@ -4,22 +4,22 @@ const rotas = {
   login: "auth-section", // Tela de Login
   templates: "screen-templates-list", // Lista de Treinos
   detalhes: "screen-workout-details", // Detalhes do Treino
-  config: "screen-config", // Futura tela
+  config: "screen-config", // Tela de Configurações
 };
 
 /**
  * Função Central de Navegação
- * @param {string} nomeRota - O nome da chave no objeto 'rotas'
- * @param {string|null} paramId - (Opcional) ID do template/item
- * @param {boolean} adicionarAoHistorico - Se true, cria entrada no histórico (padrão). Se false (botão voltar), só troca a tela.
  */
 function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
-  // 1. Ocultar TUDO
+  // ---------------------------------------------------------
+  // 1. Ocultar TUDO (Lógica Original)
+  // ---------------------------------------------------------
+
   // Primeiro, garante que estamos no modo "App" (oculta login), exceto se a rota for login
   if (nomeRota === "login") {
     document.getElementById("auth-section").classList.remove("hidden");
     document.getElementById("app-section").classList.add("hidden");
-    return; // Para por aqui
+    return; // Se for login, para por aqui e não mexe no header do App
   } else {
     document.getElementById("auth-section").classList.add("hidden");
     document.getElementById("app-section").classList.remove("hidden");
@@ -40,7 +40,44 @@ function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
     document.getElementById(idAlvo).classList.remove("hidden");
   }
 
-  // 4. Gerencia a URL (Somente se não for o botão voltar)
+  // ---------------------------------------------------------
+  // 2. A MÁGICA DO HEADER (Novo Código Integrado)
+  // ---------------------------------------------------------
+
+  // Configuração de Título e Visibilidade para cada rota
+  const configHeader = {
+    templates: { titulo: "Templates", exibir: true },
+    config: { titulo: "Configurações", exibir: true },
+    detalhes: { titulo: "Detalhes do Treino", exibir: false },
+    // Se tiver uma tela que não precisa de header, coloque exibir: false
+  };
+
+  // Pegamos os elementos do HTML (Certifique-se que os IDs existem no HTML!)
+  const headerEl = document.getElementById("app-header");
+  const tituloEl = document.getElementById("header-title");
+
+  // Só executa se os elementos existirem para evitar erro
+  if (headerEl && tituloEl) {
+    // Pegamos a config da tela atual (ou um padrão se não existir)
+    const dadosTela = configHeader[nomeRota] || { titulo: "App", exibir: true };
+
+    // APLICAMOS AS MUDANÇAS:
+
+    // 2.1 Troca o Texto
+    tituloEl.innerText = dadosTela.titulo;
+
+    // 2.2 Mostra ou Esconde o Header inteiro
+    if (dadosTela.exibir) {
+      headerEl.style.display = "flex"; // Use flex para manter o layout alinhado
+    } else {
+      headerEl.style.display = "none";
+    }
+  }
+
+  // ---------------------------------------------------------
+  // 3. Gerencia a URL (Lógica Original)
+  // ---------------------------------------------------------
+
   if (adicionarAoHistorico) {
     let url = `?page=${nomeRota}`;
     if (paramId) url += `&id=${paramId}`;
@@ -50,7 +87,7 @@ function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
   }
 }
 
-// Escuta o botão "Voltar" do navegador
+// Escuta o botão "Voltar" do navegador (Mantido idêntico)
 window.addEventListener("popstate", (event) => {
   const estado = event.state;
 

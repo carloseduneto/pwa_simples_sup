@@ -1,6 +1,6 @@
 // script.js
 
-const MEXENDO_NO_CSS = false; // Ative para usar cache local durante desenvolvimento
+const MEXENDO_NO_CSS = true; // Ative para usar cache local durante desenvolvimento
 
 // ======================================================
 // 1. VARIÁVEIS DE CONTROLE E AUTH
