@@ -1,0 +1,7 @@
+5️⃣ Modelo mental definitivo (vale guardar)
+
+Commits = instantes no tempo
+Branches = linhas do tempo
+Merge = convergência de realidades
+Rebase = reescrita da história (universo alternativo substituído)
+Tag = marco histórico (“aqui tudo funcionava”)
