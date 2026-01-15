@@ -62,13 +62,34 @@
 
 /* --- NOVO: Estilo do botão X --- */
 .btn-fechar {
-  position: absolute; /* Cola ele no canto */
+  position: absolute;
   top: 5px;
   right: 10px;
-  font-weight: bold;
-  cursor: pointer;
+  
+  /* Tamanho fixo total (30px + o padding que você tinha de 10px = 50px visualmente) */
+  width: 40px;
+  height: 40px;
+  
+  /* Mágica do alinhamento */
+  display: flex;
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center;     /* Centraliza verticalmente */
+  
+  /* Visual */
+  border-radius: 50%;
+  /* background-color: #f8ab81; */
   color: #555;
-  padding: 10px;
-  margin-bottom: 20px;
+  font-weight: bold;
   font-size: 30px;
+  cursor: pointer;
+  
+  /* Zera o padding para não somar ao tamanho */
+  padding: 0; 
+  /* Remove margem extra se houver */
+  margin: 0; 
+}
+
+.btn-fechar:active {
+  background-color: var(--faded-color);
+  transform: scale(0.96);
 }

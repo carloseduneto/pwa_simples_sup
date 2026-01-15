@@ -169,7 +169,10 @@ function renderizarExercicios(lista) {
 //=== 5. CONSULTA TEMPLATES (SEM CACHE) ===
 async function buscarTemplates() {
   const container = document.getElementById("lista-templates");
-  container.innerHTML = "Carregando templates...";
+  // container.innerHTML = "Carregando templates...";
+  container.innerHTML = "<div class=\"espaco-loader\">"+
+  "<div class=\"loader\"></div>"+
+  "</div>";
 
   // [CACHE - LEITURA]
   if (MEXENDO_NO_CSS) {

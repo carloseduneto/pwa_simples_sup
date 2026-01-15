@@ -45,7 +45,13 @@ button,
 a,
 input,
 textarea,
-[role="button"] {
+[role="button"],
+section,
+select,
+article,
+.userImage,
+.btn-fechar
+{
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -53,6 +59,13 @@ button:focus,
 a:focus,
 input:focus,
 textarea:focus,
-[role="button"]:focus {
+section:focus,
+select:focus,
+article:focus
+.userImage:focus,
+[role="button"]:focus,
+.btn-fechar:focus
+{
   outline: none;
 }
+
