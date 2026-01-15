@@ -1,6 +1,6 @@
 // script.js
 
-const MEXENDO_NO_CSS = true; // Ative para usar cache local durante desenvolvimento
+const MEXENDO_NO_CSS = false; // Ative para usar cache local durante desenvolvimento
 
 // ======================================================
 // 1. VARIÁVEIS DE CONTROLE E AUTH
@@ -259,7 +259,7 @@ async function buscarItensDeTemplate(templateId) {
   const itensPromise = client
     .from("template_itens")
     .select(
-      "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome), series_alvo, tecnica_intensificacao"
+      "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, tecnica_intensificacao"
     )
     .eq("template_id", templateId)
     .order("ordem");
@@ -342,19 +342,20 @@ async function renderizarItensDeTemplate(templateId) {
     templateSmartHeader.innerHTML
   );
 
-  wrapperTraining.insertAdjacentHTML(
-    "beforeend",
-    `<h3 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h3>`
-  );
-
-  // Botão reiniciar treino
-  wrapperTraining.insertAdjacentHTML(
-    "beforeend",
-    `<button id="concluir-treino-btn" onclick="limparDadosLocais()"><span class="material-symbols-rounded">
-rotate_left
-</span>
-    Reiniciar/zerar treino</button>`
-  );
+wrapperTraining.insertAdjacentHTML(
+  "beforeend",
+  `<section class="header-itens-template">
+  <div class="header-session-content">
+  <h1 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h1>
+  <p class="subtitulo-treino">${itens[0].templates.descricao}</p>
+  </div>
+      
+      <button id="concluir-treino-btn" onclick="limparDadosLocais()" class="btn-icon-dynamic-header">
+          <span class="material-symbols-rounded">rotate_left</span>
+          <span class="btn-text-header">Reiniciar <br>treino</span>
+      </button>
+   </section>`
+);
 
   console.log(historico);
 

@@ -8,6 +8,7 @@
   --disabled-color: #cccccc;
   --font-color-dark: #333333;
   --font-color-light: #ffffff;
+  --font-color-secondary: #7a7a7a;
   --background-color: #f5f5f5;
   --font-title: "Montserrat Alternates", sans-serif;
   --font-body: "Montserrat", sans-serif;
@@ -38,4 +39,20 @@ h6 {
   background-color: yellow;
   padding: 10px;
   border-radius: 20px;
+}
+
+button,
+a,
+input,
+textarea,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+[role="button"]:focus {
+  outline: none;
 }
