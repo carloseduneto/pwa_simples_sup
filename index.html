@@ -37,8 +37,8 @@
     <link rel="stylesheet" href="assets/css/app_section.css" />
     <link rel="stylesheet" href="assets/css/buttons.css" />
     <link rel="stylesheet" href="assets/css/bottom-navbar.css" />
-    <link rel="stylesheet" href="assets/css/test-smart-header.css">
-    <link rel="stylesheet" href="assets/css/templates-itens.css">
+    <link rel="stylesheet" href="assets/css/test-smart-header.css" />
+    <link rel="stylesheet" href="assets/css/templates-itens.css" />
 
     <link
       rel="shortcut icon"
@@ -237,6 +237,7 @@
         <div id="lista-templates"></div>
         <button onclick="roteador('config')">⚙️ Configurações</button>
 
+        <!-- Bottom Navigation -->
         <!-- <nav class="bottom-nav">
           <div class="nav-item active">
             <svg viewBox="0 0 24 24" class="nav-icon">
@@ -262,26 +263,24 @@
 
       <div id="screen-workout-details" class="hidden">
         <div class="screen-workout-details-style">
+          <!-- Remover se não usar -->
+          <!-- <section>
+            <header id="main-header" class="smart-header">
+              <div class="header-content">
+                <span class="logo">MEU TREINO</span>
+                <button onclick="voltarParaLista()" style="margin-bottom: 15px">
+                  ⬅ Voltar para Treinos
+                </button>
+              </div>
+            </header>
+          </section> -->
 
+          <!-- <button onclick="voltarParaLista()" style="margin-bottom: 15px">
+            ⬅ Voltar para Treinos
+          </button>
+          <button onclick="roteador('templates')">Voltar</button> -->
 
-        <!-- Remover se não usar -->
-        <section>
-          <header id="main-header" class="smart-header">
-            <div class="header-content">
-              <span class="logo">MEU TREINO</span>
-        <button onclick="voltarParaLista()" style="margin-bottom: 15px">
-          ⬅ Voltar para Treinos
-        </button>
-            </div>
-          </header>
-        </section>
-
-        <button onclick="voltarParaLista()" style="margin-bottom: 15px">
-          ⬅ Voltar para Treinos
-        </button>
-        <button onclick="roteador('templates')">Voltar</button>
-
-        <div class="itensTemplate"></div>
+          <div class="itensTemplate"></div>
         </div>
       </div>
 
@@ -312,6 +311,19 @@
         </div>
       </template>
 
+      <template class="template-smart-header">
+        <section>
+          <header id="main-header" class="smart-header">
+            <div class="header-content">
+              <!-- <span class="logo">MEU TREINO</span> -->
+              <button onclick="voltarParaLista()" style="margin-bottom: 15px">
+                ⬅ Voltar para Treinos
+              </button>
+            </div>
+          </header>
+        </section>
+      </template>
+
       <div id="modal-conclusao" class="modal-overlay hidden">
         <div class="modal-content">
           <h3>Treino Incompleto</h3>
@@ -329,10 +341,10 @@
       </div>
     </div>
     <script src="./assets/js/config.js"></script>
-    <script src="assets/js/router.js"></script>
+    <script src="./assets/js/router.js"></script>
     <script src="./assets/js/scriptGeneration.js"></script>
     <script src="./assets/js/scriptManipulation.js"></script>
     <script src="./assets/js/scriptUpload.js"></script>
-    <script src="assets/js/test-smart-header.js"></script>
+    <script src="./assets/js/test-smart-header.js"></script>
   </body>
 </html>

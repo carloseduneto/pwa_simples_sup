@@ -328,6 +328,10 @@ async function renderizarItensDeTemplate(templateId) {
     ".template-header-exercise"
   );
 
+  const templateSmartHeader = document.querySelector(
+    ".template-smart-header"
+  );
+
   container.innerHTML = ""; // 1. Limpa tudo
   if (!itens) return;
 
@@ -335,6 +339,10 @@ async function renderizarItensDeTemplate(templateId) {
   // Não crie uma variável 'detalhes'. Jogue direto no container.
 
   // Parte 1: Título Principal (String é mais fácil aqui)
+  wrapperTraining.insertAdjacentHTML(
+    "beforeend",
+    templateSmartHeader.innerHTML
+  );
 
   wrapperTraining.insertAdjacentHTML(
     "beforeend",
@@ -563,6 +571,21 @@ async function renderizarItensDeTemplate(templateId) {
     wrapperTraining.appendChild(wrapperExercises);
     container.appendChild(wrapperTraining);
   }
+
+
+  const divConteudoHeader = document.querySelector(".header-content");
+
+  if (divConteudoHeader) {
+    divConteudoHeader.insertAdjacentHTML(
+      "beforeend",
+      `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()" style="margin-left: 10px;">
+           Marcar Treino como Concluído
+         </button>`
+    );
+  }
+
+
+
 
   // Botão marcar como concluído
   wrapperTraining.insertAdjacentHTML(
