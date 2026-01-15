@@ -221,11 +221,19 @@
     <div id="app-section" class="hidden">
       <div class="headerPage" id="app-header">
         <div>
-          <h2 id="header-title">Templates SPA R</h2>
+          <h2 id="header-title">Aqui vai o título da página</h2>
         </div>
-        <div class="userPlace">
-          <p>Logado como: <span id="user-email"></span></p>
-          <button onclick="signOut()" class="signOut">Sair</button>
+        <div class="userPlace" id="userContainer">
+          <div class="userImage" id="btnUser"></div>
+
+          <div class="userData" id="menuData">
+            <span class="btn-fechar" id="btnClose">&times;</span>
+            <div class="userDataContent">
+              <p>Logado como: <span id="user-email">usuario@email.com</span></p>
+              <button onclick="roteador('config')">⚙️ Configurações</button>
+              <button onclick="signOut()" class="signOut">Sair</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -235,7 +243,6 @@
         <div id="container-recomendacoes">.</div>
 
         <div id="lista-templates"></div>
-        <button onclick="roteador('config')">⚙️ Configurações</button>
 
         <!-- Bottom Navigation -->
         <!-- <nav class="bottom-nav">
@@ -263,18 +270,6 @@
 
       <div id="screen-workout-details" class="hidden">
         <div class="screen-workout-details-style">
-          <!-- Remover se não usar -->
-          <!-- <section>
-            <header id="main-header" class="smart-header">
-              <div class="header-content">
-                <span class="logo">MEU TREINO</span>
-                <button onclick="voltarParaLista()" style="margin-bottom: 15px">
-                  ⬅ Voltar para Treinos
-                </button>
-              </div>
-            </header>
-          </section> -->
-
           <!-- <button onclick="voltarParaLista()" style="margin-bottom: 15px">
             ⬅ Voltar para Treinos
           </button>
@@ -316,8 +311,10 @@
           <header id="main-header" class="smart-header">
             <div class="header-content">
               <!-- <span class="logo">MEU TREINO</span> -->
-              <button onclick="voltarParaLista()" style="margin-bottom: 15px">
-                ⬅ Voltar para Treinos
+              <button onclick="voltarParaLista()" class="btn-icon-dynamic-header">
+                <span class="material-symbols-rounded">
+                  arrow_back_ios_new
+                </span>
               </button>
             </div>
           </header>
@@ -345,6 +342,7 @@
     <script src="./assets/js/scriptGeneration.js"></script>
     <script src="./assets/js/scriptManipulation.js"></script>
     <script src="./assets/js/scriptUpload.js"></script>
-    <script src="./assets/js/test-smart-header.js"></script>
+    <script src="./assets/js/ui-ux/dynamic-visibility-header.js"></script>
+    <script src="./assets/js/ui-ux/menu-flutuante-header.js"></script>
   </body>
 </html>

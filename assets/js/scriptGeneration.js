@@ -328,9 +328,7 @@ async function renderizarItensDeTemplate(templateId) {
     ".template-header-exercise"
   );
 
-  const templateSmartHeader = document.querySelector(
-    ".template-smart-header"
-  );
+  const templateSmartHeader = document.querySelector(".template-smart-header");
 
   container.innerHTML = ""; // 1. Limpa tudo
   if (!itens) return;
@@ -352,7 +350,10 @@ async function renderizarItensDeTemplate(templateId) {
   // Botão reiniciar treino
   wrapperTraining.insertAdjacentHTML(
     "beforeend",
-    `<button id="concluir-treino-btn" onclick="limparDadosLocais()">Reiniciar/zerar treino</button>`
+    `<button id="concluir-treino-btn" onclick="limparDadosLocais()"><span class="material-symbols-rounded">
+rotate_left
+</span>
+    Reiniciar/zerar treino</button>`
   );
 
   console.log(historico);
@@ -572,20 +573,17 @@ async function renderizarItensDeTemplate(templateId) {
     container.appendChild(wrapperTraining);
   }
 
-
   const divConteudoHeader = document.querySelector(".header-content");
 
   if (divConteudoHeader) {
     divConteudoHeader.insertAdjacentHTML(
       "beforeend",
-      `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()" style="margin-left: 10px;">
-           Marcar Treino como Concluído
-         </button>`
+      `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()" class="btn-icon-dynamic-header">
+           <span class="material-symbols-rounded">done_all</span> 
+           <span class="btn-text-header">Concluir</span>
+           </button>`
     );
   }
-
-
-
 
   // Botão marcar como concluído
   wrapperTraining.insertAdjacentHTML(

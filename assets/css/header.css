@@ -1,19 +1,74 @@
-.headerPage{
-    padding: 10px;
-    text-align: center;
-    display: flex;
-    flex-direction: row;
-    /* background-color: lightgreen; */
-    justify-content: space-between;
+.headerPage {
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  /* background-color: lightgreen; */
+  justify-content: space-between;
 }
 
-
-.userPlace{
-    width: 50%;
-    text-align: right;
-    /* background-color: violet; */
+.userPlace {
+  width: 50%;
+  text-align: right;
+  /* background-color: violet; */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.signOut{
-    /* display: none; */
+.signOut {
+  /* display: none; */
+}
+
+.userImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f8ab81;
+  background: linear-gradient(
+    25deg,
+    rgba(255, 209, 181, 1) 0%,
+    rgba(255, 151, 99, 1) 50%,
+    rgba(255, 219, 143, 1) 100%
+  );
+  cursor: pointer;
+}
+
+.userData {
+    display: none; /* Escondido por padrão */
+    position: absolute; /* ISSO faz ele flutuar por cima */
+  top: 60px; /* Distância do topo */
+  right: 0; /* Alinhado à direita */
+
+  /* Estilo visual da caixinha */
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombrae para destacar */
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 200px;
+  z-index: 1000; /* Garante que fique na frente de tudo */
+  margin-right: 10px;
+}
+
+/* Classe mágica que vamos adicionar com JS */
+.userData.mostrar {
+  display: block; /* Quando tiver essa classe, aparece */
+}
+
+.userDataContent {
+  padding-top: 35px;
+}
+
+/* --- NOVO: Estilo do botão X --- */
+.btn-fechar {
+  position: absolute; /* Cola ele no canto */
+  top: 5px;
+  right: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #555;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 30px;
 }
