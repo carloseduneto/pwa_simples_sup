@@ -50,6 +50,7 @@
   font-size: 0.8rem;
   margin-top: 20px;
   margin-bottom: 10px;
+
 }
 
 .rowExercise {
@@ -65,7 +66,7 @@
   padding-bottom: 8px;
   padding-left: 8px;
   padding-right: 8px;
-
+  border-radius: 21px;
 }
 
 .rowExercise input,
@@ -85,17 +86,19 @@
 
 }
 
-.rowExercise input.repsExercise, .rowExercise input.kgExercise {
-/* border: 1px solid #767676; */
-border: none;
-background-color: var(--unselected-background-color);
-border-radius: 13px;
+.rowExercise input.repsExercise,
+.rowExercise input.kgExercise {
+  /* border: 1px solid #767676; */
+  border: none;
+  background-color: var(--unselected-background-color);
+  border-radius: 13px;
 }
 
 .rowExercise input.seriesExercise {
   border: none;
 }
-.rowExercise .anteriorExercise{
+
+.rowExercise .anteriorExercise {
   color: var(--disabled-color);
   border: none;
   border-radius: 13px;
@@ -186,7 +189,6 @@ button.anteriorExercise {
   /* Deixa meio transparente para indicar inatividade */
   transition: all 0.3s ease;
   /* Animação suave */
-  border-radius: 21px;
   /* border-radius: 13px; */
 }
 
