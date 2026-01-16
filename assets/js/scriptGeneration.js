@@ -353,7 +353,7 @@ wrapperTraining.insertAdjacentHTML(
   <p class="subtitulo-treino">${itens[0].templates.descricao}</p>
   </div>
       
-      <button id="concluir-treino-btn" onclick="limparDadosLocais()" class="btn-icon-dynamic-header">
+      <button id="reiniciar-treino-btn" onclick="limparDadosLocais()" class="btn-icon-dynamic-header">
           <span class="material-symbols-rounded">rotate_left</span>
           <span class="btn-text-header">Reiniciar <br>treino</span>
       </button>

@@ -81,10 +81,11 @@ document.addEventListener("focusin", function (event) {
 
 // OUVINTE DE CLIQUES (Para os botões de Check)
 document.addEventListener("click", function (event) {
-  // 1. Verifica se o clique foi no botão de check
-  if (event.target.classList.contains("checkExercise")) {
-    const botao = event.target;
+  // 1. Verifica se o clique foi no botão (ou no ícone dentro dele)
+  // MUDANÇA AQUI: Troquei 'event.target.classList...' por 'event.target.closest'
+  const botao = event.target.closest(".checkExercise");
 
+  if (botao) {
     // 2. Encontra a linha inteira (o pai do botão)
     const linha = botao.closest(".rowExercise");
 
@@ -92,9 +93,23 @@ document.addEventListener("click", function (event) {
       // 3. A MÁGICA: 'toggle' adiciona a classe se não tiver, e remove se tiver
       linha.classList.toggle("concluido");
 
+      // --- CÓDIGO NOVO (ADICIONE ISSO AQUI) ---
+      const estaConcluido = linha.classList.contains("concluido");
+
+      // Se acabou de concluir, faz o botão pular
+      if (estaConcluido) {
+        // Adiciona a classe que tem a animação no CSS
+        botao.classList.add("animando");
+
+        // Remove a classe depois de 0.6s (tempo da animação)
+        // para ficar limpo e poder animar de novo se desmarcar e marcar
+        setTimeout(() => {
+          botao.classList.remove("animando");
+        }, 600);
+      }
+
       // 4. LÓGICA DE DADOS (Para você salvar no banco depois)
       // Se tem a classe 'concluido', o atributo vira "true", senão "false"
-      const estaConcluido = linha.classList.contains("concluido");
       linha.dataset.realizado = estaConcluido ? "true" : "false";
 
       // (Opcional) Feedback no Console para você ver acontecendo

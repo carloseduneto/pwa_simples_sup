@@ -23,3 +23,208 @@
 .detalhes-exercicio {
   color: var(--font-color-secondary);
 }
+
+#reiniciar-treino-btn .material-symbols-rounded {
+  color: var(--primary-color);
+}
+
+
+.headerExercise {
+  display: grid;
+
+  /* 1. A MÁGICA: Copie exatamente as colunas do .rowExercise */
+  grid-template-columns: 10fr 15fr 15fr 15fr 40px;
+
+  /* 2. O GAP: Tem que ser igual ao da linha (era 20px, a linha é 10px) */
+  gap: 10px;
+
+  /* 3. PADDING: Tem que ter o mesmo recuo lateral da linha */
+  padding-left: 5px;
+  padding-right: 5px;
+
+  /* Estética extra para centralizar os textos */
+  text-align: center;
+  align-items: center;
+
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.rowExercise {
+  display: grid;
+  /* Mudei o 2º item de 'auto' para '15fr' para ele esticar igual aos inputs */
+  grid-template-columns: 10fr 15fr 15fr 15fr 40px;
+  gap: 10px;
+  grid-auto-rows: 40px;
+  /* Reduzi drasticamente o vão (35px era muito) */
+  /* align-items: center; */
+  margin-bottom: 4px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+
+}
+
+.rowExercise input,
+.rowExercise button.anteriorExercise,
+.rowExercise button.checkExercise {
+  height: 40px !important;
+  /* Altura IDÊNTICA para ambos */
+  /* margin: 0 !important;  */
+  padding: 0 5px;
+  /* Padding interno igual */
+  box-sizing: border-box;
+  /* Garante que a borda não aumente o tamanho */
+  width: 100%;
+  /* Garante que preencham a coluna do grid (15fr) */
+  text-align: center;
+  /* margin: 0 !important;  */
+
+}
+
+.rowExercise input.repsExercise, .rowExercise input.kgExercise {
+/* border: 1px solid #767676; */
+border: none;
+background-color: var(--unselected-background-color);
+border-radius: 13px;
+}
+
+.rowExercise input.seriesExercise {
+  border: none;
+}
+.rowExercise .anteriorExercise{
+  color: var(--disabled-color);
+  border: none;
+  border-radius: 13px;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+
+
+
+.rowExercise button.checkExercise {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background-color: var(--unselected-background-color);
+  border: none;
+  cursor: pointer;
+  border-radius: 13px;
+
+  /* APAGUE A LINHA DA ANIMAÇÃO DAQUI */
+  /* animation: efeito-elastico 10s ease-in-out; <--- TIRE ISSO */
+
+  padding: 10px;
+  transform-origin: center;
+}
+
+
+
+.rowExercise button.checkExercise:active {
+  background-color: var(--faded-color);
+  /* Se clicar e segurar, ele só encolhe um pouquinho */
+  transform: scale(0.95);
+}
+
+@keyframes efeito-elastico {
+  0% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(0.7);
+  }
+
+  /* Encolhe bastante (pega impulso) */
+  50% {
+    transform: scale(1.2);
+  }
+
+  /* Estica além do tamanho (explosão) */
+  75% {
+    transform: scale(0.9);
+  }
+
+  /* Encolhe um pouquinho (ajuste) */
+  100% {
+    transform: scale(1);
+  }
+
+  /* Volta ao normal */
+}
+
+
+.checkExercise .material-symbols-rounded {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 900,
+    'GRAD' 0,
+    'opsz' 24
+}
+
+
+
+button.anteriorExercise {
+  /* background-color: white; 
+        border: 1px solid #767676; 
+        color: black; */
+  cursor: pointer;
+}
+
+
+/* Quando a linha tiver a classe 'concluido', ela fica cinza */
+.rowExercise.concluido {
+  background-color: var(--unselected-background-color);
+  /* background-color: var(--faded-color); */
+  /* Cinza claro */
+  /* opacity: 0.6; */
+  /* Deixa meio transparente para indicar inatividade */
+  transition: all 0.3s ease;
+  /* Animação suave */
+  border-radius: 21px;
+  /* border-radius: 13px; */
+}
+
+.rowExercise.concluido input,
+.rowExercise.concluido button.anteriorExercise {
+  pointer-events: none;
+  background-color: var(--unselected-background-color);
+  border: none;
+  /* Desativa interações */
+}
+
+
+
+/* Quando a linha estiver concluída, muda a cor do botão */
+.rowExercise.concluido .checkExercise {
+  background-color: var(--primary-color);
+  color: white;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  top: 0;
+  /* ADICIONE AQUI - Só roda quando a classe 'concluido' entra */
+  /* animation: efeito-elastico 0.6s ease-in-out; */
+}
+
+.rowExercise.concluido> :not(.checkExercise) {
+  opacity: 0.6;
+  /* Pode baixar até mais que 0.6 para destacar bem o check */
+  /* pointer-events: none; */
+  /* Garante que ninguém clica nos inputs transparentes */
+}
+
+
+
+.checkExercise.animando {
+  animation: efeito-elastico 0.6s ease-in-out;
+}
+
+.container-exercicio {
+  margin-bottom: 50px;
+}

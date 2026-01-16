@@ -25,39 +25,46 @@
   height: 40px;
   border-radius: 50%;
   background: #f8ab81;
-  background: linear-gradient(
-    25deg,
-    rgba(255, 209, 181, 1) 0%,
-    rgba(255, 151, 99, 1) 50%,
-    rgba(255, 219, 143, 1) 100%
-  );
+  background: linear-gradient(25deg,
+      rgba(255, 209, 181, 1) 0%,
+      rgba(255, 151, 99, 1) 50%,
+      rgba(255, 219, 143, 1) 100%);
   cursor: pointer;
 }
 
 .userData {
-    display: none; /* Escondido por padrão */
-    position: absolute; /* ISSO faz ele flutuar por cima */
-  top: 60px; /* Distância do topo */
-  right: 0; /* Alinhado à direita */
+  display: none;
+  /* Escondido por padrão */
+  position: absolute;
+  /* ISSO faz ele flutuar por cima */
+  top: 60px;
+  /* Distância do topo */
+  right: 0;
+  /* Alinhado à direita */
 
   /* Estilo visual da caixinha */
-  background-color: white;
+  background-color: var(--faded-color-2);
   border: 1px solid #ddd;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombrae para destacar */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Sombrae para destacar */
   padding: 20px;
   border-radius: 8px;
-  min-width: 200px;
-  z-index: 1000; /* Garante que fique na frente de tudo */
+  min-width: 10px;
+  z-index: 1000;
+  /* Garante que fique na frente de tudo */
   margin-right: 10px;
 }
 
 /* Classe mágica que vamos adicionar com JS */
 .userData.mostrar {
-  display: block; /* Quando tiver essa classe, aparece */
+  display: block;
+  /* Quando tiver essa classe, aparece */
 }
 
 .userDataContent {
   padding-top: 35px;
+  width: 180px;
+  gap: 50px;
 }
 
 /* --- NOVO: Estilo do botão X --- */
@@ -65,16 +72,18 @@
   position: absolute;
   top: 5px;
   right: 10px;
-  
+
   /* Tamanho fixo total (30px + o padding que você tinha de 10px = 50px visualmente) */
   width: 40px;
   height: 40px;
-  
+
   /* Mágica do alinhamento */
   display: flex;
-  justify-content: center; /* Centraliza horizontalmente */
-  align-items: center;     /* Centraliza verticalmente */
-  
+  justify-content: center;
+  /* Centraliza horizontalmente */
+  align-items: center;
+  /* Centraliza verticalmente */
+
   /* Visual */
   border-radius: 50%;
   /* background-color: #f8ab81; */
@@ -82,14 +91,32 @@
   font-weight: bold;
   font-size: 30px;
   cursor: pointer;
-  
+
   /* Zera o padding para não somar ao tamanho */
-  padding: 0; 
+  padding: 0;
   /* Remove margem extra se houver */
-  margin: 0; 
+  margin: 0;
 }
 
 .btn-fechar:active {
   background-color: var(--faded-color);
   transform: scale(0.96);
+}
+
+.userDataContent button {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: none;
+  background-color: var(--light-background-color);
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.userDataContent p {
+  /* font-size: 0.9rem; */
+  margin-bottom: 25px;
 }

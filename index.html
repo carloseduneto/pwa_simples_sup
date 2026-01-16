@@ -31,7 +31,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/main.css" />
-    <link rel="stylesheet" href="assets/css/header.css" />
+    <link rel="stylesheet" href="assets/css/main-header.css" />
     <link rel="stylesheet" href="assets/css/login.css" />
     <link rel="stylesheet" href="assets/css/templates.css" />
     <link rel="stylesheet" href="assets/css/app_section.css" />
@@ -39,8 +39,8 @@
     <link rel="stylesheet" href="assets/css/bottom-navbar.css" />
     <link rel="stylesheet" href="assets/css/test-smart-header.css" />
     <link rel="stylesheet" href="assets/css/templates-itens.css" />
-    <link rel="stylesheet" href="assets/css/template-itens-buttons.css">
-    <link rel="stylesheet" href="assets/css/loading.css">
+    <link rel="stylesheet" href="assets/css/template-itens-buttons.css" />
+    <link rel="stylesheet" href="assets/css/loading.css" />
 
     <link
       rel="shortcut icon"
@@ -59,7 +59,8 @@
       button {
         display: block;
         width: 100%;
-        margin-bottom: 10px;
+        /* É esssa porrinha que deixa o negócio com uma borda grossa embaixo */
+        /* margin-bottom: 0px; */
         padding: 10px;
       }
 
@@ -76,68 +77,6 @@
         padding: 10px;
         border-bottom: 1px solid #cf2020;
       }
-
-      .headerExercise {
-        display: grid;
-        grid-template-columns: 1fr 16fr 10fr 12fr 6fr;
-        gap: 20px;
-        font-weight: bold;
-        margin-top: 20px;
-        margin-bottom: 10px;
-      }
-
-      .rowExercise {
-        display: grid;
-        /* Mudei o 2º item de 'auto' para '15fr' para ele esticar igual aos inputs */
-        grid-template-columns: 10fr 15fr 15fr 15fr auto;
-        gap: 10px; /* Reduzi drasticamente o vão (35px era muito) */
-        align-items: center;
-        margin-bottom: 10px;
-      }
-
-      .rowExercise input,
-      .rowExercise button.anteriorExercise,
-      .rowExercise button.checkExercise {
-        height: 40px !important; /* Altura IDÊNTICA para ambos */
-        /* margin: 0 !important;  */
-        padding: 0 5px; /* Padding interno igual */
-        box-sizing: border-box; /* Garante que a borda não aumente o tamanho */
-        width: 100%; /* Garante que preencham a coluna do grid (15fr) */
-        text-align: center;
-      }
-
-      button.anteriorExercise {
-        /* background-color: white; 
-        border: 1px solid #767676; 
-        color: black; */
-        cursor: pointer;
-      }
-
-      /* Quando a linha tiver a classe 'concluido', ela fica cinza */
-      .rowExercise.concluido {
-        background-color: #e0e0e0; /* Cinza claro */
-        opacity: 0.6; /* Deixa meio transparente para indicar inatividade */
-        transition: all 0.3s ease; /* Animação suave */
-      }
-
-      /* Quando a linha estiver concluída, muda a cor do botão */
-      .rowExercise.concluido .checkExercise {
-        background-color: #4caf50; /* Verde */
-        color: white;
-        /* border: 1px solid; */
-        display: block;
-        width: 100%;
-        margin-bottom: 10px;
-        padding: 10px;
-      }
-
-      .rowExercise button.checkExercise {
-        display: block;
-        width: 100%;
-        margin-bottom: 10px;
-        padding: 10px;
-      }
-
 
 
       /* Adicione no seu arquivo de estilos */
@@ -229,9 +168,16 @@
           <div class="userData" id="menuData">
             <span class="btn-fechar" id="btnClose">&times;</span>
             <div class="userDataContent">
+              <!-- FIX: Pegar/Verificar o qual o e-mail que o usuário logou -->
               <p>Logado como: <span id="user-email">usuario@email.com</span></p>
-              <button onclick="roteador('config')">⚙️ Configurações</button>
-              <button onclick="signOut()" class="signOut">Sair</button>
+              <button onclick="roteador('config')">
+                <span class="material-symbols-rounded"> settings </span>
+                Configurações
+              </button>
+              <button onclick="signOut()" class="signOut">
+                <span class="material-symbols-rounded rotate180"> logout </span>
+                Sair
+              </button>
             </div>
           </div>
         </div>
@@ -292,7 +238,7 @@
           <span>ANTERIOR</span>
           <span>KG</span>
           <span>REPS</span>
-          <span>✅</span>
+          <span><span class="material-symbols-rounded"> check </span></span>
         </div>
       </template>
 
@@ -302,7 +248,9 @@
           <button class="anteriorExercise"></button>
           <input type="number" class="repsExercise" />
           <input type="number" class="kgExercise" />
-          <button class="checkExercise">✔️</button>
+          <button class="checkExercise">
+            <span class="material-symbols-rounded"> check </span>
+          </button>
         </div>
       </template>
 
@@ -311,7 +259,10 @@
           <header id="main-header" class="smart-header">
             <div class="header-content">
               <!-- <span class="logo">MEU TREINO</span> -->
-              <button onclick="voltarParaLista()" class="btn-icon-dynamic-header">
+              <button
+                onclick="voltarParaLista()"
+                class="btn-icon-dynamic-header"
+              >
                 <span class="material-symbols-rounded">
                   arrow_back_ios_new
                 </span>
