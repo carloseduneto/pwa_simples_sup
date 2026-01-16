@@ -8,7 +8,7 @@ let cacheDadosTreino = null;
 // 1. CAPTURA DA SEMANA
 // ======================================================
 function getSemanaBase() {
-  const tituloElement = document.querySelector("h3.titulo-treino");
+  const tituloElement = document.querySelector("h1.titulo-treino");
   if (tituloElement) {
     const classes = Array.from(tituloElement.classList);
     const classeSemana = classes.find((cls) => cls.startsWith("data-week-"));
@@ -203,7 +203,7 @@ let horarioInicioUTC = localStorage.getItem(CACHE_KEY);
 
 // listener único
 document.addEventListener("click", (e) => {
-  if (!e.target.classList.contains("checkExercise")) return;
+  if (!e.target.closest(".checkExercise")) return;
   if (horarioInicioUTC !== null) return;
 
   const now = new Date();
