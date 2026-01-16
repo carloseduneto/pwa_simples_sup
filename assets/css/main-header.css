@@ -43,7 +43,7 @@
   /* Alinhado à direita */
 
   /* Estilo visual da caixinha */
-  background-color: var(--faded-color-2);
+  background-color: var(--light-background-color);
   border: 1px solid #ddd;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   /* Sombrae para destacar */
@@ -107,7 +107,7 @@
   margin-top: 10px;
   padding: 12px 14px;
   border: none;
-  background-color: var(--light-background-color);
+  background-color: var(--faded-color);
   border-radius: 20px;
   cursor: pointer;
   display: flex;
