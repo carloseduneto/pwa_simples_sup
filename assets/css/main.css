@@ -77,3 +77,7 @@ article:focus
 .rotate180 {
   transform: rotate(180deg);
 } 
+
+.hidden {
+  display: none !important;
+}

@@ -9,6 +9,12 @@ let templatesJaCarregados = false;
 
 // Escuta de Autenticação (O Chefe da Segurança)
 client.auth.onAuthStateChange((event, session) => {
+  // ============================================================
+  // NOVO: Assim que o Supabase responder, removemos o Loader visual
+  // ============================================================
+  const loader = document.getElementById("initial-loader");
+  if (loader) loader.style.display = "none";
+
   if (session) {
     document.getElementById("user-email").innerText = session.user.email;
 
@@ -248,7 +254,7 @@ function aoClicarNoTemplate(id) {
 async function buscarItensDeTemplate(templateId) {
   templateAtualId = templateId; // Mantive sua lógica global
 
-  // [CACHE - LEITURA] - Usamos o ID na chave para não misturar templates
+  // [CACHE - LEITURA]
   const cacheKey = `cache_template_full_${templateId}`;
   if (MEXENDO_NO_CSS) {
     const cache = localStorage.getItem(cacheKey);
@@ -258,7 +264,7 @@ async function buscarItensDeTemplate(templateId) {
     }
   }
 
-  // --- Lógica Original ---
+  // --- Lógica Original (Itens e Contexto) ---
   const itensPromise = client
     .from("template_itens")
     .select(
@@ -272,23 +278,15 @@ async function buscarItensDeTemplate(templateId) {
     .select("series_repeticoes(nome, week, series, min_reps, max_reps)")
     .single();
 
-  const ultimaSessaoPromise = client
-    .from("sessao_treino")
-    .select(
-      `
-      id, created_at,
-      sessao_series_realizadas (exercicio_id, carga, repeticoes, ordem, tipo)
-    `
-    )
-    .eq("template_id", templateId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // --- NOVA LÓGICA (RPC) ---
+  // Chama a função que busca a última carga REAL do exercício, não importa quando foi
+  const historicoPromise = client
+    .rpc('get_ultimo_historico_por_template', { t_id: templateId });
 
-  const [resItens, resContexto, resUltimaSessao] = await Promise.all([
+  const [resItens, resContexto, resHistorico] = await Promise.all([
     itensPromise,
     contextoPromise,
-    ultimaSessaoPromise,
+    historicoPromise,
   ]);
 
   if (resItens.error) {
@@ -296,15 +294,16 @@ async function buscarItensDeTemplate(templateId) {
     return null;
   }
 
-  const historico = resUltimaSessao.data
-    ? resUltimaSessao.data.sessao_series_realizadas
-    : [];
+  // Tratamento de erro silencioso para o histórico (não deve quebrar a tela se falhar)
+  if (resHistorico.error) console.warn("Erro ao buscar histórico:", resHistorico.error);
+  
+  const historico = resHistorico.data || [];
 
   // Montamos o objeto final
   const resultadoFinal = {
     itens: resItens.data,
     contexto: resContexto.data,
-    historico: historico,
+    historico: historico, 
   };
 
   // [CACHE - GRAVAÇÃO]
