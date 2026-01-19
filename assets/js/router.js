@@ -5,6 +5,7 @@ const rotas = {
   templates: "screen-templates-list", // Lista de Treinos
   detalhes: "screen-workout-details", // Detalhes do Treino
   config: "screen-config", // Tela de Configurações
+  exercices: "screen-exercises", // Tela de Exercícios
 };
 
 /**
@@ -49,6 +50,7 @@ function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
     templates: { titulo: "Templates", exibir: true },
     config: { titulo: "Configurações", exibir: true },
     detalhes: { titulo: "Detalhes do Treino", exibir: false },
+    exercices: { titulo: "Exercícios", exibir: false },
     // Se tiver uma tela que não precisa de header, coloque exibir: false
   };
 

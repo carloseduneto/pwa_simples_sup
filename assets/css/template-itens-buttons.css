@@ -2,6 +2,8 @@
   display: flex;
   align-items: center;
   width: 20%;
+  /* O botão terá 20% da largura, mas nunca será menor que 40px nem maior que 60px */
+  /* width: clamp(40px, 20%, 60px); */
   color: var(--font-color-dark);
   border: none;
   border-radius: 5px;
@@ -13,14 +15,21 @@
   background-color: var(--light-background-color);
   justify-content: center;
   flex-direction: column;
-  transition: background-color 150ms ease, transform 100ms ease;
+  transition:
+    background-color 150ms ease,
+    transform 100ms ease;
   aspect-ratio: 1 / 1;
 }
 
-.btn-text-header{
-  font-size: 0.7em;
+@media (min-width: 768px) {
+  .btn-icon-dynamic-header {
+    width: 50px; /* Tamanho fixo para desktop */
+  }
 }
 
+.btn-text-header {
+  font-size: 0.7em;
+}
 
 .btn-icon-dynamic-header:active {
   background-color: var(--faded-color);

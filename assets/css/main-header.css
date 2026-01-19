@@ -120,3 +120,8 @@
   /* font-size: 0.9rem; */
   margin-bottom: 25px;
 }
+
+.userDataContent button:active {
+  background-color: var(--highlight-color);
+  color: var(--font-color-light);
+}

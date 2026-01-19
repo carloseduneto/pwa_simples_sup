@@ -589,11 +589,11 @@ wrapperTraining.insertAdjacentHTML(
   }
 
   // Botão marcar como concluído
-  wrapperTraining.insertAdjacentHTML(
-    "beforeend",
-    `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()">Marcar Treino como Concluído</button>
-    `
-  );
+  // wrapperTraining.insertAdjacentHTML(
+  //   "beforeend",
+  //   `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()">Marcar Treino como Concluído</button>
+  //   `
+  // );
 
   if (typeof restaurarDadosLocais === "function") {
     restaurarDadosLocais();

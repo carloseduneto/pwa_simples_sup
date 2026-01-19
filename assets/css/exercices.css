@@ -1,0 +1,138 @@
+/* O container agora faz o papel visual da barra */
+.search-container {
+  display: flex;
+  align-items: center; /* Centraliza o ícone verticalmente */
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 0 15px; /* Padding lateral */
+  background-color: #ececec;
+  border-radius: 13px;
+  margin-top: 30px;
+}
+
+/* Estilo do ícone */
+.search-container .material-symbols-rounded {
+  color: #757575; /* Cor do ícone */
+  margin-right: 10px;
+  font-size: 24px;
+}
+
+/* O input fica limpo, sem bordas ou fundo próprio */
+.search-input {
+  width: 100%;
+  padding: 15px 0; /* Padding vertical para manter a altura */
+  background: transparent;
+  border: none;
+  outline: none; /* Remove a linha azul ao clicar */
+  font-size: 16px;
+  color: #2c2c2c;
+  font-weight: 500;
+}
+
+/* Opcional: Efeito visual quando o usuário clica para digitar */
+.search-container:focus-within {
+  border: 1px solid #ccc; 
+  background-color: #f5f5f5;
+}
+
+
+.exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #ccc; /* Linha fina da imagem */
+  font-family: sans-serif;
+}
+
+.exercise-item__info {
+  display: flex;
+  flex-direction: column; /* Coloca nome em cima do grupo */
+}
+
+.exercise-item__name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.exercise-item__group {
+  font-size: 0.9rem;
+  color: #888; /* Cor cinza da imagem */
+  margin-top: 4px;
+}
+
+.exercise-item__actions{
+  display: flex;
+}
+
+/* Estilos base (o que é igual para todos os botões) */
+.exercise-item__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: opacity 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modificador para o botão de Editar */
+.exercise-item__btn--edit {
+  color: #000000; /* Preto */
+}
+
+/* Modificador para o botão de Excluir */
+.exercise-item__btn--delete {
+  color: #d32f2f; /* Vermelho (ex: Material Design Red) */
+}
+
+/* Efeito de hover comum */
+.exercise-item__btn:hover {
+  opacity: 0.6;
+}
+
+/* .exercise-button--add{
+  display: fixed;
+  position: relative;
+  background-color: var(--primary-color);
+  border: none;
+  bottom: 0;
+  right: 0;
+  color: var(--font-color-light);
+  border-radius: 13px;
+  width: 15%;
+  aspect-ratio: 1/1;
+} */
+
+/* Bloco Base: Como qualquer botão de exercício deve ser */
+.exercise-button {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+/* Modificador: Transforma o botão base em um botão fixo de adição */
+.exercise-button--add {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--primary-color);
+  border-radius: 13px;
+  width: 56px;
+  height: 56px;
+  z-index: 999;
+  color: var(--font-color-light);
+}
+
+.exercise-button--add .material-symbols-rounded {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 600,
+    'GRAD' 0,
+    'opsz' 24
+}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -41,6 +41,7 @@
     <link rel="stylesheet" href="assets/css/templates-itens.css" />
     <link rel="stylesheet" href="assets/css/template-itens-buttons.css" />
     <link rel="stylesheet" href="assets/css/loading.css" />
+    <link rel="stylesheet" href="assets/css/exercices.css" />
 
     <link
       rel="shortcut icon"
@@ -135,7 +136,7 @@
       <div class="loader"></div>
     </div>
 
-    <div id="auth-section" >
+    <div id="auth-section">
       <div class="loginContainer">
         <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
 
@@ -173,6 +174,10 @@
             <div class="userDataContent">
               <!-- FIX: Pegar/Verificar o qual o e-mail que o usuário logou -->
               <p>Logado como: <span id="user-email">usuario@email.com</span></p>
+              <button onclick="roteador('exercices')">
+                <span class="material-symbols-rounded"> accessible_menu </span>
+                Exercícios
+              </button>
               <button onclick="roteador('config')">
                 <span class="material-symbols-rounded"> settings </span>
                 Configurações
@@ -198,8 +203,8 @@
           <div class="nav-item active">
             <svg viewBox="0 0 24 24" class="nav-icon">
               <path
-                d="M20.57 14.86L22 13.43L20.57 12L17 15.57L8.43 7L12 3.43L10.57 2L9.14 3.43L7.71 2L5.57 4.14L4.14 2.71L2.71 4.14L4.14 5.57L2 7.71L3.43 9.14L2 10.57L3.43 12L7 8.43L15.57 17L12 20.57L13.43 22L14.86 20.57L16.29 22L18.43 19.86L19.86 21.29L21.29 19.86L19.86 18.43L22 16.29L20.57 14.86Z"
-                fill="currentColor"
+              d="M20.57 14.86L22 13.43L20.57 12L17 15.57L8.43 7L12 3.43L10.57 2L9.14 3.43L7.71 2L5.57 4.14L4.14 2.71L2.71 4.14L4.14 5.57L2 7.71L3.43 9.14L2 10.57L3.43 12L7 8.43L15.57 17L12 20.57L13.43 22L14.86 20.57L16.29 22L18.43 19.86L19.86 21.29L21.29 19.86L19.86 18.43L22 16.29L20.57 14.86Z"
+              fill="currentColor"
               />
             </svg>
             <span>Treino</span>
@@ -210,11 +215,11 @@
               <path
                 d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3M12,8V13L16.28,15.54L17,14.33L13.5,12.25V8H12Z"
                 fill="currentColor"
-              />
-            </svg>
-            <span>Histórico</span>
-          </div>
-        </nav> -->
+                />
+              </svg>
+              <span>Histórico</span>
+            </div>
+          </nav> -->
       </div>
 
       <div id="screen-workout-details" class="hidden">
@@ -233,6 +238,49 @@
 
         <p class="testConfig">Aqui você pode editar seus dados...</p>
         <div class="testConfig">Um teste de config</div>
+      </div>
+
+      <div id="screen-exercises" class="hidden">
+        <button onclick="voltarParaLista()" class="navigation-buttons">
+          <span class="material-symbols-rounded"> arrow_back_ios_new </span>
+        </button>
+
+        <div class="search-container">
+          <span class="material-symbols-rounded">search</span>
+          <input
+            type="text"
+            id="search-exercise"
+            placeholder="Buscar"
+            class="search-input"
+          />
+        </div>
+
+        <div class="exercise-item">
+          <div class="exercise-item__info">
+            <strong class="exercise-item__name">Nome exercício</strong>
+            <span class="exercise-item__group">Grupo muscular</span>
+          </div>
+
+          <div class="exercise-item__actions">
+            <button
+              class="exercise-item__btn exercise-item__btn--edit"
+              aria-label="Editar"
+            >
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+
+            <button
+              class="exercise-item__btn exercise-item__btn--delete"
+              aria-label="Excluir"
+            >
+              <span class="material-symbols-rounded">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="exercise-button exercise-button--add">
+          <span class="material-symbols-rounded">add_2</span>
+        </button>
       </div>
 
       <template class="template-header-exercise">
