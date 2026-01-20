@@ -125,3 +125,9 @@
   background-color: var(--highlight-color);
   color: var(--font-color-light);
 }
+
+.header-alternative-1{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}

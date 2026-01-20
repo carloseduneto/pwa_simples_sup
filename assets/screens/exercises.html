@@ -1,0 +1,48 @@
+<!-- <button onclick="voltarParaLista()" class="navigation-buttons">
+  <span class="material-symbols-rounded"> arrow_back_ios_new </span>
+</button> -->
+
+<div class="search-container">
+  <span class="material-symbols-rounded">search</span>
+  <input
+    type="text"
+    id="search-exercise"
+    placeholder="Buscar"
+    class="search-input"
+  />
+</div>
+
+<div id="lista-exercicios-container" class="exercises-list-wrapper"></div>
+
+<button
+  type="button"
+  class="exercise-button exercise-button--add"
+  onclick="roteador('exercisesAddEdit')"
+>
+  <span class="material-symbols-rounded">add_2</span>
+</button>
+
+<template class="template-exercices-item">
+  <div class="exercise-item">
+    <div class="exercise-item__info">
+      <strong class="exercise-item__name">Nome exercício</strong>
+      <span class="exercise-item__group">Grupo muscular</span>
+    </div>
+
+    <div class="exercise-item__actions">
+      <button
+        class="exercise-item__btn exercise-item__btn--edit"
+        aria-label="Editar"
+      >
+        <span class="material-symbols-rounded">edit</span>
+      </button>
+
+      <button
+        class="exercise-item__btn exercise-item__btn--delete"
+        aria-label="Excluir"
+      >
+        <span class="material-symbols-rounded">delete</span>
+      </button>
+    </div>
+  </div>
+</template>

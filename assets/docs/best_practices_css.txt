@@ -19,3 +19,6 @@ Isso é fácil de entender em 6 meses? → certo
 Isso evita conflito? → certo
 
 Se passou nesses 4, siga sem culpa.
+
+
+es6-string-html

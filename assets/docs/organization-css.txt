@@ -1,0 +1,8 @@
+base/: Reset (normalize.css), tipografia global, cores.
+components/: Arquivos para botões, cards, inputs, modais (um arquivo por
+componente).
+layout/: Header, footer, sistema de grid ou sidebar.
+pages/: Estilos específicos que só existem em uma página (ex: home.css, login.css).
+themes/: Se o seu PWA tiver Dark Mode e Light Mode.
+utils/: Classes utilitárias (ex: .text-center, .mt-20).
+vendors/: CSS de bibliotecas externas.

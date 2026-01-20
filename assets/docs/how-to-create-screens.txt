@@ -1,0 +1,92 @@
+Receita de Bolo: Como criar novas telas do zero?
+Sempre que você quiser criar uma nova funcionalidade (ex: "Histórico", "Perfil", "Cronômetro"), siga exatamente estes 3 passos:
+
+1. A Nova Receita de Bolo (Padrão rotasConfig)
+A lógica é a mesma, mas o Passo 3 ficou muito mais centralizado.
+
+Passo 1: O Arquivo HTML (O Recheio) Igual antes. Crie assets/screens/perfil.html e coloque apenas o miolo do HTML.
+
+Passo 2: O Espaço no Index (A Moldura) Igual antes (por enquanto). Vá no index.html e crie o espaço vazio:
+
+HTML
+<div id="screen-perfil" class="hidden"></div>
+Passo 3: O Roteador (O Mapa Mestre) Agora é aqui que muda. Você não mexe em rotas ou caminhosHtml. Você vai direto no rotasConfig:
+
+JavaScript
+const rotasConfig = {
+  // ... outras rotas ...
+  
+  perfil: {
+    idDiv: "screen-perfil",               // O ID que você criou no index
+    html: "assets/screens/perfil.html",   // Onde está o arquivo
+    titulo: "Meu Perfil",                 // O que aparece no topo
+    exibirHeader: true,                   // Quer barra superior?
+    onLoad: () => {                       // (Opcional) Função segura
+       if (typeof carregarDadosPerfil === 'function') carregarDadosPerfil();
+    } 
+  },
+};
+Pronto!
+
+2. Como refatorar as telas antigas (Migração)?
+Vamos supor que você queira migrar a tela de Configurações (config), que hoje está "solta" no seu index.html, para um arquivo separado.
+
+Passo A: Recortar Vá no index.html, ache a <div id="screen-config">. Recorte tudo o que está dentro dela, mas deixe a div lá vazia. (Resultado: <div id="screen-config" class="hidden"></div>).
+
+Passo B: Colar Crie o arquivo assets/screens/config.html e cole o conteúdo lá. Salve.
+
+Passo C: Atualizar o Mapa Vá no router.js, ache a entrada config e adicione a linha do HTML:
+
+JavaScript
+  config: {
+    idDiv: "screen-config",
+    html: "assets/screens/config.html", // <--- ADICIONE ISSO
+    exibirHeader: true,
+    titulo: "Configurações",
+    onLoad: null,
+  },
+Só isso. O roteador vai ver que agora tem um html configurado e vai passar a buscar o arquivo externo em vez de procurar conteúdo que já estava lá.
+
+3. O que acontece se eu omitir (não colocar) algum item?
+O seu código no router.js foi escrito de forma defensiva (ele prevê falhas). Veja o que acontece campo a campo:
+
+JavaScript
+config: {
+    // idDiv: "screen-config",  <-- SE FALTAR ESSE (Opcional virar obrigatório)
+    // O código VAI QUEBRAR.
+    // Motivo: O Javascript tenta fazer document.getElementById(undefined) e falha.
+    // Esse é o único obrigatório.
+
+    // html: "...",  <-- SE FALTAR ESSE
+    // O sistema assume que é uma "Tela Antiga".
+    // Ele não faz fetch/download. Ele apenas tenta mostrar a div que já existe no index.
+    
+    // titulo: "...", <-- SE FALTAR ESSE
+    // O código usa um padrão.
+    // No seu código tem: tituloEl.innerText = config.titulo || "App";
+    // Vai aparecer escrito "App" lá no topo.
+
+    // exibirHeader: true, <-- SE FALTAR ESSE
+    // O sistema entende como 'false'.
+    // O header vai sumir. (Porque undefined é considerado falso no if).
+
+    // onLoad: null, <-- SE FALTAR ESSE
+    // Nada acontece.
+    // O código verifica if (typeof config.onLoad === "function").
+    // Se não tiver nada, ele só segue a vida.
+},
+Resumo da Ópera:
+
+Obrigatório: idDiv.
+
+Opcionais: O resto todo. Se não colocar html, ele acha que o conteúdo já está na página. Se não colocar onLoad, ele só abre a tela sem rodar script.
+
+Ficou mais claro o poder desse objeto centralizado agora? Ele controla tudo sem você precisar criar novas variáveis
+
+
+
+Se o template template-input-exercise (que cria as linhas de input de peso/repetição) só é usado na tela de "Detalhes do Treino", ele deve ir para dentro do arquivo dessa tela.
+
+Deixar no index.html: Como é algo global, não tem problema deixar esses poucos templates genéricos no seu arquivo principal, fora das divs das telas.
+
+Arquivo components.html (Avançado): Criar um arquivo só com templates globais e carregar ele logo que o app abre. (Mas acho desnecessário para o seu momento atual).

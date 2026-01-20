@@ -30,7 +30,9 @@
     />
 
     <!-- CSS -->
-    <link rel="stylesheet" href="assets/css/main.css" />
+    <!-- Base -->
+    <link rel="stylesheet" href="assets/css/base/main.css" />
+
     <link rel="stylesheet" href="assets/css/main-header.css" />
     <link rel="stylesheet" href="assets/css/login.css" />
     <link rel="stylesheet" href="assets/css/templates.css" />
@@ -41,7 +43,10 @@
     <link rel="stylesheet" href="assets/css/templates-itens.css" />
     <link rel="stylesheet" href="assets/css/template-itens-buttons.css" />
     <link rel="stylesheet" href="assets/css/loading.css" />
-    <link rel="stylesheet" href="assets/css/exercices.css" />
+    <link rel="stylesheet" href="assets/css/pages/exercices.css" />
+
+    <!-- Components -->
+    <link rel="stylesheet" href="assets/css/components/search-bar.css" />
 
     <link
       rel="shortcut icon"
@@ -162,6 +167,8 @@
     </div>
 
     <div id="app-section" class="hidden">
+
+      
       <div class="headerPage" id="app-header">
         <div>
           <h2 id="header-title">Aqui vai o título da página</h2>
@@ -174,7 +181,7 @@
             <div class="userDataContent">
               <!-- FIX: Pegar/Verificar o qual o e-mail que o usuário logou -->
               <p>Logado como: <span id="user-email">usuario@email.com</span></p>
-              <button onclick="roteador('exercices')">
+              <button onclick="roteador('exercises')">
                 <span class="material-symbols-rounded"> accessible_menu </span>
                 Exercícios
               </button>
@@ -188,6 +195,15 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div id="app-header-alt" class="headerPageAlternative hidden">
+        <div class="header-alternative-1">
+          <button onclick="history.back()" class="navigation-buttons">
+            <span class="material-symbols-rounded"> arrow_back_ios_new </span>
+          </button>
+          <h2 id="header-title-alt">Título Alternativo</h2>
         </div>
       </div>
 
@@ -240,7 +256,10 @@
         <div class="testConfig">Um teste de config</div>
       </div>
 
-      <div id="screen-exercises" class="hidden">
+      <div id="screen-exercises" class="hidden"></div>
+      <div id="screen-exercises-add-edit" class="hidden"></div>
+
+      <!-- <div id="screen-exercises" class="hidden">
         <button onclick="voltarParaLista()" class="navigation-buttons">
           <span class="material-symbols-rounded"> arrow_back_ios_new </span>
         </button>
@@ -278,10 +297,50 @@
           </div>
         </div>
 
-        <button type="button" class="exercise-button exercise-button--add">
+        <button
+          type="button"
+          class="exercise-button exercise-button--add"
+          onclick="roteador('exercisesAddEdit')"
+        >
           <span class="material-symbols-rounded">add_2</span>
         </button>
       </div>
+
+      <div id="screen-exercises-add-edit" class="hidden">
+          <h2 id="exercise-form-title">Novo Exercício</h2>
+
+
+        <form id="form-exercise" class="exercise-form">
+          <div class="input-group">
+            <label for="input-name">Nome do Exercício</label>
+            <input
+              type="text"
+              id="input-name"
+              placeholder="Ex: Supino Reto"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="input-group">Grupo Muscular</label>
+            <select id="input-group">
+              <option value="peito">Peito</option>
+              <option value="costas">Costas</option>
+            </select>
+          </div>
+
+          <button type="submit" class="exercise-button exercise-button--save">
+            Salvar Exercício
+          </button>
+          <button
+            type="reset"
+            class="exercise-button exercise-button--cancel"
+            onclick="roteador('exercises')"
+          >
+            Cancelar
+          </button>
+        </form>
+      </div> -->
 
       <template class="template-header-exercise">
         <div class="headerExercise">
@@ -346,5 +405,6 @@
     <script src="./assets/js/scriptUpload.js"></script>
     <script src="./assets/js/ui-ux/dynamic-visibility-header.js"></script>
     <script src="./assets/js/ui-ux/menu-flutuante-header.js"></script>
+    <script src="./assets/js/generation/generation.js"></script>
   </body>
 </html>
