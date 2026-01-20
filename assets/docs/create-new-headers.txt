@@ -1,0 +1,25 @@
+1. Sobre os Headers: É isso mesmo!
+Você pegou exatamente a lógica. Programação muitas vezes é sobre encontrar padrões e repeti-los.
+
+Se você quiser criar um header novo (ex: um header transparente para fotos, ou um header só com o logo), a receita é essa:
+
+No HTML (index.html): Crie a div nova com um ID único (ex: id="app-header-foto") e a classe hidden.
+
+No Javascript (atualizarHeader): Adicione mais um else if.
+
+Como ficaria o código:
+
+JavaScript
+  // ... ifs anteriores ...
+  else if (tipo === "alternativo" && headerAlt) {
+    headerAlt.classList.remove("hidden");
+    headerAlt.style.display = "flex";
+    if (tituloAlt) tituloAlt.innerText = config.titulo;
+  }
+  // --- SEU NOVO HEADER AQUI ---
+  else if (tipo === "foto" && headerFoto) {
+     headerFoto.classList.remove("hidden");
+     headerFoto.style.display = "flex";
+     // Lógica específica desse header...
+  }
+Dica de Pro: Se você começar a ter 10 headers diferentes, esse monte de if/else vai ficar feio. No futuro, a gente pode trocar por uma estrutura chamada switch/case, mas para o seu aprendizado agora, o if/else é perfeito e funciona super bem.
