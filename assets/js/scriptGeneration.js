@@ -6,26 +6,36 @@ const MEXENDO_NO_CSS = false; // Ative para usar cache local durante desenvolvim
 // 1. VARIÁVEIS DE CONTROLE E AUTH
 // ======================================================
 let templatesJaCarregados = false;
+let appJaIniciou = false; // <--- ADICIONE ESTA LINHA (A TRAVA)
 
 // Escuta de Autenticação (O Chefe da Segurança)
 client.auth.onAuthStateChange((event, session) => {
-  // ============================================================
-  // NOVO: Assim que o Supabase responder, removemos o Loader visual
-  // ============================================================
+  // Remove loader visual se existir
   const loader = document.getElementById("initial-loader");
   if (loader) loader.style.display = "none";
 
   if (session) {
     document.getElementById("user-email").innerText = session.user.email;
 
-    // Assim que logar, verifica para onde ir baseado na URL
-    verificarRotaInicial();
+    // AQUI ESTÁ A CORREÇÃO:
+    // Só verificamos a rota se o app AINDA NÃO iniciou.
+    // Se você mudar de aba e voltar, 'appJaIniciou' será true, 
+    // e o código vai IGNORAR essa parte, mantendo você onde você está.
+    if (!appJaIniciou) {
+        console.log("🚀 Primeira carga do App. Verificando rota...");
+        verificarRotaInicial();
+        appJaIniciou = true; // TRAVAMOS AQUI. Não roda mais.
+    } else {
+        console.log("🔄 Retorno de aba detectado. Mantendo tela atual.");
+    }
 
-    // Busca contexto (o select de semanas) se necessário
+    // Busca contexto (semana) apenas se necessário
     if (typeof buscarContextRecomendacoes === "function") {
       buscarContextRecomendacoes();
     }
   } else {
+    // Se não tem sessão (logout), destrava tudo e manda pro login
+    appJaIniciou = false; 
     roteador("login");
     templatesJaCarregados = false;
   }
@@ -65,28 +75,73 @@ async function signOut() {
 // ======================================================
 
 // Lê a URL ao carregar e decide o que abrir
+// function verificarRotaInicial() {
+//   const params = new URLSearchParams(window.location.search);
+//   const page = params.get("page");
+//   const id = params.get("id");
+
+//   if (page === "detalhes" && id) {
+//     // URL pede detalhes -> Vai para detalhes e busca o template
+//     abrirTemplate(id);
+
+//     // Background: carrega a lista para quando voltar
+//     if (!templatesJaCarregados) {
+//       buscarTemplates();
+//       templatesJaCarregados = true;
+//     }
+//   } else {
+//     // Padrão -> Vai para lista
+//     roteador("templates", null, false);
+
+//     if (!templatesJaCarregados) {
+//       buscarTemplates();
+//       templatesJaCarregados = true;
+//     }
+//   }
+// }
+
+// ======================================================
+// SUBSTITUA APENAS A FUNÇÃO verificarRotaInicial
+// NO ARQUIVO generationScript.js
+// ======================================================
+
+// ======================================================
+// ARQUIVO: generationScript.js
+// APAGUE a função verificarRotaInicial antiga e cole esta:
+// ======================================================
+
 function verificarRotaInicial() {
+  // 1. Ler a URL
   const params = new URLSearchParams(window.location.search);
   const page = params.get("page");
   const id = params.get("id");
 
-  if (page === "detalhes" && id) {
-    // URL pede detalhes -> Vai para detalhes e busca o template
-    abrirTemplate(id);
+  console.log("🚦 VERIFICADOR DE ROTA ATIVADO. URL:", page); 
 
-    // Background: carrega a lista para quando voltar
-    if (!templatesJaCarregados) {
-      buscarTemplates();
-      templatesJaCarregados = true;
+  // 2. Lógica Corrigida
+  if (page) {
+    // Se TEM uma página escrita na URL (seja exercises, exercisesAddEdit, config...)
+    // Nós DEVEMOS ir para ela.
+    
+    if (page === "detalhes" && id) {
+      console.log("👉 Indo para Detalhes Específico");
+      abrirTemplate(id);
+    } else {
+      // AQUI ESTAVA O ERRO!
+      // Antes, o código não tinha esse 'else' genérico e caía no padrão.
+      console.log(`👉 Respeitando a URL: indo para ${page}`);
+      roteador(page, id, false); 
     }
   } else {
-    // Padrão -> Vai para lista
+    // 3. Só vai para templates se a URL estiver VAZIA
+    console.log("🏠 URL vazia, indo para Home (templates)");
     roteador("templates", null, false);
+  }
 
-    if (!templatesJaCarregados) {
-      buscarTemplates();
-      templatesJaCarregados = true;
-    }
+  // Carregamento de fundo (mantém igual)
+  if (!templatesJaCarregados) {
+    buscarTemplates();
+    templatesJaCarregados = true;
   }
 }
 

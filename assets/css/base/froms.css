@@ -1,0 +1,81 @@
+.default-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* background-color: aqua; */
+    height: 90vh;
+    justify-content: center;
+}
+
+.input-group {
+    width: 90%;
+}
+
+.default-form-input {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 15px;
+    background-color: #ececec;
+    border-radius: 13px;
+    font-size: 16px;
+    border: none;
+    color: #2c2c2c;
+    font-weight: 500;
+}
+
+.default-form-select {
+    /* Layout e Alinhamento */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Texto na esquerda, ícone na direita */
+
+    /* Espaçamento e Tamanho */
+    padding: 12px 20px;
+    width: 100%;
+    /* Ou o tamanho fixo que você desejar */
+    /* max-width: 220px; */
+
+    /* Estilo Visual */
+    background-color: #f0f0f0;
+    /* Cinza claro da imagem */
+    border-radius: 15px;
+    /* Bordas arredondadas */
+    border: none;
+
+    /* Tipografia */
+    color: #000;
+    font-weight: bold;
+    font-family: var(--font-body);
+    font-size: 1.0rem;
+    margin-bottom: 20px;
+
+    cursor: pointer;
+}
+
+.default-form-button {
+    width: 80%;
+    padding: 15px;
+    font-family: "Montserrat Alternates", sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    border: none;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.default-form-button--save{
+    color: var(--font-color-light);
+    background-color: var(--primary-color);
+}
+
+.default-form-button--cancel{
+    color: var(--disabled-color);
+    background-color: var(--light-background-color-2);
+
+}

@@ -1,33 +1,33 @@
-          <h2 id="exercise-form-title">Novo Exercício</h2>
+<form id="form-exercise" class="default-form exercise-form">
+  <div class="input-group">
+    <input
+      type="text"
+      id="input-name"
+      placeholder="Nome do Exercício"
+      required
+      class="default-form-input"
+    />
+  </div>
 
+  
 
-        <form id="form-exercise" class="exercise-form">
-          <div class="input-group">
-            <label for="input-name">Nome do Exercício</label>
-            <input
-              type="text"
-              id="input-name"
-              placeholder="Ex: Supino Reto"
-              required
-            />
-          </div>
+  <div class="input-group">
+    <label for="input-group"></label>
+    <select id="input-group" class="default-form-select">
+      <option default>Grupo Muscular</option>
+      <option value="peito">Peito</option>
+      <option value="costas">Costas</option>
+    </select>
+  </div>
 
-          <div class="input-group">
-            <label for="input-group">Grupo Muscular</label>
-            <select id="input-group">
-              <option value="peito">Peito</option>
-              <option value="costas">Costas</option>
-            </select>
-          </div>
-
-          <button type="submit" class="exercise-button exercise-button--save">
-            Salvar Exercício
-          </button>
-          <button
-            type="reset"
-            class="exercise-button exercise-button--cancel"
-            onclick="roteador('exercises')"
-          >
-            Cancelar
-          </button>
-        </form>
+  <button type="submit" class="default-form-button default-form-button--save">
+    Salvar Exercício
+  </button>
+  <button
+    type="reset"
+    class="default-form-button default-form-button--cancel"
+    onclick="roteador('exercises')"
+  >
+    Cancelar
+  </button>
+</form>

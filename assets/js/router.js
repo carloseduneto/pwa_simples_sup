@@ -40,7 +40,7 @@ const rotasConfig = {
     idDiv: "screen-exercises-add-edit",
     html: "assets/screens/exercisesAddEdit.html",
     tipoHeader: "alternativo", // Usa o novo header
-    titulo: "Editar Exercício",
+    titulo: "Criar exercício",
     onLoad: null,
   },
   detalhes: {
@@ -134,23 +134,40 @@ function atualizarHeader(config) {
 // 3. ROTEADOR CENTRAL
 // ============================================================================
 
+// ============================================================================
+// 3. ROTEADOR CENTRAL (Versão à Prova de Falhas)
+// ============================================================================
+
 async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
-  // 1. Validação básica
+  console.log(`Tentando navegar para: ${nomeRota}, ID: ${paramId}`); // Debug para você ver no F12
+
+  // 1. SALVAR ANTES DE TUDO (A CORREÇÃO PRINCIPAL) <<<<
+  // Garantimos que a memória é gravada antes de qualquer erro potencial de renderização
+  localStorage.setItem("app_ultima_rota", nomeRota);
+  if (paramId) {
+    localStorage.setItem("app_ultimo_id", paramId);
+  } else {
+    localStorage.removeItem("app_ultimo_id");
+  }
+
+  // 2. Validação básica
   const config = rotasConfig[nomeRota];
   if (!config) {
     console.warn(`Rota ${nomeRota} inexistente. Indo para home.`);
-    roteador("templates"); // Rota padrão de segurança
+    // Se a rota não existe, aí sim voltamos pro template e limpamos a memória errada
+    localStorage.removeItem("app_ultima_rota"); 
+    roteador("templates", null, false); 
     return;
   }
 
-  // 2. Layout (Login vs App)
+  // 3. Layout (Login vs App)
   const ehTelaInterna = gerenciarLayoutPrincipal(nomeRota);
   if (!ehTelaInterna) return;
 
-  // 3. Carregar HTML se necessário
+  // 4. Carregar HTML se necessário
   await carregarConteudoExterno(config, nomeRota);
 
-  // 4. Oculta telas
+  // 5. Oculta telas antigas
   Object.values(rotasConfig).forEach(rotaItem => {
     if (rotaItem.idDiv !== "auth-section") {
       const el = document.getElementById(rotaItem.idDiv);
@@ -158,26 +175,30 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
     }
   });
 
-  // 5. Mostra tela atual
+  // 6. Mostra tela atual
   const telaAlvo = document.getElementById(config.idDiv);
   if (telaAlvo) telaAlvo.classList.remove("hidden");
 
-  // 6. Atualiza Header (Nova lógica)
+  // 7. Atualiza Header
   atualizarHeader(config);
 
-  // 7. Executa scripts da tela
-  if (typeof config.onLoad === "function") {
-    config.onLoad(paramId);
-  }
-
-  // 8. Histórico URL
+  // 8. Histórico URL (Visual do navegador)
   if (adicionarAoHistorico) {
     let url = `?page=${nomeRota}`;
     if (paramId) url += `&id=${paramId}`;
     window.history.pushState({ rota: nomeRota, id: paramId }, "", url);
   }
-}
 
+  // 9. Executa scripts da tela (Colocamos por último, pois é onde costuma dar erro)
+  // Usamos um Try/Catch para que, se o script da tela falhar, o app não trave
+  try {
+    if (typeof config.onLoad === "function") {
+      config.onLoad(paramId);
+    }
+  } catch (erro) {
+    console.error(`Erro ao executar script da tela ${nomeRota}:`, erro);
+  }
+}
 // ============================================================================
 // 4. EVENTOS GLOBAIS & INICIALIZAÇÃO (Correção do F5)
 // ============================================================================
@@ -193,19 +214,21 @@ window.addEventListener("popstate", event => {
 });
 
 // AQUI ESTÁ A CORREÇÃO DO "REFRESH" (F5)
-// Assim que a janela carrega, lemos a URL e navegamos para o lugar certo
 window.addEventListener("load", () => {
-  // Lê os parâmetros da URL (ex: ?page=exercises&id=10)
   const params = new URLSearchParams(window.location.search);
-  const page = params.get("page");
-  const id = params.get("id");
+  const pageUrl = params.get("page");
+  const idUrl = params.get("id");
 
-  // Se tiver uma página na URL, vai pra ela. Se não, vai pra templates.
-  if (page) {
-    roteador(page, id, false); // false para não duplicar histórico
+  const pageSalva = localStorage.getItem("app_ultima_rota");
+  const idSalvo = localStorage.getItem("app_ultimo_id");
+
+  console.log("Memória ao abrir:", pageSalva, idSalvo); // Debug
+
+  if (pageUrl) {
+    roteador(pageUrl, idUrl, false);
+  } else if (pageSalva) {
+    roteador(pageSalva, idSalvo, false);
   } else {
-    // Se for o primeiro acesso sem nada na URL, decide se vai pra login ou home
-    // (Ajuste conforme sua lógica de auth)
     roteador("templates", null, false);
   }
 });

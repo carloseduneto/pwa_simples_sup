@@ -26,36 +26,3 @@ button{
 
 
 
-.navigation-buttons {
-  display: flex;
-  align-items: center;
-  width: 13%;
-  /* O botão terá 20% da largura, mas nunca será menor que 40px nem maior que 60px */
-  /* width: clamp(40px, 20%, 60px); */
-  color: var(--font-color-dark);
-  border: none;
-  border-radius: 5px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 16px;
-  /* transition: background-color 0.3s; */
-  justify-content: center;
-  background-color: var(--light-background-color-2);
-  justify-content: center;
-  flex-direction: column;
-  transition:
-    background-color 150ms ease,
-    transform 100ms ease;
-  aspect-ratio: 1 / 1;
-}
-
-@media (min-width: 768px) {
-  .navigation-buttons {
-    width: 50px; /* Tamanho fixo para desktop */
-  }
-}
-
-.navigation-buttons:active {
-  background-color: var(--faded-color);
-  transform: scale(0.96);
-}
