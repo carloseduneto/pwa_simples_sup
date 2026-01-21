@@ -6,9 +6,23 @@ function configurarBusca() {
   // Se não tiver campo de busca ou lista, aborta
   if (!searchInput || !container) return;
 
+  // AJUSTE TÉCNICO: Criamos um elemento para a mensagem para não apagar a lista
+  let msgSemResultados = document.getElementById("msg-no-results");
+  if (!msgSemResultados) {
+    msgSemResultados = document.createElement("div");
+    msgSemResultados.id = "msg-no-results";
+    msgSemResultados.innerText = "Sem resultados encontrados";
+    msgSemResultados.style.textAlign = "center";
+    msgSemResultados.style.padding = "20px";
+    msgSemResultados.style.width = "100%";
+    msgSemResultados.style.display = "none"; // Começa invisível
+    container.appendChild(msgSemResultados);
+  }
+
   searchInput.addEventListener("input", (e) => {
     const termo = e.target.value.toLowerCase();
     const itens = container.querySelectorAll(".exercise-item");
+    let foundItem = false;
 
     itens.forEach((item) => {
       // Pega o texto do nome e do grupo dentro do item
@@ -22,10 +36,19 @@ function configurarBusca() {
       // Verifica se o termo digitado existe no nome OU no grupo
       if (nome.includes(termo) || grupo.includes(termo)) {
         item.style.display = "flex"; // Mostra (use 'flex' pois seu CSS original usa flexbox)
+        foundItem = true;
       } else {
         item.style.display = "none"; // Esconde
       }
     });
+
+    // MANTIDA SUA LÓGICA, APENAS CORRIGIDO O MÉTODO DE EXIBIÇÃO
+    if (foundItem == false) {
+      // container.innerHTML = "Sem resultados encontrados" <-- ISSO APAGAVA A LISTA
+      msgSemResultados.style.display = "block"; // Agora só mostramos a mensagem
+    } else {
+      msgSemResultados.style.display = "none"; // Escondemos a mensagem se achou algo
+    }
   });
 }
 
@@ -36,8 +59,13 @@ async function renderizarListaExercicios() {
 
   if (!container || !template) return;
 
-  container.innerHTML =
-    '<p style="text-align:center; padding: 20px;">Carregando...</p>';
+  // --- CORREÇÃO DE OURO: Limpeza Imediata ---
+  // Isso mata qualquer dado antigo instantaneamente antes do 'await'
+
+  // container.innerHTML =
+  // '<p style="text-align:center; padding: 20px;">Carregando...</p>';
+
+  container.innerHTML = GlobalLoader.getSimple();
 
   try {
     const exercicios = await ExerciseService.getAll();
@@ -98,12 +126,11 @@ async function renderizarListaExercicios() {
   }
 }
 
-
 // E adicione essa funçãozinha no final do exercises-list.js (fora da função principal)
 function irParaCriacao() {
-    // REGRA DE OURO: Vai criar? Garanta que não tem lixo antigo.
-    localStorage.removeItem("editExerciseId"); 
-    roteador('exercisesAddEdit');
+  // REGRA DE OURO: Vai criar? Garanta que não tem lixo antigo.
+  localStorage.removeItem("editExerciseId");
+  roteador("exercisesAddEdit");
 }
 
 // Exponha ela para o HTML (já que estamos usando script global)

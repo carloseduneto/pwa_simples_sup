@@ -1,3 +1,7 @@
+#screen-exercises{
+  padding-bottom: 60px;
+}
+
 .exercise-item {
   display: flex;
   justify-content: space-between;

@@ -369,20 +369,25 @@ async function buscarItensDeTemplate(templateId) {
 }
 
 async function renderizarItensDeTemplate(templateId) {
-  const { itens, contexto, historico } = await buscarItensDeTemplate(
-    templateId
-  );
+  const container = document.querySelector(".itensTemplate");
+  container.innerHTML = GlobalLoader.getSimple();
+
+  const { itens, contexto, historico } =
+    await buscarItensDeTemplate(templateId);
 
   const wrapperTraining = document.createElement("div");
   wrapperTraining.className = "container-treino";
-  const container = document.querySelector(".itensTemplate");
+
+  // --- CORREÇÃO DE OURO: Limpeza Imediata ---
+  // Isso mata qualquer dado antigo instantaneamente antes do 'await'
+
 
   // Templates do HTML
   const templateInputExercise = document.querySelector(
-    ".template-input-exercise"
+    ".template-input-exercise",
   );
   const templateHeaderExercise = document.querySelector(
-    ".template-header-exercise"
+    ".template-header-exercise",
   );
 
   const templateSmartHeader = document.querySelector(".template-smart-header");
@@ -396,12 +401,12 @@ async function renderizarItensDeTemplate(templateId) {
   // Parte 1: Título Principal (String é mais fácil aqui)
   wrapperTraining.insertAdjacentHTML(
     "beforeend",
-    templateSmartHeader.innerHTML
+    templateSmartHeader.innerHTML,
   );
 
-wrapperTraining.insertAdjacentHTML(
-  "beforeend",
-  `<section class="header-itens-template">
+  wrapperTraining.insertAdjacentHTML(
+    "beforeend",
+    `<section class="header-itens-template">
   <div class="header-session-content">
   <h1 class="titulo-treino data-week-${contexto.series_repeticoes.week}">${itens[0].templates.nome}</h1>
   <p class="subtitulo-treino">${itens[0].templates.descricao}</p>
@@ -411,8 +416,8 @@ wrapperTraining.insertAdjacentHTML(
           <span class="material-symbols-rounded">rotate_left</span>
           <span class="btn-text-header">Reiniciar <br>treino</span>
       </button>
-   </section>`
-);
+   </section>`,
+  );
 
   console.log(historico);
 
@@ -426,13 +431,13 @@ wrapperTraining.insertAdjacentHTML(
 
     // Cria uma lista temporária só com as séries DESTE exercício (item.exercicios.id)
     const seriesPassadas = historico.filter(
-      (h) => h.exercicio_id === item.exercicios.id
+      (h) => h.exercicio_id === item.exercicios.id,
     );
 
     console.log(
       "Séries passadas para o exercício",
       item.exercicios.nome,
-      seriesPassadas
+      seriesPassadas,
     );
 
     // Parte 2: Título do Exercício + Header (String)
@@ -441,12 +446,12 @@ wrapperTraining.insertAdjacentHTML(
     if (item.tecnica_intensificacao) {
       wrapperExercises.insertAdjacentHTML(
         "beforeend",
-        `<h4>${item.exercicios.nome} - <em>${item.tecnica_intensificacao}</em></h4>`
+        `<h4>${item.exercicios.nome} - <em>${item.tecnica_intensificacao}</em></h4>`,
       );
     } else {
       wrapperExercises.insertAdjacentHTML(
         "beforeend",
-        `<h4>${item.exercicios.nome}</h4>`
+        `<h4>${item.exercicios.nome}</h4>`,
       );
     }
 
@@ -456,14 +461,14 @@ wrapperTraining.insertAdjacentHTML(
         "beforeend",
         `<details class="detalhes-exercicio"> 
         <summary>Recomendações:</summary>
-        ${item.treino_recomendacoes.description} ${contexto.series_repeticoes.nome}</details>`
+        ${item.treino_recomendacoes.description} ${contexto.series_repeticoes.nome}</details>`,
       );
     }
 
     // Nota: templateHeaderExercise.innerHTML retorna uma string, então usamos insertAdjacentHTML
     wrapperExercises.insertAdjacentHTML(
       "beforeend",
-      templateHeaderExercise.innerHTML
+      templateHeaderExercise.innerHTML,
     );
 
     // Parte 3: A Lógica Complexa (Nodes / Clones)
@@ -556,7 +561,7 @@ wrapperTraining.insertAdjacentHTML(
     ) {
       console.log(
         "Número de séries para preencher:",
-        contexto.series_repeticoes.series
+        contexto.series_repeticoes.series,
       );
 
       for (let i = 0; i < contexto.series_repeticoes.series; i++) {
@@ -614,7 +619,7 @@ wrapperTraining.insertAdjacentHTML(
             seriesPassadas[i]?.repeticoes || "";
           console.log(
             "Série passada para preencher o anterior:",
-            seriesPassadas[i]
+            seriesPassadas[i],
           );
         }
 
@@ -639,7 +644,7 @@ wrapperTraining.insertAdjacentHTML(
       `<button id="concluir-treino-btn" onclick="marcarTreinoComoConcluido()" class="btn-icon-dynamic-header">
            <span class="material-symbols-rounded">done_all</span> 
            <span class="btn-text-header">Concluir</span>
-           </button>`
+           </button>`,
     );
   }
 

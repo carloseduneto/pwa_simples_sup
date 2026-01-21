@@ -2,8 +2,9 @@
 .loader {
   width: 40px;
   aspect-ratio: 1;
-  --_c:no-repeat radial-gradient(farthest-side, var(--primary-color) 92%,#0000);
-  background: 
+  --_c: no-repeat
+    radial-gradient(farthest-side, var(--primary-color) 92%, #0000);
+  background:
     var(--_c) top,
     var(--_c) left,
     var(--_c) right,
@@ -11,7 +12,11 @@
   background-size: 12px 12px;
   animation: l7 1s infinite;
 }
-@keyframes l7 {to{transform: rotate(.5turn)}}
+@keyframes l7 {
+  to {
+    transform: rotate(0.5turn);
+  }
+}
 
 .espaco-loader {
   position: fixed;
@@ -28,4 +33,71 @@
   align-items: center;
   z-index: 99999;
   /* Garante que fique na frente de tudo */
+}
+
+/* assets/css/styles.css (ou onde ficar seu CSS) */
+
+/* A mágica do Skeleton */
+.skeleton {
+  /* Fundo cinza base com um degradê mais claro no meio */
+  background: #e0e0e0;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+
+  /* A animação */
+  animation: shimmer 1.5s infinite linear;
+
+  /* Esconde o texto placeholder/valor enquanto carrega */
+  color: transparent !important;
+
+  /* Impede o usuário de clicar */
+  pointer-events: none;
+  cursor: wait;
+
+  /* Opcional: remove borda para parecer um bloco sólido */
+  border-color: transparent !important;
+}
+
+.skeleton-button {
+  /* Fundo cinza base com um degradê mais claro no meio */
+  background: var(--primary-color);
+  background: linear-gradient(
+    90deg,
+    var(--primary-color) 25%,
+    var(--faded-color) 50%,
+    var(--primary-color) 75%
+  );
+
+  background-size: 200% 100%;
+
+  /* A animação */
+  animation: shimmer 1.5s infinite linear;
+
+  /* Esconde o texto placeholder/valor enquanto carrega */
+  color: transparent !important;
+
+  /* Impede o usuário de clicar */
+  pointer-events: none;
+  cursor: wait;
+
+  /* Opcional: remove borda para parecer um bloco sólido */
+  border-color: transparent !important;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Modo escuro (se você tiver, ajuste as cores aqui) */
+@media (prefers-color-scheme: dark) {
+  .skeleton {
+    background: #333;
+    background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+    background-size: 200% 100%;
+  }
 }
