@@ -264,17 +264,17 @@ async function atualizarSupabaseContextRecomendacoes(novoId) {
 }
 
 
-// screens/exerciseScreen.js
-export function renderExerciseScreen() {
-  /*html*/
-  return `
-    <div id="screen-exercises">
-      <div class="search-container">
-        <input type="text" id="search-exercise" placeholder="Buscar">
-      </div>
-      <div id="exercise-list">
-        </div>
-      <button onclick="navegar('exercicesAddEdit')">Add</button>
-    </div>
-  `;
-}
+// // screens/exerciseScreen.js
+// export function renderExerciseScreen() {
+//   /*html*/
+//   return `
+//     <div id="screen-exercises">
+//       <div class="search-container">
+//         <input type="text" id="search-exercise" placeholder="Buscar">
+//       </div>
+//       <div id="exercise-list">
+//         </div>
+//       <button onclick="navegar('exercicesAddEdit')">Add</button>
+//     </div>
+//   `;
+// }

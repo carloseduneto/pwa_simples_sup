@@ -30,7 +30,9 @@ const rotasConfig = {
     html: "assets/screens/exercises.html",
     tipoHeader: "alternativo", // <--- AQUI A MÁGICA: Usa o novo header!
     titulo: "Exercícios",
-    onLoad: id => {
+    // SE voltar daqui, vai para o inicio (ou templates)
+    voltarPara: "templates",
+    onLoad: (id) => {
       if (typeof renderizarListaExercicios === "function") {
         renderizarListaExercicios(id);
       }
@@ -40,14 +42,20 @@ const rotasConfig = {
     idDiv: "screen-exercises-add-edit",
     html: "assets/screens/exercisesAddEdit.html",
     tipoHeader: "alternativo", // Usa o novo header
-    titulo: "Criar exercício",
-    onLoad: null,
+    titulo: "Gerenciar Exercício",
+    // SE voltar daqui, volta para a lista, não para o histórico
+    voltarPara: "exercises",
+    onLoad: (id) => {
+      if (typeof initExerciseForm === "function") {
+        initExerciseForm();
+      }
+    },
   },
   detalhes: {
     idDiv: "screen-workout-details",
     tipoHeader: "nenhum", // Detalhes geralmente não tem header ou tem um próprio
     titulo: "Treino em Andamento",
-    onLoad: id => {
+    onLoad: (id) => {
       if (typeof renderizarItensDeTemplate === "function")
         renderizarItensDeTemplate(id);
     },
@@ -155,9 +163,20 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
   if (!config) {
     console.warn(`Rota ${nomeRota} inexistente. Indo para home.`);
     // Se a rota não existe, aí sim voltamos pro template e limpamos a memória errada
-    localStorage.removeItem("app_ultima_rota"); 
-    roteador("templates", null, false); 
+    localStorage.removeItem("app_ultima_rota");
+    roteador("templates", null, false);
     return;
+  }
+
+  // 2.1 Lógica Mágica do Botão Voltar
+  const btnVoltarGlobal = document.querySelector("#app-header-alt button"); // Seu botão do header alternativo
+
+  if (btnVoltarGlobal && config.voltarPara) {
+    // Remove o history.back() e força a ir para a rota pai
+    btnVoltarGlobal.onclick = () => roteador(config.voltarPara);
+  } else if (btnVoltarGlobal) {
+    // Fallback: Se não tiver configurado, usa o histórico ou vai pro home
+    btnVoltarGlobal.onclick = () => roteador("templates");
   }
 
   // 3. Layout (Login vs App)
@@ -168,7 +187,7 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
   await carregarConteudoExterno(config, nomeRota);
 
   // 5. Oculta telas antigas
-  Object.values(rotasConfig).forEach(rotaItem => {
+  Object.values(rotasConfig).forEach((rotaItem) => {
     if (rotaItem.idDiv !== "auth-section") {
       const el = document.getElementById(rotaItem.idDiv);
       if (el) el.classList.add("hidden");
