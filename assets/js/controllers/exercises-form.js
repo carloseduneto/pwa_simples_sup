@@ -67,8 +67,11 @@ async function initExerciseForm() {
 
   if (editId) {
     // --- MODO EDIÇÃO ---
-    if (headerTitle) headerTitle.innerText = "Editar Exercício";
-          setTimeout(() => {
+    if (headerTitle) 
+      inputName.innerHTML = ""
+      headerTitle.innerText = "";
+    headerTitle.innerText = "Editar Exercício";
+    setTimeout(() => {
             btnSave.classList.remove("skeleton-button");
             if (btnSave) btnSave.innerText = "Atualizar";
           }, 300);

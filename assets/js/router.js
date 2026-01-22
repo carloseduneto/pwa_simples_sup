@@ -42,7 +42,8 @@ const rotasConfig = {
     idDiv: "screen-exercises-add-edit",
     html: "assets/screens/exercisesAddEdit.html",
     tipoHeader: "alternativo", // Usa o novo header
-    titulo: "Gerenciar Exercício",
+    // titulo: "Gerenciar Exercício",
+    titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "exercises",
     onLoad: (id) => {
