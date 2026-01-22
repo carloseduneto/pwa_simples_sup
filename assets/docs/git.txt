@@ -5,3 +5,15 @@ Branches = linhas do tempo
 Merge = convergência de realidades
 Rebase = reescrita da história (universo alternativo substituído)
 Tag = marco histórico (“aqui tudo funcionava”)
+
+
+Se tiver problemas com git Rebase use
+git rebase --abort
+ou
+git rebase --continue
+
+
+
+Ao fazer uma poda com Git Graph usar
+git push origin HEAD --force
+

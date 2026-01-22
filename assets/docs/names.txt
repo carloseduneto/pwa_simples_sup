@@ -10,6 +10,11 @@ components.css  → botões, cards, modais
 utilities.css   → classes utilitárias
 
 
+
+
+
+
+
 Padrões populares (se quiser ir além)
 - BEM (nome do conteúdo, não do arquivo)
     O arquivo costuma seguir o bloco principal:

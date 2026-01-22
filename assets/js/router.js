@@ -14,7 +14,7 @@ const rotasConfig = {
   templates: {
     idDiv: "screen-templates-list",
     tipoHeader: "padrao", // Usa o header azulzão normal
-    titulo: "Meus Treinos",
+    titulo: "Templates", // Meus Treinos
     onLoad: null,
   },
   config: {
