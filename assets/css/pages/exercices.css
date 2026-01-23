@@ -7,9 +7,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #ccc; /* Linha fina da imagem */
   font-family: sans-serif;
 }
+
+.exercise-item + .exercise-item {
+  border-top: 1px solid #ccc;
+}
+
 
 .exercise-item__info {
   display: flex;
