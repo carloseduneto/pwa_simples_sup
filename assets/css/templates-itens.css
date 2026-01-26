@@ -200,6 +200,9 @@ button.anteriorExercise {
   /* Desativa interações */
 }
 
+.rowExercise.concluido input::placeholder{
+  color: var(--font-color-dark);
+}
 
 
 /* Quando a linha estiver concluída, muda a cor do botão */

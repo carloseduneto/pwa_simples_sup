@@ -1,72 +1,51 @@
 //TODO Refatorar para usar funções reutilizáveis
 
-document.addEventListener("input", function (event) {
-  if (event.target.classList.contains("kgExercise")) {
-    const inputAtual = event.target;
-    const valorDigitado = inputAtual.value;
-    const container = inputAtual.closest(".container-exercicio");
+function propagarValor(inputAtual, classeAlvo) {
+  const valorDigitado = inputAtual.value;
+  const container = inputAtual.closest(".container-exercicio");
 
-    // Se o usuário está digitando neste campo, ele deixa de ser "automático"
-    // Isso impede que ele seja sobrescrito se alguém editar o de cima depois
-    inputAtual.dataset.auto = "false";
+  // O input atual deixa de ser automático pois o usuário mexeu nele
+  inputAtual.dataset.auto = "false";
 
-    if (!container) return;
+  if (!container) return;
 
-    const todosInputs = container.querySelectorAll(".kgExercise");
-    let encontrouOAtual = false;
+  const todosInputs = container.querySelectorAll(`.${classeAlvo}`);
+  let encontrouOAtual = false;
 
-    for (const input of todosInputs) {
-      if (input === inputAtual) {
-        encontrouOAtual = true;
-        continue;
-      }
+  for (const input of todosInputs) {
+    if (input === inputAtual) {
+      encontrouOAtual = true;
+      continue;
+    }
 
-      if (encontrouOAtual) {
-        // A MÁGICA: Preenche se estiver vazio OU se já foi preenchido automaticamente antes
-        const foiPreenchidoPeloRobo = input.dataset.auto === "true";
-        const estaVazio = input.value === "";
+    if (encontrouOAtual) {
+      // 1. Verifica se tem placeholder (histórico)
+      const temPlaceholder =
+        input.placeholder && input.placeholder.trim() !== "";
 
-        if (estaVazio || foiPreenchidoPeloRobo) {
-          input.value = valorDigitado;
-          input.dataset.auto = "true"; // Marca que foi o robô que fez
-        }
+      // Se tiver placeholder, ABORTA a automação neste campo.
+      // Respeitamos o histórico.
+      if (temPlaceholder) continue;
+
+      // 2. Lógica padrão: preenche se estiver vazio ou se já for "do robô"
+      const foiPreenchidoPeloRobo = input.dataset.auto === "true";
+      const estaVazio = input.value === "";
+
+      if (estaVazio || foiPreenchidoPeloRobo) {
+        input.value = valorDigitado;
+        input.dataset.auto = "true";
       }
     }
   }
-});
+}
 
+// Listener único para os dois casos
 document.addEventListener("input", function (event) {
+  if (event.target.classList.contains("kgExercise")) {
+    propagarValor(event.target, "kgExercise");
+  }
   if (event.target.classList.contains("repsExercise")) {
-    const inputAtual = event.target;
-    const valorDigitado = inputAtual.value;
-    const container = inputAtual.closest(".container-exercicio");
-
-    // Se o usuário está digitando neste campo, ele deixa de ser "automático"
-    // Isso impede que ele seja sobrescrito se alguém editar o de cima depois
-    inputAtual.dataset.auto = "false";
-
-    if (!container) return;
-
-    const todosInputs = container.querySelectorAll(".repsExercise");
-    let encontrouOAtual = false;
-
-    for (const input of todosInputs) {
-      if (input === inputAtual) {
-        encontrouOAtual = true;
-        continue;
-      }
-
-      if (encontrouOAtual) {
-        // A MÁGICA: Preenche se estiver vazio OU se já foi preenchido automaticamente antes
-        const foiPreenchidoPeloRobo = input.dataset.auto === "true";
-        const estaVazio = input.value === "";
-
-        if (estaVazio || foiPreenchidoPeloRobo) {
-          input.value = valorDigitado;
-          input.dataset.auto = "true"; // Marca que foi o robô que fez
-        }
-      }
-    }
+    propagarValor(event.target, "repsExercise");
   }
 });
 

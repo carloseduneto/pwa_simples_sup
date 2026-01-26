@@ -34,30 +34,42 @@ window.marcarTreinoComoConcluido = async function () {
     rows.forEach((row, index) => {
       const inputKg = row.querySelector(".kgExercise");
       const inputReps = row.querySelector(".repsExercise");
-
-      // NOVA CAPTURA: Tipo da série (input de texto)
       const inputTipo = row.querySelector(".seriesExercise");
-      const valorTipo = inputTipo ? inputTipo.value.trim() : "";
 
-      const kg = parseFloat(inputKg.value);
-      const reps = parseFloat(inputReps.value);
       const foiRealizado = row.dataset.realizado === "true";
 
-      // Verifica se tem dados preenchidos
-      const temDados = inputKg.value !== "" || inputReps.value !== "";
+      // --- MUDANÇA PRINCIPAL AQUI ---
+      // 1. Pega o valor digitado. Se estiver vazio, pega o placeholder.
+      const valorKgRaw =
+        inputKg.value !== "" ? inputKg.value : inputKg.placeholder;
+      const valorRepsRaw =
+        inputReps.value !== "" ? inputReps.value : inputReps.placeholder;
 
-      if (temDados && !foiRealizado) {
+      // 2. Converte para número (agora considera o placeholder se necessário)
+      const kg = parseFloat(valorKgRaw);
+      const reps = parseFloat(valorRepsRaw);
+
+      const valorTipo = inputTipo ? inputTipo.value.trim() : "";
+
+      // Verifica se o usuário DIGITOU algo novo (ignora placeholder para essa verificação)
+      // Isso é importante para não bloquear o usuário dizendo que tem "pendência"
+      // só porque existe um placeholder ali.
+      const temDadosDigitados = inputKg.value !== "" || inputReps.value !== "";
+
+      // Se o usuário digitou algo mas não marcou o check, avisa (pendência).
+      // Se ele só confiou no placeholder e não marcou o check, assumimos que ele não fez a série.
+      if (temDadosDigitados && !foiRealizado) {
         temSeriePendente = true;
       }
 
-      if (temDados || foiRealizado) {
+      // Salva se tiver dados digitados OU se foi marcado como realizado
+      if (temDadosDigitados || foiRealizado) {
         seriesParaSalvar.push({
           exercicio_id: exercicioId,
-          carga: kg || 0,
-          repeticoes: reps || 0,
+          carga: kg || 0, // Agora 'kg' pode vir do placeholder
+          repeticoes: reps || 0, // Agora 'reps' pode vir do placeholder
           ordem: index + 1,
           realizado: foiRealizado,
-          // Salva o que foi digitado ou 'N' se estiver vazio
           tipo: valorTipo || "N",
         });
       }

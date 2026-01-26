@@ -19,14 +19,14 @@ client.auth.onAuthStateChange((event, session) => {
 
     // AQUI ESTÁ A CORREÇÃO:
     // Só verificamos a rota se o app AINDA NÃO iniciou.
-    // Se você mudar de aba e voltar, 'appJaIniciou' será true, 
+    // Se você mudar de aba e voltar, 'appJaIniciou' será true,
     // e o código vai IGNORAR essa parte, mantendo você onde você está.
     if (!appJaIniciou) {
-        console.log("🚀 Primeira carga do App. Verificando rota...");
-        verificarRotaInicial();
-        appJaIniciou = true; // TRAVAMOS AQUI. Não roda mais.
+      console.log("🚀 Primeira carga do App. Verificando rota...");
+      verificarRotaInicial();
+      appJaIniciou = true; // TRAVAMOS AQUI. Não roda mais.
     } else {
-        console.log("🔄 Retorno de aba detectado. Mantendo tela atual.");
+      console.log("🔄 Retorno de aba detectado. Mantendo tela atual.");
     }
 
     // Busca contexto (semana) apenas se necessário
@@ -35,7 +35,7 @@ client.auth.onAuthStateChange((event, session) => {
     }
   } else {
     // Se não tem sessão (logout), destrava tudo e manda pro login
-    appJaIniciou = false; 
+    appJaIniciou = false;
     roteador("login");
     templatesJaCarregados = false;
   }
@@ -116,13 +116,13 @@ function verificarRotaInicial() {
   const page = params.get("page");
   const id = params.get("id");
 
-  console.log("🚦 VERIFICADOR DE ROTA ATIVADO. URL:", page); 
+  console.log("🚦 VERIFICADOR DE ROTA ATIVADO. URL:", page);
 
   // 2. Lógica Corrigida
   if (page) {
     // Se TEM uma página escrita na URL (seja exercises, exercisesAddEdit, config...)
     // Nós DEVEMOS ir para ela.
-    
+
     if (page === "detalhes" && id) {
       console.log("👉 Indo para Detalhes Específico");
       abrirTemplate(id);
@@ -130,7 +130,7 @@ function verificarRotaInicial() {
       // AQUI ESTAVA O ERRO!
       // Antes, o código não tinha esse 'else' genérico e caía no padrão.
       console.log(`👉 Respeitando a URL: indo para ${page}`);
-      roteador(page, id, false); 
+      roteador(page, id, false);
     }
   } else {
     // 3. Só vai para templates se a URL estiver VAZIA
@@ -231,9 +231,8 @@ function renderizarExercicios(lista) {
 async function buscarTemplates() {
   const container = document.getElementById("lista-templates");
   // container.innerHTML = "Carregando templates...";
-  container.innerHTML = "<div class=\"espaco-loader\">"+
-  "<div class=\"loader\"></div>"+
-  "</div>";
+  container.innerHTML =
+    '<div class="espaco-loader">' + '<div class="loader"></div>' + "</div>";
 
   // [CACHE - LEITURA]
   if (MEXENDO_NO_CSS) {
@@ -323,7 +322,7 @@ async function buscarItensDeTemplate(templateId) {
   const itensPromise = client
     .from("template_itens")
     .select(
-      "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, tecnica_intensificacao"
+      "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, tecnica_intensificacao",
     )
     .eq("template_id", templateId)
     .order("ordem");
@@ -335,8 +334,9 @@ async function buscarItensDeTemplate(templateId) {
 
   // --- NOVA LÓGICA (RPC) ---
   // Chama a função que busca a última carga REAL do exercício, não importa quando foi
-  const historicoPromise = client
-    .rpc('get_ultimo_historico_por_template', { t_id: templateId });
+  const historicoPromise = client.rpc("get_ultimo_historico_por_template", {
+    t_id: templateId,
+  });
 
   const [resItens, resContexto, resHistorico] = await Promise.all([
     itensPromise,
@@ -350,15 +350,16 @@ async function buscarItensDeTemplate(templateId) {
   }
 
   // Tratamento de erro silencioso para o histórico (não deve quebrar a tela se falhar)
-  if (resHistorico.error) console.warn("Erro ao buscar histórico:", resHistorico.error);
-  
+  if (resHistorico.error)
+    console.warn("Erro ao buscar histórico:", resHistorico.error);
+
   const historico = resHistorico.data || [];
 
   // Montamos o objeto final
   const resultadoFinal = {
     itens: resItens.data,
     contexto: resContexto.data,
-    historico: historico, 
+    historico: historico,
   };
 
   // [CACHE - GRAVAÇÃO]
@@ -380,7 +381,6 @@ async function renderizarItensDeTemplate(templateId) {
 
   // --- CORREÇÃO DE OURO: Limpeza Imediata ---
   // Isso mata qualquer dado antigo instantaneamente antes do 'await'
-
 
   // Templates do HTML
   const templateInputExercise = document.querySelector(
@@ -487,10 +487,15 @@ async function renderizarItensDeTemplate(templateId) {
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
             seriesPassadas[i]?.repeticoes + " x " + seriesPassadas[i]?.carga ||
             " - ";
-          cloneInputSeries.querySelector(".kgExercise").value =
+          // Define o valor antigo como placeholder (dica de fundo)
+          cloneInputSeries.querySelector(".kgExercise").placeholder =
             seriesPassadas[i]?.carga || "";
-          cloneInputSeries.querySelector(".repsExercise").value =
+          // Limpa o valor real para que o placeholder fique visível
+          cloneInputSeries.querySelector(".kgExercise").value = "";
+
+          cloneInputSeries.querySelector(".repsExercise").placeholder =
             seriesPassadas[i]?.repeticoes || "";
+          cloneInputSeries.querySelector(".repsExercise").value = "";
         }
         // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
         wrapperExercises.appendChild(cloneInputSeries);
@@ -536,11 +541,21 @@ async function renderizarItensDeTemplate(templateId) {
             " x " +
             (dadoHistorico.carga || 0);
 
-          // Preenche os campos de carga e repetições
-          cloneInputSeries.querySelector(".kgExercise").value =
+          // Define o valor antigo como placeholder (dica de fundo)
+          cloneInputSeries.querySelector(".kgExercise").placeholder =
             dadoHistorico.carga || "";
-          cloneInputSeries.querySelector(".repsExercise").value =
+          // Limpa o valor real para que o placeholder fique visível
+          cloneInputSeries.querySelector(".kgExercise").value = "";
+
+          cloneInputSeries.querySelector(".repsExercise").placeholder =
             dadoHistorico.repeticoes || "";
+          cloneInputSeries.querySelector(".repsExercise").value = "";
+
+          // Preenche os campos de carga e repetições
+          // cloneInputSeries.querySelector(".kgExercise").value =
+          //   dadoHistorico.carga || "";
+          // cloneInputSeries.querySelector(".repsExercise").value =
+          //   dadoHistorico.repeticoes || "";
 
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
             textoAnterior;
@@ -582,10 +597,20 @@ async function renderizarItensDeTemplate(templateId) {
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
             serieAnterior.repeticoes + " x " + serieAnterior.carga || " - ";
 
-          cloneInputSeries.querySelector(".kgExercise").value =
+          // Define o valor antigo como placeholder (dica de fundo)
+          cloneInputSeries.querySelector(".kgExercise").placeholder =
             serieAnterior.carga || "";
-          cloneInputSeries.querySelector(".repsExercise").value =
+          // Limpa o valor real para que o placeholder fique visível
+          cloneInputSeries.querySelector(".kgExercise").value = "";
+
+          cloneInputSeries.querySelector(".repsExercise").placeholder =
             serieAnterior.repeticoes || "";
+          cloneInputSeries.querySelector(".repsExercise").value = "";
+
+          // cloneInputSeries.querySelector(".kgExercise").value =
+          //   serieAnterior.carga || "";
+          // cloneInputSeries.querySelector(".repsExercise").value =
+          //   serieAnterior.repeticoes || "";
         } else {
           // Lógica opcional: O que fazer se não tiver série anterior?
           // Deixar em branco ou colocar um traço?
