@@ -264,12 +264,15 @@ function renderizarTemplates(lista) {
   const container = document.getElementById("lista-templates");
   container.innerHTML = "";
 
+  // PROTEÇÃO: Se a lista não existir, cria um array vazio para não quebrar
+  if (!lista) lista = [];
+
   if (lista.length === 0) {
     container.innerHTML = "<p>Nenhum template encontrado.</p>";
     return;
   }
 
-  lista.forEach((item) => {
+  lista.forEach(item => {
     const articleExercicio = document.createElement("article");
     articleExercicio.className = "template-item";
 
@@ -283,7 +286,7 @@ function renderizarTemplates(lista) {
       <button class="card-dots" data-template-id="${item.id}">&#8942;</button>
     `;
 
-    articleExercicio.onclick = (e) => {
+    articleExercicio.onclick = e => {
       //   abrirTemplate(item.id);
       // Se clicou no botão ou em algo dentro dele, não navega
       if (e.target.closest(".card-dots")) return;

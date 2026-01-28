@@ -2,16 +2,20 @@
   /* Layout e Alinhamento */
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Texto na esquerda, ícone na direita */
+  justify-content: space-between;
+  /* Texto na esquerda, ícone na direita */
 
   /* Espaçamento e Tamanho */
   padding: 12px 20px;
-  width: 100%; /* Ou o tamanho fixo que você desejar */
+  width: 100%;
+  /* Ou o tamanho fixo que você desejar */
   max-width: 220px;
 
   /* Estilo Visual */
-  background-color: var(--input-bg); /* Cinza claro da imagem */
-  border-radius: 15px; /* Bordas arredondadas */
+  background-color: var(--input-bg);
+  /* Cinza claro da imagem */
+  border-radius: 15px;
+  /* Bordas arredondadas */
   border: none;
 
   /* Tipografia */
@@ -25,7 +29,8 @@
 }
 
 .input-select-context-recomendacoes:active {
-  transform: scale(0.98); /* Dá um leve efeito de "afundar" ao clicar */
+  transform: scale(0.98);
+  /* Dá um leve efeito de "afundar" ao clicar */
   background-color: var(--input-bg-hover);
 }
 
@@ -39,14 +44,16 @@
   /* A mágica: cria quantas colunas couberem de no mínimo 150px, preenchendo o resto */
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
-  padding: 10px; /* Padding nas bordas evita que os cards encostem na tela */
+  padding: 10px;
+  /* Padding nas bordas evita que os cards encostem na tela */
   width: 100%;
   box-sizing: border-box;
 }
 
 @media (min-width: 600px) {
   #lista-templates {
-    grid-template-columns: 1fr 1fr 1fr; /* 3 colunas em telas maiores */
+    grid-template-columns: 1fr 1fr 1fr;
+    /* 3 colunas em telas maiores */
   }
 }
 
@@ -54,13 +61,16 @@
   background-color: var(--btn-primary);
   /* REMOVA o width fixo de 170px */
   width: 100%;
-  aspect-ratio: 1.3 / 1; /* Mantém a proporção retangular independente da largura */
+  aspect-ratio: 1.3 / 1;
+  /* Mantém a proporção retangular independente da largura */
   border-radius: 20px;
   padding-top: 20px;
   padding-bottom: 5px;
   padding-left: 20px;
   padding-right: 5px;
-  color: var(--font-color-light);
+  /* color: var(--font-color-light); */
+  background-color: var(--card-background);
+  color: var(--card-title);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -69,12 +79,34 @@
   transition: transform 0.2s;
 }
 
+
+/* .template-item {
+  background-color: var(--card-background);
+  O tom claro que você usou
+  border-left: 5px solid var(--color-orange-500);
+  border-bottom: 5px solid var(--color-orange-500);
+  O "Laranjão" volta como um detalhe forte
+
+  Um leve ajuste no hover para não ficar sem graça
+  transition: all 0.2s ease;
+} */
+
+.template-item:hover {
+  /* background-color: var(--card-background-hover); */
+  border-left-width: 8px;
+  /* Feedback visual sutil */
+}
+
 /* No container pai (Recomendado) */
 .template-item {
-  -webkit-user-select: none; /* Safari/iOS */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE10+/Edge */
-  user-select: none; /* Padrão (Chrome, Opera, etc.) */
+  -webkit-user-select: none;
+  /* Safari/iOS */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE10+/Edge */
+  user-select: none;
+  /* Padrão (Chrome, Opera, etc.) */
 }
 
 .template-item:active {
@@ -96,25 +128,27 @@
 }
 
 .card-dots {
-  align-self: flex-end; /* Joga os três pontos para a direita */
+  align-self: flex-end;
+  /* Joga os três pontos para a direita */
   font-size: 1.5rem;
   line-height: 1;
   width: 30%;
   border: none;
   aspect-ratio: 1;
   border-radius: 50%;
-  background-color: var(--btn-primary);
-  color: var(--font-color-light);
+  background-color: var(--card-background);
+  color: var(--card-title);
   font-weight: 500;
 }
 
-.card-dots:active{
-  background-color: var(--btn-primary-hover);
+.card-dots:active {
+  background-color: var(--card-background-hover);
 }
 
 /* O Menu Inferior */
 .templates-options-container {
-  display: flex; /* Mudamos de none para flex */
+  display: flex;
+  /* Mudamos de none para flex */
   flex-direction: column;
   position: fixed;
   bottom: 0;
@@ -195,5 +229,10 @@
 /* Impede o scroll do body quando o menu está aberto */
 body.modal-open {
   overflow: hidden;
-  overscroll-behavior-y: contain; /* Impede pull-to-refresh no mobile */
+  overscroll-behavior-y: contain;
+  /* Impede pull-to-refresh no mobile */
+}
+
+.tmp-opt-item--delete{
+  color: var(--status-danger);
 }

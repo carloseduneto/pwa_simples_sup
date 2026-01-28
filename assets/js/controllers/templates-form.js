@@ -38,7 +38,7 @@ async function initTemplateForm() {
       } else {
         await TemplateService.create(templateData);
       }
-
+      
       localStorage.removeItem("editTemplateId");
       roteador("templates"); // Volta para a listagem
     } catch (err) {
@@ -46,7 +46,7 @@ async function initTemplateForm() {
       console.error(err);
     }
   };
-
+  
   if (btnCancel) {
     btnCancel.onclick = () => {
       localStorage.removeItem("editTemplateId");

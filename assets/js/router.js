@@ -15,7 +15,14 @@ const rotasConfig = {
     idDiv: "screen-templates-list",
     tipoHeader: "padrao", // Usa o header azulzão normal
     titulo: "Templates", // Meus Treinos
-    onLoad: null,
+    // onLoad: null,
+    // CORREÇÃO:
+    onLoad: () => {
+      // Chama a função que BUSCA os dados no banco
+      if (typeof buscarTemplates === "function") {
+        buscarTemplates();
+      }
+    },
   },
   config: {
     idDiv: "screen-config",

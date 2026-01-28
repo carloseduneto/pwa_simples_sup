@@ -60,10 +60,19 @@
   --bg-brand-light: var(--color-orange-50);
   --text-on-brand: #ffffff;
   --text-brand: var(--color-orange-600);
+  --caret-color: var(--color-orange-500);
 
   --btn-primary: var(--color-orange-500);
   --btn-primary-hover: var(--color-orange-600);
   --btn-primary-disabled: var(--color-orange-200);
+
+  /* O segredo: fundo quase branco, texto quase preto */
+  --card-background: var(--color-orange-100);
+  --card-background-hover: var(--color-orange-200);
+
+  /* Cores para o texto (essencial mudar para escuro agora) */
+  --card-title: var(--color-orange-800);
+  --card-subtitle: var(--color-orange-600);
 
   --btn-soft: var(--color-orange-100);
   --btn-soft-hover: var(--color-orange-200);
@@ -252,4 +261,11 @@ article:focus .userImage:focus,
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Aplica em todos os inputs e áreas de texto */
+input,
+textarea,
+[contenteditable] {
+  caret-color: var(--caret-color);
 }
