@@ -4,7 +4,8 @@ async function initExerciseForm() {
   const selectGroup = document.getElementById("input-group");
   const btnCancel = document.querySelector(".default-form-button--cancel");
   const headerTitle = document.getElementById("header-title-alt");
-  // Captura o botão de salvar logo no início
+
+  // Captura o botão de salvar
   const btnSave = form
     ? form.querySelector(".default-form-button--save")
     : null;
@@ -18,18 +19,20 @@ async function initExerciseForm() {
   if (form) {
     form.reset(); // Limpa textos antigos
   }
-  // Ativa Skeleton
+
+  // Ativa Skeleton Visualmente
   if (inputName) inputName.classList.add("skeleton");
   if (selectGroup) selectGroup.classList.add("skeleton");
   if (btnSave) btnSave.classList.add("skeleton-button");
 
-  // --- CORREÇÃO CRÍTICA: RESSUSCITA O BOTÃO ---
-  // Se o botão ficou travado como "Salvando..." da vez anterior, destrava agora.
-  if (btnSave && !editId) {
-    btnSave.classList.remove("skeleton-button");
+  // --- CORREÇÃO CRÍTICA AQUI ---
+  // Antes estava: if (btnSave && !editId).
+  // Isso impedia que o botão fosse destravado no modo edição.
+  // Agora: Destrava SEMPRE ao iniciar a tela.
+  if (btnSave) {
     btnSave.disabled = false;
-    btnSave.innerText = "Salvar"; // Texto padrão
-    btnSave.style.opacity = "1"; // Garante visualmente
+    btnSave.style.opacity = "1";
+    // O texto será definido mais abaixo (Salvar ou Atualizar)
   }
 
   // ============================================================
@@ -49,6 +52,7 @@ async function initExerciseForm() {
         selectGroup.appendChild(option);
       });
 
+      // Remove skeleton do select após carregar
       setTimeout(() => {
         selectGroup.classList.remove("skeleton");
       }, 300);
@@ -67,14 +71,16 @@ async function initExerciseForm() {
 
   if (editId) {
     // --- MODO EDIÇÃO ---
-    if (headerTitle) 
-      inputName.innerHTML = ""
-      headerTitle.innerText = "";
-    headerTitle.innerText = "Editar Exercício";
-    setTimeout(() => {
-            btnSave.classList.remove("skeleton-button");
-            if (btnSave) btnSave.innerText = "Atualizar";
-          }, 300);
+    if (headerTitle) headerTitle.innerText = "Editar Exercício";
+
+    // Configura botão para modo edição
+    if (btnSave) {
+      // Delay visual pequeno para o usuário não ver o texto piscando
+      setTimeout(() => {
+        btnSave.classList.remove("skeleton-button");
+        btnSave.innerText = "Atualizar";
+      }, 300);
+    }
 
     try {
       const exercicio = await ExerciseService.getById(editId);
@@ -86,16 +92,21 @@ async function initExerciseForm() {
       }
     } catch (err) {
       console.error("Erro na edição", err);
-      alert("Erro ao buscar dados.");
+      alert("Erro ao buscar dados para edição.");
     } finally {
       if (inputName) inputName.classList.remove("skeleton");
     }
   } else {
     // --- MODO CRIAÇÃO ---
     if (headerTitle) headerTitle.innerText = "Criar Exercício";
-    if (btnSave) btnSave.innerText = "Salvar";
 
-    // Remove skeleton do nome imediatamente (não estamos esperando dados)
+    // Configura botão para modo criação imediatamente
+    if (btnSave) {
+      btnSave.classList.remove("skeleton-button");
+      btnSave.innerText = "Salvar";
+    }
+
+    // Remove skeleton do nome imediatamente
     if (inputName) inputName.classList.remove("skeleton");
   }
 
@@ -103,6 +114,7 @@ async function initExerciseForm() {
   // 4. ENVIO DO FORMULÁRIO (SUBMIT)
   // ============================================================
   if (form) {
+    // Garante que o evento anterior seja substituído
     form.onsubmit = async (e) => {
       e.preventDefault();
 
@@ -125,10 +137,10 @@ async function initExerciseForm() {
 
         if (editId) {
           await ExerciseService.update(editId, formData);
-          alert("Salvo com sucesso!");
+          alert("Exercício atualizado com sucesso!");
         } else {
           await ExerciseService.create(formData);
-          alert("Criado com sucesso!");
+          alert("Exercício criado com sucesso!");
         }
 
         // Sucesso: Limpa ID e sai

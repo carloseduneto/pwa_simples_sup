@@ -45,3 +45,33 @@ Como você reescreveu o histórico, é necessário forçar a atualização no Gi
     ```bash
     git push origin HEAD --force
     ```
+
+
+
+#Quer "descolar commit base e recolar"
+Como fazer isso no Git Graph (Passo a Passo)
+Vamos supor este cenário:
+
+Você corrigiu um bug na ramificação feat/crud-exercicios e fez o commit lá.
+
+Agora você quer levar essa correção para a feat/crud-templates sem criar nós.
+
+Siga estes cliques:
+
+Vá para a ramificação filha: Dê duplo clique na feat/crud-templates para fazer o checkout (ficar nela).
+
+Escolha a nova base: No gráfico, encontre o commit mais recente da feat/crud-exercicios (onde está a correção).
+
+O comando mágico: Clique com o botão direito nesse commit da exercicios e selecione: 👉 Rebase current branch on this Commit
+
+Confirmação: Uma janela vai perguntar se tem certeza. Clique em Yes, rebase.
+
+O que vai acontecer visualmente?
+O Git vai pegar seus commits de templates, vai "descolá-los" temporariamente, atualizar a base com a correção, e "colar" seus commits de volta no topo. A linha ficará reta, azul e contínua, exatamente como está agora, mas contendo a correção lá na base.
+
+⚠️ O "Pulo do Gato" (Importante)
+Sempre que você faz Rebase, você mudou o passado da ramificação. O GitHub vai rejeitar se você tentar enviar normalmente. Por isso, após um Rebase, você sempre precisa usar o comando de força no terminal para atualizar o servidor:
+
+Bash
+git push origin feat/crud-templates --force
+Isso garante que a linha reta bonita do seu computador substitua a linha antiga do servidor.
