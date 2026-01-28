@@ -1,0 +1,223 @@
+:root {
+  --primary-color: #ff6314;
+  --secondary-color: #eb611c;
+  --highlight-color: #ff8a50;
+  --highlight2-color: #FF6D23;
+  --tertiary-color: #2ecc71;
+  --faded-color: #ffe0d0;
+  --faded-color-2: #fff7f3;
+  --light-background-color: #fafafa;
+  --light-background-color-2: #ffffff;
+  --dark-background-color: #222222;
+  --unselected-background-color: #e9e9e9;
+  --disabled-color: #949494;
+  --font-color-dark: #333333;
+  --font-color-light: #ffffff;
+  --font-color-secondary: #7a7a7a;
+  --background-color: #f5f5f5;
+  --error-color: #ff4d4d;
+  --font-title: "Montserrat Alternates", sans-serif;
+  --font-body: "Montserrat", sans-serif;
+}
+
+* {
+  font-family: "Montserrat", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.titleFont,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Montserrat Alternates", sans-serif;
+}
+
+.titleLoginFont {
+  font-family: "Anton", sans-serif;
+  font-size: 60px;
+}
+
+.testConfig {
+  background-color: yellow;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+button,
+a,
+input,
+textarea,
+[role="button"],
+section,
+select,
+article,
+.userImage,
+.btn-fechar {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+section:focus,
+select:focus,
+article:focus .userImage:focus,
+[role="button"]:focus,
+.btn-fechar:focus {
+  outline: none;
+}
+
+.rotate180 {
+  transform: rotate(180deg);
+}
+
+.hidden {
+  display: none !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+:root {
+  /* --- PALETA LARANJA (Fixa) --- */
+  --color-orange-50: #fff6ed;
+  --color-orange-100: #ffead4;
+  --color-orange-200: #ffd1a8;
+  --color-orange-300: #ffaf70;
+  --color-orange-400: #ff8237;
+  --color-orange-500: #ff6314;
+  --color-orange-600: #f04506;
+  --color-orange-700: #c73107;
+  --color-orange-800: #9e270e;
+  --color-orange-900: #7f240f;
+  --color-orange-950: #450e05;
+}
+
+
+:root {
+  /* --- PALETA DOVE GRAY (Atual) --- */
+  --color-dove-gray-50: #f6f6f6;
+  --color-dove-gray-100: #e7e7e7;
+  --color-dove-gray-200: #d1d1d1;
+  --color-dove-gray-300: #b0b0b0;
+  --color-dove-gray-400: #888888;
+  --color-dove-gray-500: #737373;
+  --color-dove-gray-600: #5d5d5d;
+  --color-dove-gray-700: #4f4f4f;
+  --color-dove-gray-800: #454545;
+  --color-dove-gray-900: #3d3d3d;
+  --color-dove-gray-950: #262626;
+}
+
+:root {
+  /* --- CORES DE ESTADO (Vermelho/Alerta) --- */
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+}
+
+:root {
+  /* --- GERAL / LARANJA (Elementos de Marca e Destaque) --- */
+  --bg-brand-light: var(--color-orange-50);
+  /* Texto no botão laranja */
+  --text-on-brand: #ffffff;
+  /* Texto laranja em fundo claro */
+  --text-brand: var(--color-orange-600);
+
+  --btn-primary: var(--color-orange-500);
+  --btn-primary-hover: var(--color-orange-600);
+  --btn-primary-disabled: var(--color-orange-200);
+
+  --btn-soft: var(--color-orange-100);
+  --btn-soft-hover: var(--color-orange-200);
+
+  --status-danger: var(--color-red-500);
+  --status-danger-hover: var(--color-red-600);
+
+}
+
+
+
+[data-theme="dark"] {
+  /* --- GERAL / LARANJA (No escuro) --- */
+  --bg-brand-light: var(--color-orange-950);
+  --text-on-brand: #ffffff;
+  /* Laranja mais claro para ler no escuro */
+  --text-brand: var(--color-orange-400);
+
+  --btn-primary: var(--color-orange-500);
+  --btn-primary-hover: var(--color-orange-400);
+  --btn-primary-disabled: var(--color-orange-800);
+
+  --btn-soft: var(--color-orange-900);
+  --btn-soft-hover: var(--color-orange-800);
+}
+
+[data-theme-gray="color-dove-gray-light"] {
+  /* --- CINZAS (Tema Claro Forçado) - DOVE GRAY DIRETO --- */
+
+  /* Subtítulos e textos menos importantes */
+  --text-muted: var(--raw-gray-500);
+
+  --bg-main: var(--color-dove-gray-50);
+  --bg-surface: #ffffff;
+
+  --text-main: var(--color-dove-gray-900);
+  --text-secondary: var(--color-dove-gray-500);
+
+  --input-bg: var(--color-dove-gray-100);
+  --input-border: var(--color-dove-gray-200);
+
+  --btn-neutral: var(--color-dove-gray-200);
+  --btn-neutral-hover: var(--color-dove-gray-300);
+}
+
+[data-theme-gray="color-dove-gray-dark"] {
+  /* --- CINZAS (Tema Escuro Forçado) - DOVE GRAY DIRETO --- */
+  --bg-main: var(--color-dove-gray-950);
+  --bg-surface: var(--color-dove-gray-900);
+
+  --text-main: var(--color-dove-gray-50);
+  --text-secondary: var(--color-dove-gray-400);
+
+  --input-bg: var(--color-dove-gray-800);
+  --input-border: var(--color-dove-gray-700);
+
+  --btn-neutral: var(--color-dove-gray-800);
+  --btn-neutral-hover: var(--color-dove-gray-700);
+}
+
+
+/* --- CINZAS (Fundos e Textos Neutros) - DOVE GRAY DIRETO ---
+  --bg-main: var(--color-dove-gray-50);
+  --bg-surface: #ffffff;
+  
+  --text-main: var(--color-dove-gray-900);
+  --text-secondary: var(--color-dove-gray-500);
+  
+  --input-bg: var(--color-dove-gray-100);
+  --input-border: var(--color-dove-gray-200);
+  
+  --btn-neutral: var(--color-dove-gray-200);
+  --btn-neutral-hover: var(--color-dove-gray-300);
+  */
+
+/* --- CINZAS (No escuro) - DOVE GRAY DIRETO --- 
+    --bg-main: var(--color-dove-gray-950);
+    --bg-surface: var(--color-dove-gray-900);
+    
+    --text-main: var(--color-dove-gray-50);
+    --text-secondary: var(--color-dove-gray-400);
+    
+    --input-bg: var(--color-dove-gray-800);
+    --input-border: var(--color-dove-gray-700);
+    
+    --btn-neutral: var(--color-dove-gray-800);
+    --btn-neutral-hover: var(--color-dove-gray-700);
+    */

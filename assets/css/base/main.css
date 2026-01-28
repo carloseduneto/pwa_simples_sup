@@ -1,24 +1,194 @@
+/* ==========================================================
+   CAMADA 1: PALETAS DE CORES BRUTAS (DEFINIÇÕES)
+   Aqui nascem as cores. Ninguém usa isso diretamente na UI.
+   ========================================================== */
 :root {
-  --primary-color: #ff6314;
-  --secondary-color: #eb611c;
-  --highlight-color: #ff8a50;
-  --tertiary-color: #2ecc71;
-  --faded-color: #FF6D23;
-  /* --faded-color: #ffe0d0; */
-  --faded-color-2: #fff7f3;
-  --light-background-color: #fafafa;
-  --light-background-color-2: #ffffff;
-  --dark-background-color: #222222;
-  --unselected-background-color: #e9e9e9;
-  --disabled-color: #949494;
-  --font-color-dark: #333333;
-  --font-color-light: #ffffff;
-  --font-color-secondary: #7a7a7a;
-  --background-color: #f5f5f5;
-  --error-color: #ff4d4d;
+  /* --- PALETA LARANJA (Fixa) --- */
+  --color-orange-50: #fff6ed;
+  --color-orange-100: #ffead4;
+  --color-orange-200: #ffd1a8;
+  --color-orange-300: #ffaf70;
+  --color-orange-400: #ff8237;
+  --color-orange-500: #ff6314;
+  --color-orange-600: #f04506;
+  --color-orange-700: #c73107;
+  --color-orange-800: #9e270e;
+  --color-orange-900: #7f240f;
+  --color-orange-950: #450e05;
+
+  /* --- PALETA DOVE GRAY (A que está em teste) --- */
+  --color-dove-gray-50: #f6f6f6;
+  --color-dove-gray-100: #e7e7e7;
+  --color-dove-gray-200: #d1d1d1;
+  --color-dove-gray-300: #b0b0b0;
+  --color-dove-gray-400: #888888;
+  --color-dove-gray-500: #737373;
+  --color-dove-gray-600: #5d5d5d;
+  --color-dove-gray-700: #4f4f4f;
+  --color-dove-gray-800: #454545;
+  --color-dove-gray-900: #3d3d3d;
+  --color-dove-gray-950: #262626;
+
+  /* --- Outras Cores Auxiliares --- */
+  --color-green-500: #2ecc71;
+  --color-red-500: #ff4d4d;
+}
+
+
+:root {
+  --color-lynch-50: #f6f7f9;
+  --color-lynch-100: #eceef2;
+  --color-lynch-200: #d5d9e2;
+  --color-lynch-300: #b1bbc8;
+  --color-lynch-400: #8695aa;
+  --color-lynch-500: #64748b;
+  --color-lynch-600: #526077;
+  --color-lynch-700: #434e61;
+  --color-lynch-800: #3a4252;
+  --color-lynch-900: #343a46;
+  --color-lynch-950: #23272e;
+}
+
+/* ==========================================================
+   CAMADA 2.A: SEMÂNTICA DA MARCA (LARANJA)
+   Isso define como o Laranja se comporta no Claro vs Escuro.
+   Isso independe de qual cinza você escolher depois.
+   ========================================================== */
+
+/* Comportamento de Marca no Tema Claro (Padrão) */
+:root {
+  --bg-brand-light: var(--color-orange-50);
+  --text-on-brand: #ffffff;
+  --text-brand: var(--color-orange-600);
+
+  --btn-primary: var(--color-orange-500);
+  --btn-primary-hover: var(--color-orange-600);
+  --btn-primary-disabled: var(--color-orange-200);
+
+  --btn-soft: var(--color-orange-100);
+  --btn-soft-hover: var(--color-orange-200);
+
+  --status-danger: var(--color-red-500);
+  --status-success: var(--color-green-500);
+}
+
+/* Comportamento de Marca no Tema Escuro */
+[data-theme="dark"] {
+  --bg-brand-light: var(--color-orange-950);
+  --text-brand: var(--color-orange-400);
+  /* Laranja mais claro para ler no escuro */
+
+  --btn-primary: var(--color-orange-500);
+  --btn-primary-hover: var(--color-orange-400);
+  --btn-primary-disabled: var(--color-orange-800);
+
+  --btn-soft: var(--color-orange-900);
+  --btn-soft-hover: var(--color-orange-800);
+}
+
+/* ==========================================================
+   CAMADA 2.B: SEMÂNTICA DOS CINZAS (O LABORATÓRIO)
+   Aqui você isola o teste do Dove Gray.
+   Quando quiser testar outro cinza, crie outro bloco igual a este.
+   ========================================================== */
+
+/* TESTE: Dove Gray - Modo Claro */
+[data-theme-gray="color-dove-gray-light"] {
+  --text-muted: var(--color-dove-gray-400);
+  /* Ajustado para var do Dove */
+
+  --bg-main: var(--color-dove-gray-50);
+  --bg-surface: #ffffff;
+
+  --text-main: var(--color-dove-gray-900);
+  --text-secondary: var(--color-dove-gray-500);
+
+  --input-bg: var(--color-dove-gray-100);
+  --input-bg-hover: var(--color-dove-gray-100);
+  --input-border: var(--color-dove-gray-200);
+
+  --btn-neutral: var(--color-dove-gray-200);
+  --btn-neutral-hover: var(--color-dove-gray-300);
+}
+
+/* TESTE: Dove Gray - Modo Claro */
+[data-theme-gray="color-lynch-light"] {
+  --text-muted: var(--color-lynch-400);
+  /* Ajustado para var do Dove */
+
+  --bg-main: var(--color-lynch-50);
+  --bg-surface: #ffffff;
+
+  --text-main: var(--color-lynch-900);
+  --text-secondary: var(--color-lynch-500);
+
+  --input-bg: var(--color-lynch-100);
+  --input-bg-hover: var(--color-lynch-100);
+  --input-border: var(--color-lynch-200);
+
+  --btn-neutral: var(--color-lynch-200);
+  --btn-neutral-hover: var(--color-lynch-300);
+}
+
+/* TESTE: Dove Gray - Modo Escuro */
+[data-theme-gray="color-dove-gray-dark"] {
+  --bg-main: var(--color-dove-gray-950);
+  --bg-surface: var(--color-dove-gray-900);
+
+  --text-main: var(--color-dove-gray-50);
+  --text-secondary: var(--color-dove-gray-400);
+  --text-muted: var(--color-dove-gray-600);
+
+  --input-bg: var(--color-dove-gray-800);
+  --input-border: var(--color-dove-gray-700);
+
+  --btn-neutral: var(--color-dove-gray-800);
+  --btn-neutral-hover: var(--color-dove-gray-700);
+}
+
+/* ==========================================================
+   CAMADA 3: O ADAPTADOR LEGADO
+   Mapeia as variáveis antigas para as novas semânticas.
+   Isso garante que o código antigo respeite os testes acima.
+   ========================================================== */
+:root {
+  /* Laranjas (Herda da Camada 2.A) */
+  --primary-color: var(--btn-primary);
+  --secondary-color: var(--btn-primary-hover);
+  --highlight-color: var(--color-orange-400);
+  --highlight2-color: var(--text-brand);
+
+  /* Fundos (Herda da Camada 2.B - O Cinza Ativo) */
+  --light-background-color: var(--bg-main);
+  --light-background-color-2: var(--bg-surface);
+  --background-color: var(--bg-main);
+
+  /* Hardcode para Dark Mode antigo, agora aponta para o cinza escuro base */
+  /* Nota: Se o tema estiver light, isso pega a cor escura mesmo assim (comportamento padrão antigo) */
+  --dark-background-color: var(--color-dove-gray-950);
+
+  /* Textos (Herda da Camada 2.B) */
+  --font-color-dark: var(--text-main);
+  --font-color-light: var(--text-on-brand);
+  --font-color-secondary: var(--text-secondary);
+
+  /* UI Elements */
+  --unselected-background-color: var(--input-bg);
+  --disabled-color: var(--text-muted);
+  --error-color: var(--status-danger);
+  --tertiary-color: var(--status-success);
+
+  /* Cores Pálidas */
+  --faded-color: var(--btn-soft);
+  --faded-color-2: var(--bg-brand-light);
+
+  /* Fontes */
   --font-title: "Montserrat Alternates", sans-serif;
   --font-body: "Montserrat", sans-serif;
 }
+
+
+
 
 * {
   font-family: "Montserrat", sans-serif;
@@ -41,7 +211,7 @@ h6 {
   font-size: 60px;
 }
 
-.testConfig{
+.testConfig {
   background-color: yellow;
   padding: 10px;
   border-radius: 20px;
@@ -56,8 +226,7 @@ section,
 select,
 article,
 .userImage,
-.btn-fechar
-{
+.btn-fechar {
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -67,17 +236,15 @@ input:focus,
 textarea:focus,
 section:focus,
 select:focus,
-article:focus
-.userImage:focus,
+article:focus .userImage:focus,
 [role="button"]:focus,
-.btn-fechar:focus
-{
+.btn-fechar:focus {
   outline: none;
 }
 
 .rotate180 {
   transform: rotate(180deg);
-} 
+}
 
 .hidden {
   display: none !important;

@@ -16,11 +16,11 @@
     width: 100%;
     margin-bottom: 10px;
     padding: 15px;
-    background-color: #ececec;
+    background-color: var(--input-bg);
     border-radius: 13px;
     font-size: 16px;
     border: none;
-    color: #2c2c2c;
+    color: var(--text-main);
     /* font-weight: 500; */
 }
 
@@ -38,14 +38,14 @@
     /* max-width: 220px; */
 
     /* Estilo Visual */
-    background-color: #f0f0f0;
+    background-color: var(--input-bg);
     /* Cinza claro da imagem */
     border-radius: 15px;
     /* Bordas arredondadas */
     border: none;
 
     /* Tipografia */
-    color: #000;
+    color: var(--text-main);
     /* font-weight: bold; */
     font-family: var(--font-body);
     font-size: 1.0rem;

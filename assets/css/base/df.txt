@@ -1,0 +1,58 @@
+Paletas
+
+:root {
+    --color-orange-50: #fff6ed;
+    --color-orange-100: #ffead4;
+    --color-orange-200: #ffd1a8;
+    --color-orange-300: #ffaf70;
+    --color-orange-400: #ff8237;
+    --color-orange-500: #ff6314;
+    --color-orange-600: #f04506;
+    --color-orange-700: #c73107;
+    --color-orange-800: #9e270e;
+    --color-orange-900: #7f240f;
+    --color-orange-950: #450e05;
+}
+
+
+:root {
+    --color-dove-gray-50: #f6f6f6;
+    --color-dove-gray-100: #e7e7e7;
+    --color-dove-gray-200: #d1d1d1;
+    --color-dove-gray-300: #b0b0b0;
+    --color-dove-gray-400: #888888;
+    --color-dove-gray-500: #737373;
+    --color-dove-gray-600: #5d5d5d;
+    --color-dove-gray-700: #4f4f4f;
+    --color-dove-gray-800: #454545;
+    --color-dove-gray-900: #3d3d3d;
+    --color-dove-gray-950: #262626;
+}
+
+
+Descrição
+
+Nessa sessão todos vão usar a base laranja #ff6314 (se algum não combinar me alerte)
+Fundo para background geral usando tonalidade clara
+Fundo de destaque claro, diferente do fundo, só que para apenas dar um leve destaque em um elemento usando a cor primária
+Texto e ícones na tonalidade clara para fundos na cores base ou escuro (não sei se usar paleta do laranja aqui)
+Texto e ícones na tonalidade escura para fundos na cores base ou claros (não sei se usar paleta do laranja aqui)
+Botão primário laranja 
+Botão primário laranja quando interagido
+Botão primário laranja desativado
+Botão laranja só que em alguma tonalidade mais clara para fundo claro
+Botão laranja só que em alguma tonalidade mais clara para fundo claro interagido
+(Se faltar algum me avise por favor)
+
+Não vou usar por enquanto, mas faça o tema escuro dessas descrições que te passei
+
+Agora nessa sessão vai ser o tema usando #737373
+Cinza usado em inputs e selects (atualmente usa-se #ececec)
+Cinza usado em botão não selecionado ainda mas com mais destaque que os inputs
+Cinza para elementos de menor importância, tipo um subtítulo (convém ajustar isso com "Texto na tonalidade clara para fundos na cores base ou escuro" e "Texto na tonalidade escura para fundos na cores base ou claros")
+
+
+Agora são cores no geral 
+Vermelho de alerta, como excluir
+
+Por favor, selecione nomes fáceis de eu lembrar, pq tá virando um caos de eu esquecer os nomes ao colocar a cor, tendo que voltar no main toda hora. E se faltar algo, me avise, por favor

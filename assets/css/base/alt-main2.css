@@ -1,0 +1,55 @@
+:root {
+    --color-orange-50: #fff6ed;
+    --color-orange-100: #ffead4;
+    --color-orange-200: #ffd1a8;
+    --color-orange-300: #ffaf70;
+    --color-orange-400: #ff8237;
+    --color-orange-500: #ff6314;
+    --color-orange-600: #f04506;
+    --color-orange-700: #c73107;
+    --color-orange-800: #9e270e;
+    --color-orange-900: #7f240f;
+    --color-orange-950: #450e05;
+}
+
+:root {
+    --color-jumbo-50: #f5f5f6;
+    --color-jumbo-100: #e6e6e7;
+    --color-jumbo-200: #cfcfd2;
+    --color-jumbo-300: #adadb3;
+    --color-jumbo-400: #84848c;
+    --color-jumbo-500: #71717a;
+    --color-jumbo-600: #5a5a60;
+    --color-jumbo-700: #4d4c52;
+    --color-jumbo-800: #434347;
+    --color-jumbo-900: #3c3b3e;
+    --color-jumbo-950: #252527;
+}
+
+:root {
+    --color-lynch-50: #f6f7f9;
+    --color-lynch-100: #eceef2;
+    --color-lynch-200: #d5d9e2;
+    --color-lynch-300: #b1bbc8;
+    --color-lynch-400: #8695aa;
+    --color-lynch-500: #64748b;
+    --color-lynch-600: #526077;
+    --color-lynch-700: #434e61;
+    --color-lynch-800: #3a4252;
+    --color-lynch-900: #343a46;
+    --color-lynch-950: #23272e;
+}
+
+:root {
+    --color-dove-gray-50: #f6f6f6;
+    --color-dove-gray-100: #e7e7e7;
+    --color-dove-gray-200: #d1d1d1;
+    --color-dove-gray-300: #b0b0b0;
+    --color-dove-gray-400: #888888;
+    --color-dove-gray-500: #737373;
+    --color-dove-gray-600: #5d5d5d;
+    --color-dove-gray-700: #4f4f4f;
+    --color-dove-gray-800: #454545;
+    --color-dove-gray-900: #3d3d3d;
+    --color-dove-gray-950: #262626;
+}

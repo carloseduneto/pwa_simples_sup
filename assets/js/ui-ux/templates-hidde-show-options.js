@@ -7,6 +7,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- FUNÇÕES DE CONTROLE ---
 
+
+const btnSession = document.getElementById("start-session");
+if (btnSession) {
+  btnSession.addEventListener("click", () => {
+    // console.log(currentTemplateId);
+    abrirTemplate(currentTemplateId);
+  });
+}
+
+
   const openMenu = (id) => {
     currentTemplateId = id;
     console.log("Editando template ID:", currentTemplateId); // Aqui você tem o ID
@@ -14,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     sheet.classList.add("active");
     backdrop.classList.add("active");
     document.body.classList.add("modal-open");
+
+
+
   };
 
   const closeMenu = () => {

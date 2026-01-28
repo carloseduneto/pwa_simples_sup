@@ -10,7 +10,7 @@
   max-width: 220px;
 
   /* Estilo Visual */
-  background-color: #f0f0f0; /* Cinza claro da imagem */
+  background-color: var(--input-bg); /* Cinza claro da imagem */
   border-radius: 15px; /* Bordas arredondadas */
   border: none;
 
@@ -26,7 +26,7 @@
 
 .input-select-context-recomendacoes:active {
   transform: scale(0.98); /* Dá um leve efeito de "afundar" ao clicar */
-  background-color: #e5e5e5;
+  background-color: var(--input-bg-hover);
 }
 
 .lista-opcoes {
@@ -51,14 +51,14 @@
 }
 
 .template-item {
-  background-color: var(--secondary-color);
+  background-color: var(--btn-primary);
   /* REMOVA o width fixo de 170px */
   width: 100%;
   aspect-ratio: 1.3 / 1; /* Mantém a proporção retangular independente da largura */
   border-radius: 20px;
   padding-top: 20px;
   padding-bottom: 5px;
-  padding-left: 5px;
+  padding-left: 20px;
   padding-right: 5px;
   color: var(--font-color-light);
   cursor: pointer;
@@ -77,8 +77,9 @@
   user-select: none; /* Padrão (Chrome, Opera, etc.) */
 }
 
-.template-item:hover {
+.template-item:active {
   transform: scale(1.03);
+  /* background-color: aliceblue; */
 }
 
 .card-title {
@@ -102,13 +103,13 @@
   border: none;
   aspect-ratio: 1;
   border-radius: 50%;
-  background-color: var(--secondary-color);
+  background-color: var(--btn-primary);
   color: var(--font-color-light);
   font-weight: 500;
 }
 
 .card-dots:active{
-  background-color: var(--faded-color);
+  background-color: var(--btn-primary-hover);
 }
 
 /* O Menu Inferior */
