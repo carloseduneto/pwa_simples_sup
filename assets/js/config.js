@@ -7,3 +7,6 @@ const SUPABASE_KEY =
 
 // Iniciando o cliente (agora ele fica disponível para os outros arquivos)
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const MEXENDO_NO_CSS = true; // Ative para usar cache local durante desenvolvimento
+

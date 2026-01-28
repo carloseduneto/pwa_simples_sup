@@ -34,9 +34,11 @@
     <link rel="stylesheet" href="assets/css/base/main.css" />
     <link rel="stylesheet" href="assets/css/base/froms.css" />
 
+    <!-- Pages -->
+    <link rel="stylesheet" href="assets/css/pages/templates.css" />
+
     <link rel="stylesheet" href="assets/css/main-header.css" />
     <link rel="stylesheet" href="assets/css/login.css" />
-    <link rel="stylesheet" href="assets/css/templates.css" />
     <link rel="stylesheet" href="assets/css/app_section.css" />
     <link rel="stylesheet" href="assets/css/buttons.css" />
     <link rel="stylesheet" href="assets/css/bottom-navbar.css" />
@@ -212,13 +214,6 @@
         <div id="container-recomendacoes">.</div>
 
         <div id="lista-templates"></div>
-
-        <aside class="templates-options-container">
-          <div>
-            <span class="material-symbols-rounded"> check </span>
-            <span>Texto</span>
-          </div>
-        </aside>
 
         <!-- Bottom Navigation -->
         <!-- <nav class="bottom-nav">
@@ -404,7 +399,42 @@
         </div>
       </div>
     </div>
+
+    <div class="templates-backdrop"></div>
+
+    <aside class="templates-options-container">
+      <div class="tmp-opt-dragger-place">
+        <span class="tmp-opt-dragger"></span>
+      </div>
+      <span></span>
+      <div class="tmp-opt-item">
+        <span class="material-symbols-rounded temp-opt-icon--fill">
+          play_arrow
+        </span>
+        <span>Iniciar treino</span>
+      </div>
+      <div class="tmp-opt-item">
+        <span class="material-symbols-rounded"> category_search </span>
+        <span>Ver treino</span>
+      </div>
+      <div class="tmp-opt-item">
+        <span class="material-symbols-rounded"> edit </span>
+        <span>Editar</span>
+      </div>
+      <div class="tmp-opt-item">
+        <span class="material-symbols-rounded"> block </span>
+        <span>Inativar</span>
+      </div>
+      <div class="tmp-opt-item">
+        <span class="material-symbols-rounded"> delete </span>
+        <span>Excluir</span>
+      </div>
+    </aside>
+
+    
+    <!-- Config -->
     <script src="./assets/js/config.js"></script>
+
     <script src="./assets/js/router.js"></script>
     <script src="./assets/js/scriptGeneration.js"></script>
     <script src="./assets/js/scriptManipulation.js"></script>
@@ -414,6 +444,7 @@
     <script src="./assets/js/ui-ux/dynamic-visibility-header.js"></script>
     <script src="./assets/js/ui-ux/menu-flutuante-header.js"></script>
     <script src="./assets/js/ui-ux/global-loader.js"></script>
+    <script src="./assets/js/ui-ux/templates-hidde-show-options.js"></script>
 
     <!-- Service -->
     <script src="assets/js/services/muscle-group.service.js"></script>

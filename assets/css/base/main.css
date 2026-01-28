@@ -3,7 +3,8 @@
   --secondary-color: #eb611c;
   --highlight-color: #ff8a50;
   --tertiary-color: #2ecc71;
-  --faded-color: #ffe0d0;
+  --faded-color: #FF6D23;
+  /* --faded-color: #ffe0d0; */
   --faded-color-2: #fff7f3;
   --light-background-color: #fafafa;
   --light-background-color-2: #ffffff;
@@ -80,4 +81,8 @@ article:focus
 
 .hidden {
   display: none !important;
+}
+
+html {
+  scroll-behavior: smooth;
 }

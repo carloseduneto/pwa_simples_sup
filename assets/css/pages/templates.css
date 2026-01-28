@@ -1,0 +1,198 @@
+.input-select-context-recomendacoes {
+  /* Layout e Alinhamento */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Texto na esquerda, ícone na direita */
+
+  /* Espaçamento e Tamanho */
+  padding: 12px 20px;
+  width: 100%; /* Ou o tamanho fixo que você desejar */
+  max-width: 220px;
+
+  /* Estilo Visual */
+  background-color: #f0f0f0; /* Cinza claro da imagem */
+  border-radius: 15px; /* Bordas arredondadas */
+  border: none;
+
+  /* Tipografia */
+  color: #000;
+  font-weight: bold;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  margin-bottom: 20px;
+
+  cursor: pointer;
+}
+
+.input-select-context-recomendacoes:active {
+  transform: scale(0.98); /* Dá um leve efeito de "afundar" ao clicar */
+  background-color: #e5e5e5;
+}
+
+.lista-opcoes {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+}
+
+#lista-templates {
+  display: grid;
+  /* A mágica: cria quantas colunas couberem de no mínimo 150px, preenchendo o resto */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 10px; /* Padding nas bordas evita que os cards encostem na tela */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  #lista-templates {
+    grid-template-columns: 1fr 1fr 1fr; /* 3 colunas em telas maiores */
+  }
+}
+
+.template-item {
+  background-color: var(--secondary-color);
+  /* REMOVA o width fixo de 170px */
+  width: 100%;
+  aspect-ratio: 1.3 / 1; /* Mantém a proporção retangular independente da largura */
+  border-radius: 20px;
+  padding-top: 20px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: var(--font-color-light);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  transition: transform 0.2s;
+}
+
+/* No container pai (Recomendado) */
+.template-item {
+  -webkit-user-select: none; /* Safari/iOS */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Padrão (Chrome, Opera, etc.) */
+}
+
+.template-item:hover {
+  transform: scale(1.03);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.card-subtitle {
+  margin: 5px 0 0 0;
+  font-size: 1rem;
+  font-weight: 300;
+  opacity: 0.9;
+}
+
+.card-dots {
+  align-self: flex-end; /* Joga os três pontos para a direita */
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 30%;
+  border: none;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--secondary-color);
+  color: var(--font-color-light);
+  font-weight: 500;
+}
+
+.card-dots:active{
+  background-color: var(--faded-color);
+}
+
+/* O Menu Inferior */
+.templates-options-container {
+  display: flex; /* Mudamos de none para flex */
+  flex-direction: column;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--light-background-color);
+  padding: 5% 10%;
+  border-radius: 20px 20px 0 0;
+  z-index: 1000;
+
+  /* Estado inicial: escondido abaixo da tela */
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  box-sizing: border-box;
+}
+
+/* Estado aberto */
+.templates-options-container.active {
+  transform: translateY(0);
+}
+
+.templates-options-container .tmp-opt-item:not(:last-child) {
+  border-bottom: 1px solid rgb(141, 141, 141);
+}
+
+.tmp-opt-item {
+  display: flex;
+  align-items: center;
+  /* background-color: yellowgreen; */
+  height: 3rem;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.temp-opt-icon--fill {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.tmp-opt-dragger-place {
+  /* background-color: aqua; */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 5%;
+}
+
+.tmp-opt-dragger {
+  background-color: grey;
+  width: 10%;
+  height: 0.4rem;
+  border-radius: 20px;
+}
+
+/* O fundo escurecido */
+.templates-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  z-index: 999;
+}
+
+.templates-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Impede o scroll do body quando o menu está aberto */
+body.modal-open {
+  overflow: hidden;
+  overscroll-behavior-y: contain; /* Impede pull-to-refresh no mobile */
+}

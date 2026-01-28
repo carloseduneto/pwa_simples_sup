@@ -1,7 +1,5 @@
 // script.js
 
-const MEXENDO_NO_CSS = false; // Ative para usar cache local durante desenvolvimento
-
 // ======================================================
 // 1. VARIÁVEIS DE CONTROLE E AUTH
 // ======================================================
@@ -276,15 +274,20 @@ function renderizarTemplates(lista) {
     articleExercicio.className = "template-item";
 
     // Criamos a estrutura interna do card
+    /*html*/
     articleExercicio.innerHTML = `
       <div class="card-info">
         <h3 class="card-title">${item.nome}</h3>
         <p class="card-subtitle">${item.descricao}</p>
       </div>
-      <span class="card-dots">&#8942;</span>
+      <button class="card-dots" data-template-id="${item.id}">&#8942;</button>
     `;
 
-    articleExercicio.onclick = () => {
+    articleExercicio.onclick = (e) => {
+      //   abrirTemplate(item.id);
+      // Se clicou no botão ou em algo dentro dele, não navega
+      if (e.target.closest(".card-dots")) return;
+
       abrirTemplate(item.id);
     };
 
