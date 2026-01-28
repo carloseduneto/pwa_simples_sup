@@ -32,6 +32,7 @@
   /* --- Outras Cores Auxiliares --- */
   --color-green-500: #2ecc71;
   --color-red-500: #ff4d4d;
+  --color-white: #ffffff
 }
 
 
@@ -268,4 +269,17 @@ input,
 textarea,
 [contenteditable] {
   caret-color: var(--caret-color);
+}
+
+
+::selection {
+  /*color: red; /* Changes the text color when selected */
+  background: var(--btn-soft); /* Changes the highlight/background color */
+}
+
+/* For compatibility with older Firefox versions */
+::-moz-selection { 
+  /* color: red; */
+  background: var(--btn-soft); /* Changes the highlight/background color */
+  /* background: yellow; */
 }

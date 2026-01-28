@@ -211,7 +211,18 @@
       <div id="screen-templates-list">
         <!-- <h3>Seus Treinos</h3> -->
 
-        <div id="container-recomendacoes">.</div>
+        <header class="template-header--actions">
+
+          <div id="container-recomendacoes"></div>
+          <button
+          id="template-button-inactived"
+          onclick="alternarVisualizacaoInativos()"
+          class="btn-template-inactive-active "
+          >
+          <span class="material-symbols-rounded">block</span>
+          <span class="btn-text-header">Inativos</span>
+        </button>
+      </header>
 
         <div id="lista-templates"></div>
         <button
@@ -249,10 +260,6 @@
 
       <div id="screen-workout-details" class="hidden">
         <div class="screen-workout-details-style">
-          <!-- <button onclick="voltarParaLista()" style="margin-bottom: 15px">
-            ⬅ Voltar para Treinos
-          </button>
-          <button onclick="roteador('templates')">Voltar</button> -->
 
           <div class="itensTemplate"></div>
         </div>
@@ -268,89 +275,7 @@
       <div id="screen-exercises" class="hidden"></div>
       <div id="screen-exercises-add-edit" class="hidden"></div>
 
-      <!-- <div id="screen-exercises" class="hidden">
-        <button onclick="voltarParaLista()" class="navigation-buttons">
-          <span class="material-symbols-rounded"> arrow_back_ios_new </span>
-        </button>
-
-        <div class="search-container">
-          <span class="material-symbols-rounded">search</span>
-          <input
-            type="text"
-            id="search-exercise"
-            placeholder="Buscar"
-            class="search-input"
-          />
-        </div>
-
-        <div class="exercise-item">
-          <div class="exercise-item__info">
-            <strong class="exercise-item__name">Nome exercício</strong>
-            <span class="exercise-item__group">Grupo muscular</span>
-          </div>
-
-          <div class="exercise-item__actions">
-            <button
-              class="exercise-item__btn exercise-item__btn--edit"
-              aria-label="Editar"
-            >
-              <span class="material-symbols-rounded">edit</span>
-            </button>
-
-            <button
-              class="exercise-item__btn exercise-item__btn--delete"
-              aria-label="Excluir"
-            >
-              <span class="material-symbols-rounded">delete</span>
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          class="primary-button primary-button--add"
-          onclick="roteador('exercisesAddEdit')"
-        >
-          <span class="material-symbols-rounded">add_2</span>
-        </button>
-      </div>
-
-      <div id="screen-exercises-add-edit" class="hidden">
-          <h2 id="exercise-form-title">Novo Exercício</h2>
-
-
-        <form id="form-exercise" class="exercise-form">
-          <div class="input-group">
-            <label for="input-name">Nome do Exercício</label>
-            <input
-              type="text"
-              id="input-name"
-              placeholder="Ex: Supino Reto"
-              required
-            />
-          </div>
-
-          <div class="input-group">
-            <label for="input-group">Grupo Muscular</label>
-            <select id="input-group">
-              <option value="peito">Peito</option>
-              <option value="costas">Costas</option>
-            </select>
-          </div>
-
-          <button type="submit" class="primary-button primary-button--save">
-            Salvar Exercício
-          </button>
-          <button
-            type="reset"
-            class="primary-button primary-button--cancel"
-            onclick="roteador('exercises')"
-          >
-            Cancelar
-          </button>
-        </form>
-      </div> -->
-
+      
       <template class="template-header-exercise">
         <div class="headerExercise">
           <span>SÉRIES</span>
@@ -429,7 +354,7 @@
         <span class="material-symbols-rounded"> edit </span>
         <span>Editar</span>
       </div>
-      <div class="tmp-opt-item">
+      <div class="tmp-opt-item tmp-opt-item--deactive">
         <span class="material-symbols-rounded"> block </span>
         <span>Inativar</span>
       </div>
@@ -457,12 +382,11 @@
     <script src="assets/js/services/muscle-group.service.js"></script>
     <script src="assets/js/services/exercise.service.js"></script>
     <script src="assets/js/services/template.service.js"></script>
-    
 
     <!-- Controllers -->
-    <script src="assets/js/controllers/templates-form.js"></script>
-    <script src="assets/js/controllers/templates-list.js"></script>
-    <script src="assets/js/controllers/exercises-form.js"></script>
-    <script src="assets/js/controllers/exercises-list.js"></script>
+    <script src="assets/js/controllers/form-templates.js"></script>
+    <script src="assets/js/controllers/list-templates.js"></script>
+    <script src="assets/js/controllers/form-exercises.js"></script>
+    <script src="assets/js/controllers/list-exercises.js"></script>
   </body>
 </html>

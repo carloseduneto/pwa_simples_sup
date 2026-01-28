@@ -1,3 +1,37 @@
+.template-header--actions{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+
+
+.btn-template-inactive-active {
+  display: flex;
+  align-items: center;
+  width: 15%;
+  /* O botão terá 20% da largura, mas nunca será menor que 40px nem maior que 60px */
+  /* width: clamp(40px, 20%, 60px); */
+  color: var(--font-color-dark);
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  /* transition: background-color 0.3s; */
+  justify-content: center;
+  background-color: var(--color-white);
+  justify-content: center;
+  flex-direction: column;
+  transition:
+    background-color 150ms ease,
+    transform 100ms ease;
+  aspect-ratio: 1 / 1;
+}
+
+
 .input-select-context-recomendacoes {
   /* Layout e Alinhamento */
   display: flex;
@@ -7,6 +41,7 @@
 
   /* Espaçamento e Tamanho */
   padding: 12px 20px;
+
   width: 100%;
   /* Ou o tamanho fixo que você desejar */
   max-width: 220px;
@@ -23,7 +58,7 @@
   font-weight: bold;
   font-family: var(--font-title);
   font-size: 1rem;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 
   cursor: pointer;
 }
@@ -43,6 +78,7 @@
   display: grid;
   /* A mágica: cria quantas colunas couberem de no mínimo 150px, preenchendo o resto */
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding: 10px;
   /* Padding nas bordas evita que os cards encostem na tela */

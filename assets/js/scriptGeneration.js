@@ -225,78 +225,9 @@ function renderizarExercicios(lista) {
   });
 }
 
-//=== 5. CONSULTA TEMPLATES (SEM CACHE) ===
-async function buscarTemplates() {
-  const container = document.getElementById("lista-templates");
-  // container.innerHTML = "Carregando templates...";
-  container.innerHTML =
-    '<div class="espaco-loader">' + '<div class="loader"></div>' + "</div>";
 
-  // [CACHE - LEITURA]
-  if (MEXENDO_NO_CSS) {
-    const cache = localStorage.getItem("cache_templates");
-    if (cache) {
-      console.log("📦 Usando cache local (Templates)");
-      renderizarTemplates(JSON.parse(cache));
-      return;
-    }
-  }
 
-  const { data, error } = await client
-    .from("templates")
-    .select("id, nome, descricao")
-    .order("nome");
 
-  if (error) {
-    container.innerHTML = "Erro ao buscar: " + error.message;
-    return;
-  }
-
-  // [CACHE - GRAVAÇÃO]
-  if (MEXENDO_NO_CSS)
-    localStorage.setItem("cache_templates", JSON.stringify(data));
-
-  console.log("Templates encontrados:", data);
-  renderizarTemplates(data);
-}
-
-function renderizarTemplates(lista) {
-  const container = document.getElementById("lista-templates");
-  container.innerHTML = "";
-
-  // PROTEÇÃO: Se a lista não existir, cria um array vazio para não quebrar
-  if (!lista) lista = [];
-
-  if (lista.length === 0) {
-    container.innerHTML = "<p>Nenhum template encontrado.</p>";
-    return;
-  }
-
-  lista.forEach(item => {
-    const articleExercicio = document.createElement("article");
-    articleExercicio.className = "template-item";
-
-    // Criamos a estrutura interna do card
-    /*html*/
-    articleExercicio.innerHTML = `
-      <div class="card-info">
-        <h3 class="card-title">${item.nome}</h3>
-        <p class="card-subtitle">${item.descricao}</p>
-      </div>
-      <button class="card-dots" data-template-id="${item.id}">&#8942;</button>
-    `;
-
-    articleExercicio.onclick = e => {
-      //   abrirTemplate(item.id);
-      // Se clicou no botão ou em algo dentro dele, não navega
-      if (e.target.closest(".card-dots")) return;
-
-      abrirTemplate(item.id);
-    };
-
-    container.appendChild(articleExercicio);
-  });
-}
 
 //
 //
