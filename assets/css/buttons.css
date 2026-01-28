@@ -1,33 +1,62 @@
-.botaoLargo{
-    width: 80%;
-    padding: 15px;
-    background-color: var(--primary-color);
-    font-family: "Montserrat Alternates", sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--font-color-light);
-    border: none;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    margin-bottom: 10px;
+.botaoLargo {
+  width: 80%;
+  padding: 15px;
+  background-color: var(--primary-color);
+  font-family: "Montserrat Alternates", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--font-color-light);
+  border: none;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 10px;
 }
 
-.botaoLargo.desativado{
-    opacity: 0.5;
-    pointer-events: none;
+.botaoLargo.desativado {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
-button{
-    cursor: pointer;
+button {
+  cursor: pointer;
 }
 
-
-.buttonTeste{
-    color: red
+.buttonTeste {
+  color: red;
 }
 
+/* Bloco Base: Como qualquer botão de exercício deve ser */
+.primary-button {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  /* The drop shadow */
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
 
+/* Modificador: Transforma o botão base em um botão fixo de adição */
+.primary-button--add {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--primary-color);
+  border-radius: 13px;
+  width: 56px;
+  height: 56px;
+  z-index: 999;
+  color: var(--font-color-light);
+}
 
+.primary-button--add .material-symbols-rounded {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 600,
+    "GRAD" 0,
+    "opsz" 24;
+}

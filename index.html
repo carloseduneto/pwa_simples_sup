@@ -214,7 +214,13 @@
         <div id="container-recomendacoes">.</div>
 
         <div id="lista-templates"></div>
-
+        <button
+          type="button"
+          class="primary-button primary-button--add"
+          onclick="roteador('templateForm')"
+        >
+          <span class="material-symbols-rounded">add_2</span>
+        </button>
         <!-- Bottom Navigation -->
         <!-- <nav class="bottom-nav">
           <div class="nav-item active">
@@ -238,6 +244,8 @@
             </div>
           </nav> -->
       </div>
+
+      <div id="screen-template-add-edit" class="hidden"></div>
 
       <div id="screen-workout-details" class="hidden">
         <div class="screen-workout-details-style">
@@ -300,7 +308,7 @@
 
         <button
           type="button"
-          class="exercise-button exercise-button--add"
+          class="primary-button primary-button--add"
           onclick="roteador('exercisesAddEdit')"
         >
           <span class="material-symbols-rounded">add_2</span>
@@ -330,12 +338,12 @@
             </select>
           </div>
 
-          <button type="submit" class="exercise-button exercise-button--save">
+          <button type="submit" class="primary-button primary-button--save">
             Salvar Exercício
           </button>
           <button
             type="reset"
-            class="exercise-button exercise-button--cancel"
+            class="primary-button primary-button--cancel"
             onclick="roteador('exercises')"
           >
             Cancelar
@@ -417,7 +425,7 @@
         <span class="material-symbols-rounded"> category_search </span>
         <span>Ver treino</span>
       </div>
-      <div class="tmp-opt-item">
+      <div class="tmp-opt-item" onclick="roteador('templateForm')">
         <span class="material-symbols-rounded"> edit </span>
         <span>Editar</span>
       </div>
@@ -431,7 +439,6 @@
       </div>
     </aside>
 
-    
     <!-- Config -->
     <script src="./assets/js/config.js"></script>
 
@@ -451,6 +458,7 @@
     <script src="assets/js/services/exercise.service.js"></script>
 
     <!-- Controllers -->
+    <script src="assets/js/controllers/templates-form.js"></script>
     <script src="assets/js/controllers/exercises-form.js"></script>
     <script src="assets/js/controllers/exercises-list.js"></script>
   </body>

@@ -32,7 +32,7 @@ const rotasConfig = {
     titulo: "Exercícios",
     // SE voltar daqui, vai para o inicio (ou templates)
     voltarPara: "templates",
-    onLoad: (id) => {
+    onLoad: id => {
       if (typeof renderizarListaExercicios === "function") {
         renderizarListaExercicios(id);
       }
@@ -46,9 +46,23 @@ const rotasConfig = {
     titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "exercises",
-    onLoad: (id) => {
+    onLoad: id => {
       if (typeof initExerciseForm === "function") {
         initExerciseForm();
+      }
+    },
+  },
+  templateForm: {
+    idDiv: "screen-template-add-edit",
+    html: "assets/screens/templatesForm.html",
+    tipoHeader: "alternativo", // Usa o novo header
+    titulo: "Add/Edit Template",
+    // titulo: "",
+    // SE voltar daqui, volta para a lista, não para o histórico
+    voltarPara: "templates",
+    onLoad: id => {
+      if (typeof initTemplateForm === "function") {
+        initTemplateForm();
       }
     },
   },
@@ -56,7 +70,7 @@ const rotasConfig = {
     idDiv: "screen-workout-details",
     tipoHeader: "nenhum", // Detalhes geralmente não tem header ou tem um próprio
     titulo: "Treino em Andamento",
-    onLoad: (id) => {
+    onLoad: id => {
       if (typeof renderizarItensDeTemplate === "function")
         renderizarItensDeTemplate(id);
     },
