@@ -42,6 +42,17 @@ const TemplateService = {
     return data;
   },
 
+  async updateStatus(id, novoStatus) {
+    // Mudei o nome do parametro para ficar claro
+    const { data, error } = await client
+      .from("templates")
+      .update({ status: novoStatus }) // <--- AQUI ESTÁ O SEGRED0
+      .eq("id", id);
+
+    if (error) throw error;
+    return data;
+  },
+
   async delete(id) {
     const { error } = await client.from("templates").delete().eq("id", id);
     if (error) throw error;
