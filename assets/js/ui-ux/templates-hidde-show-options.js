@@ -55,6 +55,35 @@ document.addEventListener("DOMContentLoaded", () => {
   // };
 
   const openMenu = id => {
+    // --- CÓDIGO NOVO ADICIONADO AQUI ---
+    // Verifica se estamos na tela de inativos (usando a variável global do list-templates.js)
+    const isModoInativo =
+      typeof EXIBINDO_INATIVOS !== "undefined" && EXIBINDO_INATIVOS;
+
+    const btnStatus = sheet.querySelector(".tmp-opt-item--deactive");
+    if (btnStatus) {
+      const icon = btnStatus.querySelector(".material-symbols-rounded");
+      const text = btnStatus.querySelector("span:last-child"); // Pega o span do texto
+
+      if (isModoInativo) {
+        // Se já está inativo, mostramos opção de ATIVAR
+        icon.innerText = "check";
+        text.innerText = "Ativar";
+        // Opcional: mudar cor para verde ou laranja se quiser destaque
+        // icon.style.color = "#4CAF50";
+        icon.style.color = "#FF6B00";
+        text.style.color = "#FF6B00";
+      } else {
+        // Padrão: Desativar
+        icon.innerText = "block";
+        text.innerText = "Inativar";
+        // icon.style.color = "";
+        icon.style.color = ""; // Volta ao CSS original
+        text.style.color = "#000000";
+      }
+    }
+    // --- FIM DO CÓDIGO NOVO ---
+
     currentTemplateId = id;
 
     sheet.classList.add("active");
@@ -86,6 +115,32 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("editTemplateId", currentTemplateId); // Passo essencial!
         closeMenu();
         roteador("templateForm");
+      }
+    };
+  }
+
+  const btnDisableTemplate = sheet.querySelector(".tmp-opt-item--deactive");
+  if (btnDisableTemplate) {
+    btnDisableTemplate.onclick = async () => {
+      if (!currentTemplateId) return;
+
+      // --- CÓDIGO NOVO: LÓGICA DINÂMICA ---
+      const isModoInativo =
+        typeof EXIBINDO_INATIVOS !== "undefined" && EXIBINDO_INATIVOS;
+
+      // Se está no modo inativo, o novo status deve ser 'active'. Se não, 'inactive'.
+      const novoStatus = isModoInativo ? "active" : "inactive";
+      const acaoTexto = isModoInativo ? "ativar" : "desativar";
+
+      if (!confirm(`Deseja realmente ${acaoTexto} este template?`)) return;
+
+      try {
+        // Passamos o novoStatus calculado
+        await TemplateService.updateStatus(currentTemplateId, novoStatus);
+        location.reload();
+      } catch (err) {
+        alert(`Erro ao atualizar status: ${err.message}`);
+        console.error(err);
       }
     };
   }

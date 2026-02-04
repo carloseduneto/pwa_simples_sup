@@ -1,0 +1,140 @@
+<!-- <form id="form-template-itens" class="default-form exercise-form">
+  
+  <div class="input-group">
+    <label for="input-group"></label>
+    <select id="input-group" class="default-form-select">
+      <option default>Grupo Muscular</option>
+      <option value="peito">Peito</option>
+      <option value="costas">Costas</option>
+    </select>
+  </div>
+  
+  <div class="input-group">
+    <label for="input-group"></label>
+    <select id="input-name" class="default-form-select">
+      <option default>Exercício*</option>
+      <option value="peito">Peito</option>
+      <option value="costas">Costas</option>
+    </select>
+  </div>
+
+  <div class="input-group">
+    <input
+      type="text"
+      id="input-name"
+      placeholder="Técnica de intensificação"
+      required
+      class="default-form-input"
+    />
+  </div>
+
+    <div class="input-group switch-container">
+
+      <span>Exercício dinâmico</span>
+      <label class="switch">
+  <input type="checkbox">
+  <span class="slider round"></span>
+</label>
+    </div>
+
+      <div class="input-group">
+    <label for="input-group"></label>
+    <select id="input-name" class="default-form-select">
+      <option default>Tipo de dinâmico*</option>
+      <option value="peito">Peito</option>
+      <option value="costas">Costas</option>
+    </select>
+  </div>
+
+  <div class="form-exercise-series">
+      <div class="input-group">
+    <input
+      type="text"
+      id="input-name"
+      placeholder="Séries"
+      required
+      class="default-form-input"
+    />
+  </div>
+    <span class="form-exercise--series-reps">×</span>
+  <div class="input-group">
+    <input
+      type="text"
+      id="input-name"
+      placeholder="Repetições"
+      required
+      class="default-form-input"
+    />
+  </div>
+  </div>
+
+
+  <button type="submit" class="default-form-button default-form-button--save">
+    Salvar Exercício
+  </button>
+  <button
+    type="button"
+    class="default-form-button default-form-button--cancel"
+    onclick="roteador('exercises')"
+  >
+    Cancelar
+  </button>
+</form> -->
+
+<form id="form-template-itens" class="default-form exercise-form">
+  
+  <div class="input-group">
+    <label class="form-label">Filtrar por Grupo</label>
+    <select id="select-muscle-group" class="default-form-select">
+      <option value="" disabled selected>Carregando grupos...</option>
+    </select>
+  </div>
+  
+  <div class="input-group">
+    <label class="form-label">Exercício*</label>
+    <select id="select-exercise" class="default-form-select" required disabled>
+      <option value="" selected>Selecione um grupo primeiro</option>
+    </select>
+  </div>
+
+  <div class="input-group switch-container" style="margin: 20px 0; display:flex; justify-content:space-between; align-items:center">
+    <span>Exercício Dinâmico?</span>
+    <label class="switch">
+      <input type="checkbox" id="switch-dynamic">
+      <span class="slider round"></span>
+    </label>
+  </div>
+
+  <div id="container-static">
+    <div class="form-exercise-series">
+      <div class="input-group">
+        <input type="number" id="input-series" placeholder="Séries" class="default-form-input" />
+      </div>
+      <span class="form-exercise--series-reps">×</span>
+      <div class="input-group">
+        <input type="text" id="input-reps" placeholder="Reps (Ex: 8-12)" class="default-form-input" />
+      </div>
+    </div>
+  </div>
+
+  <div id="container-dynamic" class="hidden">
+    <div class="input-group">
+      <select id="select-recommendation" class="default-form-select">
+        <option value="" selected>Tipo (Ex: Top Set, Feeder)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <input type="text" id="input-technique" placeholder="Téc. Intensificação (Opcional)" class="default-form-input" />
+  </div>
+
+  <div class="form-actions">
+      <button type="submit" class="default-form-button default-form-button--save">
+        Salvar Item
+      </button>
+      <button type="button" class="default-form-button default-form-button--cancel" onclick="voltarParaItens()">
+        Cancelar
+      </button>
+  </div>
+</form>

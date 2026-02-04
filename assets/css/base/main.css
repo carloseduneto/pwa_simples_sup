@@ -63,6 +63,9 @@
   --text-brand: var(--color-orange-600);
   --caret-color: var(--color-orange-500);
 
+  --switch-active-bg: var(--color-orange-500);
+  --switch-active-knob: #ffffff;
+
   --btn-primary: var(--color-orange-500);
   --btn-primary-hover: var(--color-orange-600);
   --btn-primary-disabled: var(--color-orange-200);

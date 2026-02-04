@@ -1,0 +1,19 @@
+.form-exercise-series{
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    /* background-color: lightblue; */
+    margin-bottom: 20px;
+}
+.form-exercise-series .input-group{
+    width: 150px;
+}
+
+.form-exercise--series-reps{
+    /* background-color: antiquewhite; */
+    /* padding: 15px; */
+    font-weight: 500;
+    font-size: 24px;
+}

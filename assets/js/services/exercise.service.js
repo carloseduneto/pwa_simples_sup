@@ -35,6 +35,16 @@ const ExerciseService = {
     return data;
   },
 
+  async getByMuscleGroup(grupo_muscular_id) {
+    const { data, error } = await client
+      .from("exercicios")
+      .select("*")
+      .eq("grupo_muscular", grupo_muscular_id)
+      .order("nome", { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
   // CRIAR (CREATE)
   async create(exerciseData) {
     // exerciseData deve ser { nome: "...", grupo_muscular: ID }

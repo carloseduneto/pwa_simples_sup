@@ -39,7 +39,7 @@ const TemplateFilterUX = {
     } else {
       // Estado: PADRÃO (Cinza)
       icon.innerHTML = "block";
-      text.innerText = "Inativar";
+      text.innerText = "Inativos";
       icon.style.color = "";
       text.style.color = "#000000";
     }

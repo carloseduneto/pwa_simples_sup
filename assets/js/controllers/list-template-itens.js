@@ -49,7 +49,7 @@ async function renderizarListItensTemplate(currentTemplateId) {
       return;
     }
 
-    exercicios.forEach(exercicio => {
+    exercicios.forEach((exercicio) => {
       const clone = template.content.cloneNode(true);
 
       const nomeEl = clone.querySelector(".exercise-item__name");
@@ -64,8 +64,11 @@ async function renderizarListItensTemplate(currentTemplateId) {
       btnEdit.dataset.id = exercicio.id;
 
       btnEdit.onclick = () => {
-        localStorage.setItem("editExerciseId", exercicio.id);
-        roteador("exercisesAddEdit");
+        // 1. A chave correta é 'editTemplateItem' (o formulário espera essa)
+        localStorage.setItem("editTemplateItem", exercicio.id);
+
+        // 2. A rota correta é 'templateItensForm'
+        roteador("templateItensForm");
       };
 
       // --- Botão Excluir ---
@@ -73,13 +76,15 @@ async function renderizarListItensTemplate(currentTemplateId) {
       btnDelete.dataset.id = exercicio.id;
 
       btnDelete.onclick = async () => {
+        // O nome está dentro do objeto aninhado 'exercicios'
         const confirmacao = confirm(
-          `Deseja realmente excluir "${exercicio.nome}"?`,
+          `Deseja realmente excluir "${exercicio.exercicios.nome}"?`,
         );
         if (confirmacao) {
           try {
             await TemplateItensService.delete(exercicio.id);
-            renderizarListaExercicios();
+            // Recarrega a própria lista
+            renderizarListItensTemplate(currentTemplateId);
           } catch (err) {
             alert("Erro ao excluir: " + err.message);
           }
@@ -111,7 +116,7 @@ function adicionarItemTemplate() {
   // Aqui tem um pulo do gato: Para adicionar um item, você vai para a tela de exercícios?
   // Se sim, o roteador("exercisesAddEdit") precisa saber que é para esse template.
   // Sugestão: salvar o ID do template no localStorage quando a tela carrega.
-  roteador("exercisesAddEdit");
+  roteador("templateItensForm");
 }
 
 // Exponha ela para o HTML com o nome correto

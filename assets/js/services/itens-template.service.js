@@ -24,6 +24,31 @@ const TemplateItensService = {
     if (error) throw error;
     return data;
   },
+  // NOVA FUNÇÃO: Busca APENAS UM item para preencher o formulário de edição
+  async getByIdSingle(itemId) {
+    const { data, error } = await client
+      .from("template_itens")
+      .select(
+        `
+        id,
+        exercicio_id,
+        series_alvo,
+        repeticoes_alvo,
+        tecnica_intensificacao,
+        treino_recomendacoes,
+        exercicios (
+            id,
+            nome,
+            grupo_muscular
+        )
+      `,
+      )
+      .eq("id", itemId)
+      .single(); // Traz um objeto só, não um array
+
+    if (error) throw error;
+    return data;
+  },
 
   async getAll() {
     const { data, error } = await client

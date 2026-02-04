@@ -89,6 +89,20 @@ const rotasConfig = {
       }
     },
   },
+  templateItensForm: {
+    idDiv: "screen-template-itens-form",
+    html: "assets/screens/formTemplateItens.html",
+    tipoHeader: "alternativo", // Usa o novo header
+    // titulo: "Gerenciar Exercício",
+    titulo: "",
+    // SE voltar daqui, volta para a lista, não para o histórico
+    voltarPara: "templateItens",
+    onLoad: (id) => {
+      if (typeof initTemplateItensForm === "function") {
+        initTemplateItensForm(id);
+      }
+    },
+  },
   detalhes: {
     idDiv: "screen-workout-details",
     tipoHeader: "nenhum", // Detalhes geralmente não tem header ou tem um próprio
