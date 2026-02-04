@@ -217,17 +217,13 @@ function renderizarExercicios(lista) {
     return;
   }
 
-  lista.forEach((item) => {
+  lista.forEach(item => {
     const div = document.createElement("div");
     div.className = "exercicio-item";
     div.textContent = item.nome;
     container.appendChild(div);
   });
 }
-
-
-
-
 
 //
 //
@@ -368,7 +364,7 @@ async function renderizarItensDeTemplate(templateId) {
 
     // Cria uma lista temporária só com as séries DESTE exercício (item.exercicios.id)
     const seriesPassadas = historico.filter(
-      (h) => h.exercicio_id === item.exercicios.id,
+      h => h.exercicio_id === item.exercicios.id,
     );
 
     console.log(
@@ -440,9 +436,18 @@ async function renderizarItensDeTemplate(templateId) {
 
       // Parte 3b: Itens das séries TOPs do contexto
       for (let i = 0; i < contexto.series_repeticoes.series; i++) {
+        // Conta quantos itens de aquecimento existem no array de recomendações
+        const qtdAquecimento = item.treino_recomendacoes.detalhes.length;
+
+        // O índice no histórico será: Quantidade de Aquecimentos + Índice da Série Atual (0, 1, 2...)
+        // let lastPrepareSerie = qtdAquecimento + i;
         // Seu cálculo de índice atual
-        let lastPrepareSerie =
-          item.treino_recomendacoes.detalhes.at(-1).label + i + 1;
+        // let lastPrepareSerie =
+        //   item.treino_recomendacoes.detalhes.at(-1).label + i + 1;
+
+        // Usa o length para saber quantos pular.
+        // Garante que é número e remove o +1 desnecessário que causava o salto.
+        let lastPrepareSerie = item.treino_recomendacoes.detalhes.length + i;
 
         const cloneInputSeries = templateInputExercise.content.cloneNode(true);
 
@@ -506,90 +511,116 @@ async function renderizarItensDeTemplate(templateId) {
         wrapperExercises.appendChild(cloneInputSeries);
       }
 
-      // Parte 3c: Apenas recomendações semanais
+      // Parte 3c: Apenas recomendações semanais fixas (sem séries alvo definidas no template, usa o contexto)
     } else if (
       item.treino_recomendacoes === null &&
       item.series_alvo === null
     ) {
       console.log(
-        "Número de séries para preencher:",
+        "Caso 3 - Variável Sem Aquecimento. Séries:",
         contexto.series_repeticoes.series,
       );
 
       for (let i = 0; i < contexto.series_repeticoes.series; i++) {
-        // --- CORREÇÃO: O clone deve ser criado AQUI, para cada nova série ---
         const cloneInputSeries = templateInputExercise.content.cloneNode(true);
 
-        // Manipula o clone à vontade
-        cloneInputSeries.querySelector(".seriesExercise").value =
-          i + 1 + " Série Alternativa";
+        // --- LÓGICA INTELIGENTE (IGUAL AO CASO 1) ---
+        let serieAnterior;
 
-        // Verifica se existe histórico, mas cria o input de qualquer forma (ou ajuste conforme sua lógica)
-        const serieAnterior =
-          seriesPassadas && seriesPassadas[i] ? seriesPassadas[i] : null;
+        // Regra de Ouro: Se é a ÚLTIMA série de hoje E o histórico tinha MAIS séries...
+        // Pega a última do histórico (o pico), ignorando a sequência 1-1, 2-2.
+        if (
+          i === contexto.series_repeticoes.series - 1 &&
+          seriesPassadas.length > contexto.series_repeticoes.series
+        ) {
+          serieAnterior = seriesPassadas[seriesPassadas.length - 1];
+        } else {
+          // Caso normal: 1ª com 1ª, 2ª com 2ª...
+          serieAnterior = seriesPassadas[i];
+        }
 
+        // Fallback: Se undefined (ex: aumentou o volume hoje e não tem correspondente), pega a última feita
+        if (!serieAnterior && seriesPassadas.length > 0) {
+          serieAnterior = seriesPassadas[seriesPassadas.length - 1];
+        }
+        // ---------------------------------------------
+
+        // --- VISUAL PADRONIZADO (PLACEHOLDERS) ---
         if (serieAnterior) {
-          console.log("Série passada encontrada:", serieAnterior);
+          const textoAnterior =
+            (serieAnterior.repeticoes || 0) +
+            " x " +
+            (serieAnterior.carga || 0);
 
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
-            serieAnterior.repeticoes + " x " + serieAnterior.carga || " - ";
+            textoAnterior;
 
-          // Define o valor antigo como placeholder (dica de fundo)
+          // Carga: Põe no placeholder e limpa o value
           cloneInputSeries.querySelector(".kgExercise").placeholder =
             serieAnterior.carga || "";
-          // Limpa o valor real para que o placeholder fique visível
+          cloneInputSeries.querySelector(".kgExercise").value = "";
+
+          // Repetições: Põe no placeholder e limpa o value
+          cloneInputSeries.querySelector(".repsExercise").placeholder =
+            serieAnterior.repeticoes || "";
+          cloneInputSeries.querySelector(".repsExercise").value = "";
+        } else {
+          // Se não tem histórico nenhum para essa série
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            " - ";
+          cloneInputSeries.querySelector(".kgExercise").value = "";
+          cloneInputSeries.querySelector(".repsExercise").value = "";
+        }
+
+        // Configura o label (Ex: "1ª Série Alternativa")
+        // Como é variável, usamos o contador 'i'
+        const inputSerieLabel =
+          cloneInputSeries.querySelector(".seriesExercise");
+
+        // Se quiser manter o texto "Série Alternativa" ou apenas "1ª Série":
+        inputSerieLabel.value = i + 1;
+
+        wrapperExercises.appendChild(cloneInputSeries);
+      }
+    } else {
+      console.log("Caso 4 - Fixo. Séries Alvo:", item.series_alvo);
+
+      for (let i = 0; i < item.series_alvo; i++) {
+        const cloneInputSeries = templateInputExercise.content.cloneNode(true);
+
+        // --- LÓGICA SIMPLES (1 para 1) ---
+        // Aqui não tem mágica. A 1ª é a 1ª, a 2ª é a 2ª.
+        const serieAnterior = seriesPassadas[i];
+
+        // --- VISUAL PADRONIZADO (PLACEHOLDERS) ---
+        if (serieAnterior) {
+          const textoAnterior =
+            (serieAnterior.repeticoes || 0) +
+            " x " +
+            (serieAnterior.carga || 0);
+
+          cloneInputSeries.querySelector(".anteriorExercise").textContent =
+            textoAnterior;
+
+          // AQUI MUDOU: Em vez de preencher o value, usamos placeholder
+          cloneInputSeries.querySelector(".kgExercise").placeholder =
+            serieAnterior.carga || "";
           cloneInputSeries.querySelector(".kgExercise").value = "";
 
           cloneInputSeries.querySelector(".repsExercise").placeholder =
             serieAnterior.repeticoes || "";
           cloneInputSeries.querySelector(".repsExercise").value = "";
-
-          // cloneInputSeries.querySelector(".kgExercise").value =
-          //   serieAnterior.carga || "";
-          // cloneInputSeries.querySelector(".repsExercise").value =
-          //   serieAnterior.repeticoes || "";
         } else {
-          // Lógica opcional: O que fazer se não tiver série anterior?
-          // Deixar em branco ou colocar um traço?
+          // Se não tem histórico (ex: primeira vez fazendo ou aumentou séries fixas)
           cloneInputSeries.querySelector(".anteriorExercise").textContent =
             " - ";
           cloneInputSeries.querySelector(".kgExercise").value = "";
           cloneInputSeries.querySelector(".repsExercise").value = "";
         }
 
-        // Configura o label da série atual
-        const inputSerieLabel =
-          cloneInputSeries.querySelector(".seriesExercise");
-        if (inputSerieLabel) {
-          inputSerieLabel.textContent = i + 1 + "ª Série"; // Ex: 1ª Série, 2ª Série...
-        }
+        // Label: Aqui geralmente é fixo, mas podemos numerar
+        cloneInputSeries.querySelector(".seriesExercise").value = i + 1;
 
-        // Adiciona ao DOM
-        wrapperExercises.appendChild(cloneInputSeries);
-      }
-    } else {
-      for (let i = 0; i < item.series_alvo; i++) {
-        const cloneInputSeries = templateInputExercise.content.cloneNode(true);
-
-        if (seriesPassadas[i] != undefined) {
-          cloneInputSeries.querySelector(".anteriorExercise").textContent =
-            seriesPassadas[i]?.repeticoes + " x " + seriesPassadas[i]?.carga ||
-            " - ";
-          cloneInputSeries.querySelector(".kgExercise").value =
-            seriesPassadas[i]?.carga || "";
-          cloneInputSeries.querySelector(".repsExercise").value =
-            seriesPassadas[i]?.repeticoes || "";
-          console.log(
-            "Série passada para preencher o anterior:",
-            seriesPassadas[i],
-          );
-        }
-
-        // Manipula o clone à vontade
-        cloneInputSeries.querySelector(".seriesExercise").value =
-          i + 1 + " Série Padrão";
-
-        // Joga o NODE direto no container. Ele vai ficar logo depois do Header que inserimos acima
         wrapperExercises.appendChild(cloneInputSeries);
       }
     }
@@ -623,7 +654,7 @@ async function renderizarItensDeTemplate(templateId) {
 
   const containerPrincipal = document.querySelector(".container-treino");
   if (containerPrincipal) {
-    containerPrincipal.addEventListener("input", (event) => {
+    containerPrincipal.addEventListener("input", event => {
       if (event.target.matches(".kgExercise, .repsExercise, .seriesExercise")) {
         salvarInputLocalmente(event.target);
       }
@@ -752,7 +783,7 @@ function renderizarContextRecomendacoes(opcoes, idSelecionado) {
       }>Selecione uma semana...</option>
   `;
 
-  opcoes.forEach((opcao) => {
+  opcoes.forEach(opcao => {
     // Verifica se essa é a opção que estava salva no banco
     const isSelected = opcao.id === idSelecionado ? "selected" : "";
 
