@@ -20,6 +20,16 @@ async function initTemplateItensForm() {
 
   // IDs de Controle
   const editItemId = localStorage.getItem("editTemplateItem"); // ID do ITEM (Tabela template_itens)
+
+  // ADICIONE ISSO PARA DEBUGAR:
+  // console.log("🛠️ DEBUG EDIÇÃO:", {
+  //   editItemId: editItemId,
+  //   tipo: typeof editItemId,
+  //   payloadEsperado: {
+  //     id: Number(editItemId),
+  //   },
+  // });
+
   const parentTemplateId = localStorage.getItem("currentTemplateId");
 
   // --- 2. PREPARAÇÃO VISUAL ---
@@ -49,7 +59,7 @@ async function initTemplateItensForm() {
       selectExercise.innerHTML =
         '<option value="" selected>Selecione o exercício</option>';
 
-      exercicios.forEach((ex) => {
+      exercicios.forEach(ex => {
         const opt = document.createElement("option");
         opt.value = ex.id;
         opt.innerText = ex.nome;
@@ -75,7 +85,7 @@ async function initTemplateItensForm() {
     const grupos = await MuscleGroupService.getAll();
     selectGroup.innerHTML =
       '<option value="" disabled selected>Selecione o grupo</option>';
-    grupos.forEach((g) => {
+    grupos.forEach(g => {
       selectGroup.innerHTML += `<option value="${g.id}">${g.nome}</option>`;
     });
   } catch (err) {
@@ -88,7 +98,7 @@ async function initTemplateItensForm() {
       const recs = await TreinoRecomendacoesService.getAll();
       selectRec.innerHTML =
         '<option value="" selected>Selecione o tipo...</option>';
-      recs.forEach((r) => {
+      recs.forEach(r => {
         selectRec.innerHTML += `<option value="${r.id}">${r.name}</option>`;
       });
     }
@@ -152,7 +162,7 @@ async function initTemplateItensForm() {
   };
 
   // --- 5. SALVAR (CORREÇÃO DO ERRO 8) ---
-  form.onsubmit = async (e) => {
+  form.onsubmit = async e => {
     e.preventDefault();
 
     if (!selectExercise.value) {
@@ -160,39 +170,49 @@ async function initTemplateItensForm() {
       return;
     }
 
-    // Objeto base
+    // 1. MONTAGEM DO PAYLOAD (Dados limpos)
+    // Nota: Não incluímos template_id no objeto base para evitar conflitos no update
     const payload = {
-      template_id: parentTemplateId,
-      exercicio_id: selectExercise.value,
+      exercicio_id: Number(selectExercise.value),
       tecnica_intensificacao: inputTech.value || null,
     };
 
-    // LÓGICA DE LIMPEZA (O que você pediu)
+    // 2. LÓGICA DE LIMPEZA (Séries/Reps vs Recomendação)
     if (switchDynamic.checked) {
-      // É DINÂMICO: Salva recomendação e LIMPA o resto
-      payload.treino_recomendacoes = selectRec.value || null;
-      payload.series_alvo = null; // Limpa no banco
-      payload.repeticoes_alvo = null; // Limpa no banco
+      // Modo Dinâmico: Salva recomendação e anula o resto
+      payload.treino_recomendacoes = selectRec.value
+        ? Number(selectRec.value)
+        : null;
+      payload.series_alvo = null;
+      payload.repeticoes_alvo = null;
     } else {
-      // É FIXO: Salva séries/reps e LIMPA recomendação
-      payload.series_alvo = inputSeries.value || null;
+      // Modo Fixo: Salva séries/reps e anula recomendação
+      payload.series_alvo = inputSeries.value
+        ? Number(inputSeries.value)
+        : null;
       payload.repeticoes_alvo = inputReps.value || null;
-      payload.treino_recomendacoes = null; // Limpa no banco
+      payload.treino_recomendacoes = null;
     }
+
+    // Debug rápido: Veja no F12 se o payload está saindo com os dados certos
+    console.log("Payload para salvar:", payload);
 
     try {
       btnSave.disabled = true;
       btnSave.innerText = "Salvando...";
 
       if (editItemId) {
-        // Atualiza o item existente usando o ID que pegamos do localStorage
+        // --- ATUALIZAÇÃO ---
         await TemplateItensService.update(editItemId, payload);
       } else {
-        // Cria novo e define ordem (maior + 1)
+        // --- CRIAÇÃO ---
+        // Na criação, precisamos incluir o template_id
+        payload.template_id = Number(parentTemplateId);
+
         const itensAtuais =
           await TemplateItensService.getByid(parentTemplateId);
         const maiorOrdem = itensAtuais.reduce(
-          (max, item) => (item.ordem > max ? item.ordem : max),
+          (max, i) => (i.ordem > max ? i.ordem : max),
           0,
         );
         payload.ordem = maiorOrdem + 1;
@@ -201,9 +221,9 @@ async function initTemplateItensForm() {
       }
 
       alert("Salvo com sucesso!");
-      voltarParaItens(); // Função que limpa o localStorage e volta
+      voltarParaItens();
     } catch (error) {
-      console.error(error);
+      console.error("Erro no salvamento:", error);
       alert("Erro ao salvar: " + error.message);
       btnSave.disabled = false;
       btnSave.innerText = editItemId ? "Atualizar Item" : "Salvar Item";
