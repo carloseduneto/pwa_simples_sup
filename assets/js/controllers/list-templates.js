@@ -19,18 +19,18 @@ async function buscarTemplates() {
     }
   }
 
-const { data, error } = await client
+  const { data, error } = await client
     .from("templates")
     .select("id, nome, descricao, status")
-    
+
     // 1º CRITÉRIO: Status (Prioridade máxima)
     // Isso joga tudo que é 'active' (ou null) para o topo da lista,
     // e empurra os 'inactive' para o final.
-    .order("status", { ascending: true, nullsFirst: true }) 
-    
+    .order("status", { ascending: true, nullsFirst: true })
+
     // 2º CRITÉRIO: Nome (Ordem alfabética dentro do grupo)
     .order("nome", { ascending: true })
-    
+
     // Agora o corte de 500 vai pegar todos os ativos primeiro.
     // Só se houver mais de 500 ATIVOS é que algo ativo ficaria de fora.
     .limit(500);
@@ -46,23 +46,33 @@ const { data, error } = await client
 
   console.log("Templates encontrados:", data);
   TODOS_TEMPLATES = data;
-//   renderizarTemplates(data);
-aplicarFiltroERenderizar();
+
+  // --- AQUI ESTAVA FALTANDO ---
+  // O Router matou o clique do botão ao trocar de tela.
+  // O init() religa o fio do botão novo.
+  if (typeof TemplateFilterUX !== "undefined") {
+    TemplateFilterUX.init();
+  }
+  // ---------------------------
+  
+  //   renderizarTemplates(data);
+  aplicarFiltroERenderizar();
 }
 
 
 // === NOVA FUNÇÃO: FILTRO ===
 function aplicarFiltroERenderizar() {
-  // Se EXIBINDO_INATIVOS for true, filtra onde status == 'inactive'
-  // Se for false, filtra onde status != 'inactive' (ou seja, null ou 'active')
-
-  const listaFiltrada = TODOS_TEMPLATES.filter((item) => {
+  const listaFiltrada = TODOS_TEMPLATES.filter(item => {
     const ehInativo = item.status === "inactive";
     return EXIBINDO_INATIVOS ? ehInativo : !ehInativo;
   });
 
   renderizarTemplates(listaFiltrada);
-  atualizarBotaoVisual(); // Muda a cor do ícone
+
+  // AQUI: Chama o novo arquivo de UX para arrumar o botão
+  if (typeof TemplateFilterUX !== "undefined") {
+    TemplateFilterUX.atualizarVisual();
+  }
 }
 
 // === NOVA FUNÇÃO: AÇÃO DO BOTÃO ===
@@ -72,23 +82,30 @@ function alternarVisualizacaoInativos() {
 }
 
 function atualizarBotaoVisual() {
-    const btn = document.getElementById("template-button-inactived");
-    const icon = btn.querySelector(".material-symbols-rounded");
-    const text = btn.querySelector(".btn-text-header");
+  const btn = document.getElementById("template-button-inactived");
 
-    if (EXIBINDO_INATIVOS) {
-        // Estilo "Ativado" (Laranja)
-        icon.style.color = "#FF6B00"; 
-        text.style.color = "#FF6B00"; 
-        icon.innerHTML = "check"
-        text.innerText = "Ativos"; // Muda texto opcionalmente
-    } else {
-        // Estilo "Normal" (Cinza)
-        icon.style.color = ""; // Volta ao CSS original
-        text.style.color = "#000000"; 
-        text.innerText = "Inativos";
-        icon.innerHTML = "block"
-    }
+  // TRAVA DE SEGURANÇA: Se não achar o botão, para a função sem dar erro
+  if (!btn) {
+    console.warn("Botão 'template-button-inactived' não encontrado no HTML.");
+    return;
+  }
+
+  const icon = btn.querySelector(".material-symbols-rounded");
+  const text = btn.querySelector(".btn-text-header");
+
+  if (EXIBINDO_INATIVOS) {
+    // Estilo "Ativado" (Laranja)
+    icon.style.color = "#FF6B00";
+    text.style.color = "#FF6B00";
+    icon.innerHTML = "check";
+    text.innerText = "Ativos"; // Muda texto opcionalmente
+  } else {
+    // Estilo "Normal" (Cinza)
+    icon.style.color = ""; // Volta ao CSS original
+    text.style.color = "#000000";
+    text.innerText = "Inativos";
+    icon.innerHTML = "block";
+  }
 }
 
 // === RENDERIZAÇÃO (Pequeno ajuste no CSS Class) ===

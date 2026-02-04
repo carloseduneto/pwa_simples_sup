@@ -5,7 +5,25 @@ async function renderizarListItensTemplate(currentTemplateId) {
     console.warn("Tentativa de carregar itens sem ID de template válido.");
     return;
   }
-  
+
+  // --- CÓDIGO NOVO: VINCULAR O BOTÃO PLAY ---
+  // A lógica é: O Router me deu o ID, então eu dou o ID para o botão.
+  const btnStart = document.getElementById("btn-start-internal");
+
+  if (btnStart) {
+    btnStart.onclick = () => {
+      // Reutiliza a mesma função que o menu de 3 pontinhos usa
+      if (typeof abrirTemplate === "function") {
+        console.log("Iniciando treino pelo botão interno:", currentTemplateId);
+        abrirTemplate(currentTemplateId);
+      } else {
+        console.error(
+          "Função abrirTemplate não encontrada (verifique se ela é global)",
+        );
+      }
+    };
+  }
+
   const container = document.getElementById("itens-template-container");
   const template = document.querySelector(".template-template-list-item");
 
@@ -22,6 +40,7 @@ async function renderizarListItensTemplate(currentTemplateId) {
   try {
     const exercicios = await TemplateItensService.getByid(currentTemplateId);
 
+    console.log("Exercícios do template:", exercicios);
     container.innerHTML = "";
 
     if (!exercicios || exercicios.length === 0) {
@@ -30,14 +49,15 @@ async function renderizarListItensTemplate(currentTemplateId) {
       return;
     }
 
-    exercicios.forEach((exercicio) => {
+    exercicios.forEach(exercicio => {
       const clone = template.content.cloneNode(true);
 
       const nomeEl = clone.querySelector(".exercise-item__name");
       const grupoEl = clone.querySelector(".exercise-item__group");
 
-      nomeEl.innerText = exercicio.nome;
-      grupoEl.innerText = exercicio.grupos_musculares?.nome || "Sem grupo";
+      nomeEl.innerText = exercicio.exercicios.nome;
+      grupoEl.innerText =
+        exercicio.exercicios.grupo_muscular?.nome || "Sem grupo";
 
       // --- Botão Editar ---
       const btnEdit = clone.querySelector(".exercise-item__btn--edit");

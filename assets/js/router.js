@@ -34,7 +34,7 @@ const rotasConfig = {
   // --- TELAS NOVAS ---
   exercises: {
     idDiv: "screen-exercises",
-    html: "assets/screens/exercises.html",
+    html: "assets/screens/listExercises.html",
     tipoHeader: "alternativo", // <--- AQUI A MÁGICA: Usa o novo header!
     titulo: "Exercícios",
     // SE voltar daqui, vai para o inicio (ou templates)
@@ -47,7 +47,7 @@ const rotasConfig = {
   },
   exercisesAddEdit: {
     idDiv: "screen-exercises-add-edit",
-    html: "assets/screens/exercisesAddEdit.html",
+    html: "assets/screens/formExercises.html",
     tipoHeader: "alternativo", // Usa o novo header
     // titulo: "Gerenciar Exercício",
     titulo: "",
@@ -61,7 +61,7 @@ const rotasConfig = {
   },
   templateForm: {
     idDiv: "screen-template-add-edit",
-    html: "assets/screens/templatesForm.html",
+    html: "assets/screens/formTemplates.html",
     tipoHeader: "alternativo", // Usa o novo header
     titulo: "Add/Edit Template",
     // titulo: "",
