@@ -3,7 +3,20 @@ const TemplateItensService = {
     const { data, error } = await client
       .from("template_itens")
       .select(
-        "id, exercicios(id, nome, grupo_muscular(id, nome)), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, repeticoes_alvo,tecnica_intensificacao",
+        `
+        id,
+        ordem,
+        series_alvo,
+        repeticoes_alvo,
+        tecnica_intensificacao,
+        exercicios (
+            id,
+            nome,
+            grupo_muscular ( id, nome )
+        ),
+        treino_recomendacoes ( valor, detalhes, description ),
+        templates ( nome, descricao )
+      `,
       )
       .eq("template_id", templateId)
       .order("ordem");

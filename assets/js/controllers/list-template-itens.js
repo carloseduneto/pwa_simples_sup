@@ -1,5 +1,11 @@
 // Sua função principal (com a chamada da busca adicionada no final)
 async function renderizarListItensTemplate(currentTemplateId) {
+  // 1. TRAVA DE SEGURANÇA: Se o ID for nulo, indefinido ou "null", pare tudo.
+  if (!currentTemplateId || currentTemplateId === "null") {
+    console.warn("Tentativa de carregar itens sem ID de template válido.");
+    return;
+  }
+  
   const container = document.getElementById("itens-template-container");
   const template = document.querySelector(".template-template-list-item");
 
@@ -69,12 +75,31 @@ async function renderizarListItensTemplate(currentTemplateId) {
   }
 }
 
-// E adicione essa funçãozinha no final do exercises-list.js (fora da função principal)
-function addTemplateItem() {
-  // REGRA DE OURO: Vai criar? Garanta que não tem lixo antigo.
+// Função para o botão de Adicionar
+function adicionarItemTemplate() {
+  // <--- Renomeado para bater com o HTML
+  // Pegamos o ID do template atual da URL ou de onde salvamos
+  // Como o roteador não salva estado global, idealmente salvamos no localStorage ao entrar na tela
+  // Mas para simplificar, vamos assumir que você tem acesso ao ID.
+
+  // DICA: O botão "Adicionar" precisa saber qual é o Template Pai.
+  // Vamos garantir que limpamos a edição, mas precisamos passar o ID do template pai
+  // para a tela de adicionar, senão ele cria um item órfão.
+
   localStorage.removeItem("editTemplateItem");
-  roteador("templateItens");
+
+  // Aqui tem um pulo do gato: Para adicionar um item, você vai para a tela de exercícios?
+  // Se sim, o roteador("exercisesAddEdit") precisa saber que é para esse template.
+  // Sugestão: salvar o ID do template no localStorage quando a tela carrega.
+  roteador("exercisesAddEdit");
 }
 
-// Exponha ela para o HTML (já que estamos usando script global)
-window.addTemplateItem = addTemplateItem;
+// Exponha ela para o HTML com o nome correto
+window.adicionarItemTemplate = adicionarItemTemplate;
+
+// PEQUENO TRUQUE: Salvar o ID globalmente quando renderizar
+const renderizarOriginal = renderizarListItensTemplate;
+renderizarListItensTemplate = async (id) => {
+  localStorage.setItem("currentTemplateId", id); // Salva para usar no botão adicionar
+  await renderizarOriginal(id);
+};

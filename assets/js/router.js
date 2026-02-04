@@ -76,14 +76,16 @@ const rotasConfig = {
   templateItens: {
     idDiv: "screen-template-itens",
     html: "assets/screens/listTemplateItens.html",
-    tipoHeader: "alternativo", // Usa o novo header
-    titulo: "Itens template",
-    // titulo: "",
-    // SE voltar daqui, volta para a lista, não para o histórico
+    tipoHeader: "alternativo",
+    titulo: "Itens do Template", // Ajustei o título
     voltarPara: "templates",
     onLoad: (id) => {
-      if (typeof initTemplateForm === "function") {
-        initTemplateForm();
+      console.log("Router recebeu ID:", id); // Adicione este log para debugar!
+      // CORREÇÃO: Chamamos a função do seu controller de LISTA, passando o ID
+      if (typeof renderizarListItensTemplate === "function") {
+        renderizarListItensTemplate(id);
+      } else {
+        console.error("Função renderizarListItensTemplate não encontrada.");
       }
     },
   },
@@ -144,19 +146,19 @@ function atualizarHeader(config) {
   // 1. Pegar os elementos
   const headerPadrao = document.getElementById("app-header");
   const headerAlt = document.getElementById("app-header-alt");
-  
+
   const tituloPadrao = document.getElementById("header-title");
   const tituloAlt = document.getElementById("header-title-alt");
 
   // 2. Primeiro, GARANTE que tudo está escondido
   // Usamos classList para respeitar o CSS do seu projeto
   if (headerPadrao) {
-      headerPadrao.classList.add("hidden");
-      headerPadrao.style.display = "none"; // Segurança extra
+    headerPadrao.classList.add("hidden");
+    headerPadrao.style.display = "none"; // Segurança extra
   }
   if (headerAlt) {
-      headerAlt.classList.add("hidden");
-      headerAlt.style.display = "none"; // Segurança extra
+    headerAlt.classList.add("hidden");
+    headerAlt.style.display = "none"; // Segurança extra
   }
 
   // 3. Decide qual mostrar e remove o 'hidden' do escolhido
@@ -166,8 +168,7 @@ function atualizarHeader(config) {
     headerPadrao.classList.remove("hidden");
     headerPadrao.style.display = "flex"; // Força o layout flex
     if (tituloPadrao) tituloPadrao.innerText = config.titulo;
-  } 
-  else if (tipo === "alternativo" && headerAlt) {
+  } else if (tipo === "alternativo" && headerAlt) {
     headerAlt.classList.remove("hidden");
     headerAlt.style.display = "flex"; // Força o layout flex
     if (tituloAlt) tituloAlt.innerText = config.titulo;
@@ -259,7 +260,7 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
 // ============================================================================
 
 // Botão Voltar do Navegador
-window.addEventListener("popstate", event => {
+window.addEventListener("popstate", (event) => {
   const estado = event.state;
   if (estado && estado.rota) {
     roteador(estado.rota, estado.id, false);

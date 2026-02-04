@@ -33,11 +33,18 @@ document.addEventListener("DOMContentLoaded", () => {
       abrirTemplate(currentTemplateId);
     });
   }
-  
+
   const btnItensTemplate = document.getElementById("template-itens");
-  if (btnSession) {
+  if (btnItensTemplate) {
     btnItensTemplate.addEventListener("click", () => {
-      renderizarListItensTemplate(currentTemplateId);
+      console.log("Botão Itens do Template encontrado.", currentTemplateId);
+      if (currentTemplateId) {
+        closeMenu(); // Fecha o menu antes de navegar
+
+        // 3. CORREÇÃO: Usamos o roteador para navegar!
+        // Isso troca a tela E dispara o onLoad do router com o ID correto
+        roteador("templateItens", currentTemplateId);
+      }
     });
   }
   // const openMenu = (id) => {
