@@ -209,20 +209,19 @@
       </div>
 
       <div id="screen-templates-list">
-        <!-- <h3>Seus Treinos</h3> -->
 
-        <header class="template-header--actions">
-
-          <div id="container-recomendacoes"></div>
-          <button
-          id="template-button-inactived"
-          onclick="alternarVisualizacaoInativos()"
-          class="btn-template-inactive-active "
-          >
-          <span class="material-symbols-rounded">block</span>
-          <span class="btn-text-header">Inativos</span>
-        </button>
-      </header>
+      <!-- <h3>Seus Treinos</h3> -->
+      <header class="template-header--actions">
+        <div id="container-recomendacoes"></div>
+        <button
+        id="template-button-inactived"
+        onclick="alternarVisualizacaoInativos()"
+        class="btn-template-inactive-active"
+        >
+            <span class="material-symbols-rounded">block</span>
+            <span class="btn-text-header">Inativos</span>
+          </button>
+        </header>
 
         <div id="lista-templates"></div>
         <button
@@ -256,11 +255,12 @@
           </nav> -->
       </div>
 
+      <div id="screen-template-itens" class="hidden"></div>
+
       <div id="screen-template-add-edit" class="hidden"></div>
 
       <div id="screen-workout-details" class="hidden">
         <div class="screen-workout-details-style">
-
           <div class="itensTemplate"></div>
         </div>
       </div>
@@ -275,7 +275,6 @@
       <div id="screen-exercises" class="hidden"></div>
       <div id="screen-exercises-add-edit" class="hidden"></div>
 
-      
       <template class="template-header-exercise">
         <div class="headerExercise">
           <span>SÉRIES</span>
@@ -346,7 +345,7 @@
         </span>
         <span>Iniciar treino</span>
       </div>
-      <div class="tmp-opt-item">
+      <div class="tmp-opt-item" id="template-itens">
         <span class="material-symbols-rounded"> category_search </span>
         <span>Ver treino</span>
       </div>
@@ -382,11 +381,13 @@
     <script src="assets/js/services/muscle-group.service.js"></script>
     <script src="assets/js/services/exercise.service.js"></script>
     <script src="assets/js/services/template.service.js"></script>
+    <script src="assets/js/services/itens-template.service.js"></script>
 
     <!-- Controllers -->
     <script src="assets/js/controllers/form-templates.js"></script>
     <script src="assets/js/controllers/list-templates.js"></script>
     <script src="assets/js/controllers/form-exercises.js"></script>
     <script src="assets/js/controllers/list-exercises.js"></script>
+    <script src="assets/js/controllers/list-template-itens.js"></script>
   </body>
 </html>

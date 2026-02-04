@@ -33,7 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
       abrirTemplate(currentTemplateId);
     });
   }
-
+  
+  const btnItensTemplate = document.getElementById("template-itens");
+  if (btnSession) {
+    btnItensTemplate.addEventListener("click", () => {
+      renderizarListItensTemplate(currentTemplateId);
+    });
+  }
   // const openMenu = (id) => {
   //   currentTemplateId = id;
   //   sheet.classList.add("active");

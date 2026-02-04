@@ -37,11 +37,11 @@ button {
   justify-content: center;
   transition: transform 0.2s;
   /* The drop shadow */
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Modificador: Transforma o botão base em um botão fixo de adição */
 .primary-button--add {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -59,4 +59,34 @@ button {
     "wght" 600,
     "GRAD" 0,
     "opsz" 24;
+}
+
+/* Modificador: Transforma o botão base em um botão fixo de adição */
+.primary-button--add-center {
+  /* position: fixed; */
+  /* bottom: 20px;
+  right: 20px; */
+  background-color: var(--primary-color);
+  border-radius: 13px;
+  width: 70%;
+  height: 46px;
+  z-index: 999;
+  color: var(--font-color-light);
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  gap: 5px;
+}
+
+.primary-button--start {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--primary-color);
+  border-radius: 13px;
+  width: 56px;
+  height: 56px;
+  z-index: 999;
+  color: var(--font-color-light);
 }
