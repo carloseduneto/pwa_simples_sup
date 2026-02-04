@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Supabase Edge PWA</title>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <link rel="manifest" href="./manifest.json" />
@@ -211,6 +212,25 @@
         </div>
       </div>
 
+      <div id="app-header-drag" class="headerPageAlternative hidden">
+        <div class="header-alternative-1">
+          <button onclick="history.back()" class="navigation-buttons">
+            <span class="material-symbols-rounded"> arrow_back_ios_new </span>
+          </button>
+          <h2 id="header-title-drag-handle">Título Alternativo</h2>
+                    <button
+            id="template-itens-reorder"
+            onclick="alternarVisualizacaoInativos()"
+            class="btn-template-inactive-active"
+          >
+            <span class="material-symbols-rounded rotate180">low_priority</span>
+            <span class="btn-text-header">Reordenar</span>
+          </button>
+
+        </div>
+      </div>
+
+
       <div id="screen-templates-list">
         <!-- <h3>Seus Treinos</h3> -->
         <header class="template-header--actions">
@@ -255,7 +275,6 @@
               <span>Histórico</span>
             </div>
           </nav> -->
-          
       </div>
 
       <div id="screen-template-add-edit" class="hidden"></div>
@@ -389,7 +408,6 @@
     <script src="assets/js/services/template.service.js"></script>
     <script src="assets/js/services/itens-template.service.js"></script>
     <script src="assets/js/services/treino-recomendacoes.service.js"></script>
-
 
     <!-- Controllers -->
     <script src="assets/js/controllers/form-templates.js"></script>

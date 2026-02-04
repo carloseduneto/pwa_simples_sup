@@ -12,6 +12,14 @@
   >
     <span class="material-symbols-rounded">add</span>Adicionar exercício
   </button>
+
+  <button
+    type="button"
+    class="default-form-button default-form-button--cancel hidden"
+    onclick="cancelarReordenacao()"
+  >
+    Cancelar
+  </button>
 </div>
 
 <button
@@ -45,7 +53,7 @@
         <span class="material-symbols-rounded">delete</span>
       </button>
       <button
-        class="exercise-item__btn exercise-item__btn--drag hidden"
+        class="exercise-item__btn exercise-item__btn--drag drag-handle hidden"
         aria-label="Reordenar"
       >
         <span class="material-symbols-rounded">drag_handle</span>

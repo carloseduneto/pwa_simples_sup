@@ -181,4 +181,27 @@ const TemplateItensService = {
     if (error) throw error;
     return true;
   },
+
+  // NOVA FUNÇÃO: Atualizar vários de uma vez
+  async updateOrderBatch(listaDeIds) {
+    // listaDeIds é algo tipo: ["50", "52", "51"]
+
+    // Vamos criar uma promessa para cada item da lista
+    const promessas = listaDeIds.map((idItem, index) => {
+      // A nova ordem é o índice + 1 (porque array começa em 0)
+      const novaOrdem = index + 1;
+
+      // Chama o Supabase para atualizar SÓ a coluna ordem desse ID
+      return client
+        .from("template_itens")
+        .update({ ordem: novaOrdem })
+        .eq("id", Number(idItem));
+    });
+
+    // O Promise.all espera TODOS os updates terminarem antes de continuar.
+    // Isso garante que a gente não avise que salvou antes de terminar.
+    await Promise.all(promessas);
+
+    return true;
+  },
 };

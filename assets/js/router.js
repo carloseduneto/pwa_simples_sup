@@ -76,7 +76,7 @@ const rotasConfig = {
   templateItens: {
     idDiv: "screen-template-itens",
     html: "assets/screens/listTemplateItens.html",
-    tipoHeader: "alternativo",
+    tipoHeader: "drag-handle", // Usa o novo header
     titulo: "Itens do Template", // Ajustei o título
     voltarPara: "templates",
     onLoad: (id) => {
@@ -157,35 +157,49 @@ function gerenciarLayoutPrincipal(nomeRota) {
  * Atualiza o Cabeçalho (Agora manipulando as classes corretamente)
  */
 function atualizarHeader(config) {
-  // 1. Pegar os elementos
+  // 1. Pegar os elementos dos Headers (Containers)
   const headerPadrao = document.getElementById("app-header");
   const headerAlt = document.getElementById("app-header-alt");
+  const headerDrag = document.getElementById("app-header-drag");
 
+  // 2. Pegar os elementos dos Títulos (CORREÇÃO AQUI)
   const tituloPadrao = document.getElementById("header-title");
   const tituloAlt = document.getElementById("header-title-alt");
 
-  // 2. Primeiro, GARANTE que tudo está escondido
-  // Usamos classList para respeitar o CSS do seu projeto
+  // O ID no HTML é "header-title-drag-handle", então o JS tem que buscar igualzinho
+  const tituloDrag = document.getElementById("header-title-drag-handle");
+
+  // 3. Reset: Esconde tudo primeiro
   if (headerPadrao) {
     headerPadrao.classList.add("hidden");
-    headerPadrao.style.display = "none"; // Segurança extra
+    headerPadrao.style.display = "none";
   }
   if (headerAlt) {
     headerAlt.classList.add("hidden");
-    headerAlt.style.display = "none"; // Segurança extra
+    headerAlt.style.display = "none";
+  }
+  if (headerDrag) {
+    headerDrag.classList.add("hidden");
+    headerDrag.style.display = "none";
   }
 
-  // 3. Decide qual mostrar e remove o 'hidden' do escolhido
+  // 4. Mostra o escolhido e atualiza o texto
   const tipo = config.tipoHeader || "nenhum";
 
   if (tipo === "padrao" && headerPadrao) {
     headerPadrao.classList.remove("hidden");
-    headerPadrao.style.display = "flex"; // Força o layout flex
+    headerPadrao.style.display = "flex";
     if (tituloPadrao) tituloPadrao.innerText = config.titulo;
   } else if (tipo === "alternativo" && headerAlt) {
     headerAlt.classList.remove("hidden");
-    headerAlt.style.display = "flex"; // Força o layout flex
+    headerAlt.style.display = "flex";
     if (tituloAlt) tituloAlt.innerText = config.titulo;
+  } else if (tipo === "drag-handle" && headerDrag) {
+    headerDrag.classList.remove("hidden");
+    headerDrag.style.display = "flex";
+
+    // Agora ele vai encontrar o elemento e trocar o texto!
+    if (tituloDrag) tituloDrag.innerText = config.titulo;
   }
 }
 
@@ -219,16 +233,37 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
     return;
   }
 
-  // 2.1 Lógica Mágica do Botão Voltar
-  const btnVoltarGlobal = document.querySelector("#app-header-alt button"); // Seu botão do header alternativo
+  // 2.1 Lógica Mágica do Botão Voltar (AGORA UNIVERSAL)
 
-  if (btnVoltarGlobal && config.voltarPara) {
-    // Remove o history.back() e força a ir para a rota pai
-    btnVoltarGlobal.onclick = () => roteador(config.voltarPara);
-  } else if (btnVoltarGlobal) {
-    // Fallback: Se não tiver configurado, usa o histórico ou vai pro home
-    btnVoltarGlobal.onclick = () => roteador("templates");
-  }
+  // Lista de IDs de todos os headers que possuem botão de voltar
+  const headersIds = ["app-header-alt", "app-header-drag"];
+
+  headersIds.forEach((headerId) => {
+    const headerEl = document.getElementById(headerId);
+
+    // Só mexemos no botão se o header existir no HTML
+    if (headerEl) {
+      const btnVoltar = headerEl.querySelector("button.navigation-buttons");
+
+      if (btnVoltar) {
+        // Limpa eventos antigos (para não acumular cliques se trocar de tela rápido)
+        // Clonar o nó é um truque rápido para limpar event listeners
+        const novoBtn = btnVoltar.cloneNode(true);
+        btnVoltar.parentNode.replaceChild(novoBtn, btnVoltar);
+
+        // Define a ação baseada na rota atual
+        if (config.voltarPara) {
+          novoBtn.onclick = () => {
+            console.log(`Voltando de ${nomeRota} para ${config.voltarPara}`);
+            roteador(config.voltarPara);
+          };
+        } else {
+          // Fallback seguro
+          novoBtn.onclick = () => roteador("templates");
+        }
+      }
+    }
+  });
 
   // 3. Layout (Login vs App)
   const ehTelaInterna = gerenciarLayoutPrincipal(nomeRota);
