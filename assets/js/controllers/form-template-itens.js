@@ -98,6 +98,8 @@ async function initTemplateItensForm() {
       const recs = await TreinoRecomendacoesService.getAll();
       selectRec.innerHTML =
         '<option value="" selected>Selecione o tipo...</option>';
+      selectRec.innerHTML += `<option value="auto">Automático</option>`;
+
       recs.forEach(r => {
         selectRec.innerHTML += `<option value="${r.id}">${r.name}</option>`;
       });
@@ -183,6 +185,11 @@ async function initTemplateItensForm() {
       payload.treino_recomendacoes = selectRec.value
         ? Number(selectRec.value)
         : null;
+      payload.series_alvo = null;
+      payload.repeticoes_alvo = null;
+    }else if (switchDynamic.checked && selectRec.value === "auto")   {
+      // Modo Dinâmico Automático: Salva recomendação automática e anula o resto
+      payload.treino_recomendacoes = null;
       payload.series_alvo = null;
       payload.repeticoes_alvo = null;
     } else {

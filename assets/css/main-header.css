@@ -126,10 +126,51 @@
   color: var(--font-color-light);
 }
 
-.header-alternative-1{
+/* .header-alternative-1{
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  background-color: #f8ab81;
+  justify-content: space-evenly;
+} */
+
+.header-alternative-1 {
+  /* Sai o Flex, entra o Grid */
+  display: grid;
+
+  /* Define as 3 colunas: 
+     50px (esquerda) | O que sobrar (meio) | 50px (direita) */
+  grid-template-columns: 40px 1fr 40px;
+
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  /* Espaço entre as colunas */
+  /* background-color: tomato; */
+}
+
+/* O título precisa saber que ele pertence à coluna do meio */
+#header-title-alt,
+#header-title-drag-handle {
+  text-align: left;
+  /* padding-left: 0.rem; */
+  grid-column: 2;
+  /* Força o título a ficar SEMPRE na coluna 2 */
+  margin: 0;
+  white-space: nowrap;
+  /* Evita quebra de linha feia */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(0.1rem, 5.647vw, 2.5rem);
+  /* Se o texto for gigante, põe "..." */
+}
+
+/* O botão de ação (quando existir) vai para a coluna 3 */
+.header-side-right {
+  grid-column: 3;
+  justify-self: end;
+  /* Alinha o botão no final da célula */
 }
 
 .navigation-buttons {

@@ -16,4 +16,57 @@
     /* padding: 15px; */
     font-weight: 500;
     font-size: 24px;
+    height: 45px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+
+
+.buttonBaseAdd{
+    margin-top: 20px;
+}
+
+#container-dynamic{
+    display: flex;
+    align-items: center;
+    width: 90%;
+    /* background-color: aqua; */
+}
+
+#container-dynamic .input-group{
+    /* background-color: brown; */
+    width: 100%;
+}
+
+#container-static{
+    height: 65px;
+}
+
+.form-exercise-series .input-group{
+    /* background-color: aquamarine; */
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    width: 40%;
+}
+
+.form-exercise-series{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* background-color: lightcoral; */
+    padding-bottom: 0px;
+}
+
+.form-actions{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 20px;
 }

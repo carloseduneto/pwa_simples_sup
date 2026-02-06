@@ -218,18 +218,21 @@
             <span class="material-symbols-rounded"> arrow_back_ios_new </span>
           </button>
           <h2 id="header-title-drag-handle">Título Alternativo</h2>
-                    <button
-            id="template-itens-reorder"
-            onclick="alternarVisualizacaoInativos()"
-            class="btn-template-inactive-active"
-          >
-            <span class="material-symbols-rounded rotate180">low_priority</span>
-            <span class="btn-text-header">Reordenar</span>
-          </button>
 
+          <div class="header-side-right">
+            <button
+              id="template-itens-reorder"
+              onclick="alternarVisualizacaoInativos()"
+              class="btn-template-inactive-active"
+            >
+              <span class="material-symbols-rounded rotate180"
+                >low_priority</span
+              >
+              <span class="btn-text-header">Reordenar</span>
+            </button>
+          </div>
         </div>
       </div>
-
 
       <div id="screen-templates-list">
         <!-- <h3>Seus Treinos</h3> -->
@@ -313,8 +316,8 @@
         <div class="rowExercise">
           <input type="text" class="seriesExercise" />
           <button class="anteriorExercise"></button>
+          <input type="number" class="kgExercise"/>
           <input type="number" class="repsExercise" />
-          <input type="number" class="kgExercise" />
           <button class="checkExercise">
             <span class="material-symbols-rounded"> check </span>
           </button>
