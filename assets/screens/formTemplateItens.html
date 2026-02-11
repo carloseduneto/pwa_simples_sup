@@ -90,13 +90,28 @@
     </select>
   </div>
   
-  <div class="input-group">
+  <!-- <div class="input-group">
     <label class="form-label">Exercício*</label>
     <select id="select-exercise" class="default-form-select" required disabled>
       <option value="" selected>Selecione um grupo primeiro</option>
     </select>
-  </div>
+  </div> -->
 
+  <div class="input-group" style="position: relative;"> <label class="form-label">Exercício*</label>
+  
+  <input type="text" 
+         id="input-exercise-search" 
+         class="default-form-input block_input" 
+         placeholder="Selecione um grupo muscular" 
+         autocomplete="off" 
+         disabled>
+  
+  <input type="hidden" id="input-exercise-id">
+
+  <ul id="list-exercise-results" class="autocomplete-list hidden"></ul>
+</div>
+
+  
   <div class="input-group switch-container" style="margin: 20px 0; display:flex; justify-content:space-between; align-items:center">
     <span>Exercício Dinâmico?</span>
     <label class="switch">

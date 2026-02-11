@@ -2,43 +2,34 @@ async function initTemplateItensForm() {
   // --- 1. REFERÊNCIAS ---
   const form = document.getElementById("form-template-itens");
   const selectGroup = document.getElementById("select-muscle-group");
-  const selectExercise = document.getElementById("select-exercise");
-  const switchDynamic = document.getElementById("switch-dynamic");
 
-  // Containers e Inputs
+  // NOVAS REFERÊNCIAS
+  const inputSearch = document.getElementById("input-exercise-search");
+  const inputHiddenId = document.getElementById("input-exercise-id");
+  const resultsList = document.getElementById("list-exercise-results");
+
+  let allExercisesCache = []; // Memória dos exercícios
+
+  // Referências UI padrão
+  const switchDynamic = document.getElementById("switch-dynamic");
   const containerStatic = document.getElementById("container-static");
   const containerDynamic = document.getElementById("container-dynamic");
   const inputSeries = document.getElementById("input-series");
   const inputReps = document.getElementById("input-reps");
   const selectRec = document.getElementById("select-recommendation");
   const inputTech = document.getElementById("input-technique");
-
   const btnSave = form
     ? form.querySelector(".default-form-button--save")
     : null;
-  const headerTitle = document.getElementById("header-title-alt"); // Título do header
-
-  // IDs de Controle
-  const editItemId = localStorage.getItem("editTemplateItem"); // ID do ITEM (Tabela template_itens)
-
-  // ADICIONE ISSO PARA DEBUGAR:
-  // console.log("🛠️ DEBUG EDIÇÃO:", {
-  //   editItemId: editItemId,
-  //   tipo: typeof editItemId,
-  //   payloadEsperado: {
-  //     id: Number(editItemId),
-  //   },
-  // });
-
+  const headerTitle = document.getElementById("header-title-alt");
+  const editItemId = localStorage.getItem("editTemplateItem");
   const parentTemplateId = localStorage.getItem("currentTemplateId");
 
-  // --- 2. PREPARAÇÃO VISUAL ---
   if (btnSave) {
     btnSave.disabled = false;
     btnSave.innerText = editItemId ? "Atualizar Item" : "Salvar Item";
   }
 
-  // Lógica do Switch (Dinâmico vs Estático)
   const toggleDynamicMode = () => {
     const isDynamic = switchDynamic.checked;
     if (isDynamic) {
@@ -50,94 +41,186 @@ async function initTemplateItensForm() {
     }
   };
 
-  // Carrega exercícios ao mudar o grupo
-  const loadExercises = async (groupId, selectedExerciseId = null) => {
-    selectExercise.innerHTML = "<option>Carregando...</option>";
-    selectExercise.disabled = true;
-    try {
-      const exercicios = await ExerciseService.getByMuscleGroup(groupId);
-      selectExercise.innerHTML =
-        '<option value="" selected>Selecione o exercício</option>';
+  // --- [NOVO] FUNÇÃO MÁGICA: Cria exercício instantaneamente ---
+  const createQuickExercise = async (nomeExercicio) => {
+    const groupId = selectGroup.value;
+    if (!groupId) return alert("Selecione um grupo muscular primeiro.");
 
-      exercicios.forEach(ex => {
-        const opt = document.createElement("option");
-        opt.value = ex.id;
-        opt.innerText = ex.nome;
-        selectExercise.appendChild(opt);
+    // 1. UI OTIMISTA (Snappy): Finge que já deu certo antes da API responder
+    inputSearch.value = nomeExercicio;
+    resultsList.classList.add("hidden");
+    inputSearch.classList.add("loading-pulse"); // (Opcional) Classe CSS pra dar feedback
+
+    try {
+      // 2. Chama API em background
+      const result = await ExerciseService.create({
+        nome: nomeExercicio,
+        grupo_muscular: Number(groupId),
       });
 
-      selectExercise.disabled = false;
+      // Supabase retorna array no insert
+      const novoExercicio = result[0] || result.data[0];
 
-      // Se estiver editando, seleciona o exercício correto
-      if (selectedExerciseId) {
-        selectExercise.value = selectedExerciseId;
-      }
+      // 3. Consolida os dados reais
+      allExercisesCache.push(novoExercicio); // Adiciona ao cache local
+      inputHiddenId.value = novoExercicio.id; // Vincula o ID real
+
+      // Feedback sutil de sucesso (opcional: piscar borda verde)
+      inputSearch.style.borderColor = "#4CAF50";
+      setTimeout(() => (inputSearch.style.borderColor = ""), 1000);
     } catch (error) {
       console.error(error);
-      selectExercise.innerHTML = "<option>Erro ao carregar</option>";
+      alert("Erro ao criar exercício rápido. Tente novamente.");
+      inputHiddenId.value = ""; // Reverte em caso de erro
+      inputSearch.value = "";
+    } finally {
+      inputSearch.classList.remove("loading-pulse");
     }
   };
 
-  // --- 3. CARREGAMENTO INICIAL DOS DADOS ---
+  // --- [NOVO] Renderiza a lista com a opção "Criar" ---
+  const renderList = (list) => {
+    resultsList.innerHTML = "";
+    const termo = inputSearch.value.trim();
 
-  // A) Carrega Grupos Musculares
+    // Cenário 1: Lista Vazia + Termo digitado = Oferecer Cadastro
+    if (list.length === 0 && termo.length > 2) {
+      resultsList.classList.remove("hidden");
+
+      const li = document.createElement("li");
+      // Estilização inline pra garantir o destaque laranja
+      li.innerHTML = `Não encontrado. <span style="color: var(--highlight-text); font-weight: bold;">Adicionar "${termo}"?</span>`;
+      li.style.cursor = "pointer";
+      li.style.padding = "10px";
+
+      li.onclick = (e) => {
+        e.stopPropagation(); // Evita fechar a lista antes da hora
+        createQuickExercise(termo); // Chama a função mágica
+      };
+
+      resultsList.appendChild(li);
+      return;
+    }
+
+    // Cenário 2: Nada encontrado e texto curto
+    if (list.length === 0) {
+      resultsList.classList.add("hidden");
+      return;
+    }
+
+    // Cenário 3: Lista normal
+    list.forEach((ex) => {
+      const li = document.createElement("li");
+      li.innerText = ex.nome;
+      li.onclick = () => selectItem(ex);
+      resultsList.appendChild(li);
+    });
+
+    resultsList.classList.remove("hidden");
+  };
+
+  const selectItem = (exercise) => {
+    inputSearch.value = exercise.nome;
+    inputHiddenId.value = exercise.id;
+    resultsList.classList.add("hidden");
+  };
+
+  const loadExercises = async (groupId, selectedId = null) => {
+    inputSearch.value = "Carregando...";
+    inputSearch.disabled = true;
+    inputHiddenId.value = "";
+    resultsList.classList.add("hidden");
+
+    try {
+      const exercicios = await ExerciseService.getByMuscleGroup(groupId);
+      allExercisesCache = exercicios;
+
+      inputSearch.value = "";
+      inputSearch.disabled = false;
+      inputSearch.placeholder = "Digite para buscar ou adicionar..."; // Placeholder atualizado
+
+      if (selectedId) {
+        const found = exercicios.find((ex) => ex.id == selectedId);
+        if (found) selectItem(found);
+      }
+    } catch (error) {
+      console.error(error);
+      inputSearch.value = "Erro ao carregar";
+    }
+  };
+
+  // --- EVENTOS DO INPUT ---
+  inputSearch.addEventListener("input", (e) => {
+    const termo = e.target.value.toLowerCase();
+    inputHiddenId.value = "";
+
+    // Filtra
+    const filtrados = allExercisesCache.filter((ex) =>
+      ex.nome.toLowerCase().includes(termo),
+    );
+    renderList(filtrados);
+  });
+
+  inputSearch.addEventListener("focus", () => {
+    if (inputSearch.value === "") {
+      renderList(allExercisesCache);
+    } else {
+      inputSearch.dispatchEvent(new Event("input"));
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!inputSearch.contains(e.target) && !resultsList.contains(e.target)) {
+      resultsList.classList.add("hidden");
+    }
+  });
+
+  // --- CARREGAMENTO INICIAL ---
   try {
     const grupos = await MuscleGroupService.getAll();
     selectGroup.innerHTML =
       '<option value="" disabled selected>Selecione o grupo</option>';
-    grupos.forEach(g => {
+    grupos.forEach((g) => {
       selectGroup.innerHTML += `<option value="${g.id}">${g.nome}</option>`;
     });
   } catch (err) {
     console.error("Erro grupos", err);
   }
 
-  // B) Carrega Recomendações (CORREÇÃO DO ERRO 7)
   try {
     if (typeof TreinoRecomendacoesService !== "undefined") {
       const recs = await TreinoRecomendacoesService.getAll();
       selectRec.innerHTML =
-        '<option value="" selected>Selecione o tipo...</option>';
-      selectRec.innerHTML += `<option value="auto">Automático</option>`;
-
-      recs.forEach(r => {
-        selectRec.innerHTML += `<option value="${r.id}">${r.name}</option>`;
-      });
+        '<option value="" selected>Selecione o tipo...</option><option value="auto">Automático</option>';
+      recs.forEach(
+        (r) =>
+          (selectRec.innerHTML += `<option value="${r.id}">${r.name}</option>`),
+      );
     }
   } catch (err) {
-    console.error("Erro recomendações", err);
+    console.error("Erro recs", err);
   }
-
-  // C) MODO EDIÇÃO (CORREÇÃO DO ERRO 9)
+  
   if (editItemId) {
+    form.reset();
+    inputSearch.classList.remove("disable-input");
     if (headerTitle) headerTitle.innerText = "Editar Item do Treino";
-
     try {
-      // Busca o item específico pelo ID
       const itemData = await TemplateItensService.getByIdSingle(editItemId);
-
       if (itemData) {
-        // 1. Preenche dados do exercício
         if (itemData.exercicios && itemData.exercicios.grupo_muscular) {
           selectGroup.value = itemData.exercicios.grupo_muscular;
-          // Carrega a lista de exercícios e seleciona o correto
           await loadExercises(
             itemData.exercicios.grupo_muscular,
             itemData.exercicio_id,
           );
         }
-
-        // 2. Preenche Técnica
         inputTech.value = itemData.tecnica_intensificacao || "";
-
-        // 3. Preenche Estático ou Dinâmico
         if (itemData.treino_recomendacoes) {
-          // É dinâmico
           switchDynamic.checked = true;
           toggleDynamicMode();
           selectRec.value = itemData.treino_recomendacoes;
         } else {
-          // É estático
           switchDynamic.checked = false;
           toggleDynamicMode();
           inputSeries.value = itemData.series_alvo || "";
@@ -145,15 +228,18 @@ async function initTemplateItensForm() {
         }
       }
     } catch (err) {
-      console.error("Erro ao carregar item para edição:", err);
-      alert("Erro ao carregar dados.");
+      console.error("Erro edição", err);
     }
   } else {
     if (headerTitle) headerTitle.innerText = "Adicionar Exercício";
+    inputSearch.classList.add("disable-input");
+    inputSearch.placeholder = "Selecione um grupo muscular";
+    form.reset();
   }
 
-  // --- 4. LISTENERS ---
+  // LISTENERS
   selectGroup.onchange = () => {
+    inputSearch.classList.remove("disable-input");
     if (selectGroup.value) loadExercises(selectGroup.value);
   };
   switchDynamic.onchange = toggleDynamicMode;
@@ -163,37 +249,27 @@ async function initTemplateItensForm() {
     roteador("templateItens", parentTemplateId);
   };
 
-  // --- 5. SALVAR (CORREÇÃO DO ERRO 8) ---
-  form.onsubmit = async e => {
+  form.onsubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectExercise.value) {
-      alert("Selecione um exercício!");
+    if (!inputHiddenId.value) {
+      alert("Por favor, selecione um exercício da lista ou crie um novo.");
       return;
     }
 
-    // 1. MONTAGEM DO PAYLOAD (Dados limpos)
-    // Nota: Não incluímos template_id no objeto base para evitar conflitos no update
     const payload = {
-      exercicio_id: Number(selectExercise.value),
+      exercicio_id: Number(inputHiddenId.value),
       tecnica_intensificacao: inputTech.value || null,
     };
 
-    // 2. LÓGICA DE LIMPEZA (Séries/Reps vs Recomendação)
     if (switchDynamic.checked) {
-      // Modo Dinâmico: Salva recomendação e anula o resto
-      payload.treino_recomendacoes = selectRec.value
-        ? Number(selectRec.value)
-        : null;
-      payload.series_alvo = null;
-      payload.repeticoes_alvo = null;
-    }else if (switchDynamic.checked && selectRec.value === "auto")   {
-      // Modo Dinâmico Automático: Salva recomendação automática e anula o resto
-      payload.treino_recomendacoes = null;
+      payload.treino_recomendacoes =
+        selectRec.value && selectRec.value !== "auto"
+          ? Number(selectRec.value)
+          : null;
       payload.series_alvo = null;
       payload.repeticoes_alvo = null;
     } else {
-      // Modo Fixo: Salva séries/reps e anula recomendação
       payload.series_alvo = inputSeries.value
         ? Number(inputSeries.value)
         : null;
@@ -201,21 +277,14 @@ async function initTemplateItensForm() {
       payload.treino_recomendacoes = null;
     }
 
-    // Debug rápido: Veja no F12 se o payload está saindo com os dados certos
-    console.log("Payload para salvar:", payload);
-
     try {
       btnSave.disabled = true;
       btnSave.innerText = "Salvando...";
 
       if (editItemId) {
-        // --- ATUALIZAÇÃO ---
         await TemplateItensService.update(editItemId, payload);
       } else {
-        // --- CRIAÇÃO ---
-        // Na criação, precisamos incluir o template_id
         payload.template_id = Number(parentTemplateId);
-
         const itensAtuais =
           await TemplateItensService.getByid(parentTemplateId);
         const maiorOrdem = itensAtuais.reduce(
@@ -223,18 +292,17 @@ async function initTemplateItensForm() {
           0,
         );
         payload.ordem = maiorOrdem + 1;
-
         await TemplateItensService.create(payload);
       }
-
       alert("Salvo com sucesso!");
       voltarParaItens();
     } catch (error) {
-      console.error("Erro no salvamento:", error);
+      console.error(error);
       alert("Erro ao salvar: " + error.message);
       btnSave.disabled = false;
       btnSave.innerText = editItemId ? "Atualizar Item" : "Salvar Item";
     }
   };
 }
+
 window.initTemplateItensForm = initTemplateItensForm;

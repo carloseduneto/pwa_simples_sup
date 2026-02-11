@@ -62,6 +62,7 @@
   --text-on-brand: #ffffff;
   --text-brand: var(--color-orange-600);
   --caret-color: var(--color-orange-500);
+  --highlight-text: var(--color-orange-500);
 
   --switch-active-bg: var(--color-orange-500);
   --switch-active-knob: #ffffff;
@@ -299,4 +300,9 @@ textarea,
     "wght" 400,
     "GRAD" 0,
     "opsz" 24;
+}
+
+.disable-input{
+  pointer-events: none;
+  opacity: 0.5;
 }

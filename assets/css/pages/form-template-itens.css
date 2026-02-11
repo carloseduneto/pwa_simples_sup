@@ -70,3 +70,40 @@
     width: 100%;
     margin-top: 20px;
 }
+
+
+/* Lista de sugestões flutuante */
+.autocomplete-list {
+  position: absolute;
+  top: 100%; /* Logo abaixo do input */
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 0 0 8px 8px;
+  max-height: 250px; /* Limite de altura com scroll */
+  overflow-y: auto;
+  z-index: 1000; /* Fica por cima de tudo */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Item da lista */
+.autocomplete-list li {
+  padding: 12px 15px; /* Área de toque grande para mobile */
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 16px; /* Tamanho legível */
+  color: #333;
+}
+
+.autocomplete-list li:hover, .autocomplete-list li:active {
+  background-color: #f0f0f0; /* Feedback visual de toque */
+}
+
+/* Utilitário para esconder */
+.hidden {
+  display: none !important;
+}
