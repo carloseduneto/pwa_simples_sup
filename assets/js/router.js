@@ -34,7 +34,7 @@ const rotasConfig = {
   // --- TELAS NOVAS ---
   exercises: {
     idDiv: "screen-exercises",
-    html: "assets/screens/listExercises.html",
+    html: "assets/screens/list-exercises.html",
     tipoHeader: "alternativo", // <--- AQUI A MÁGICA: Usa o novo header!
     titulo: "Exercícios",
     // SE voltar daqui, vai para o inicio (ou templates)
@@ -47,7 +47,7 @@ const rotasConfig = {
   },
   exercisesAddEdit: {
     idDiv: "screen-exercises-add-edit",
-    html: "assets/screens/formExercises.html",
+    html: "assets/screens/form-exercises.html",
     tipoHeader: "alternativo", // Usa o novo header
     // titulo: "Gerenciar Exercício",
     titulo: "",
@@ -61,7 +61,7 @@ const rotasConfig = {
   },
   templateForm: {
     idDiv: "screen-template-add-edit",
-    html: "assets/screens/formTemplates.html",
+    html: "assets/screens/form-templates.html",
     tipoHeader: "alternativo", // Usa o novo header
     titulo: "Add/Edit Template",
     // titulo: "",
@@ -75,7 +75,7 @@ const rotasConfig = {
   },
   templateItens: {
     idDiv: "screen-template-itens",
-    html: "assets/screens/listTemplateItens.html",
+    html: "assets/screens/list-template-itens.html",
     tipoHeader: "drag-handle", // Usa o novo header
     titulo: "Itens do Template", // Ajustei o título
     voltarPara: "templates",
@@ -91,7 +91,7 @@ const rotasConfig = {
   },
   templateItensForm: {
     idDiv: "screen-template-itens-form",
-    html: "assets/screens/formTemplateItens.html",
+    html: "assets/screens/form-template-itens.html",
     tipoHeader: "alternativo", // Usa o novo header
     // titulo: "Gerenciar Exercício",
     titulo: "",
