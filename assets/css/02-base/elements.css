@@ -1,0 +1,66 @@
+body {
+  font-family: system-ui, sans-serif;
+  /* padding: 20px; */
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+input,
+button {
+  display: block;
+  width: 100%;
+  /* É esssa porrinha que deixa o negócio com uma borda grossa embaixo */
+  /* margin-bottom: 0px; */
+  padding: 10px;
+}
+
+pre {
+  background: #f4f4f4;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+/* Reset de Highlight Mobile */
+button,
+a,
+input,
+textarea,
+[role="button"],
+section,
+select,
+article,
+.btn-fechar,
+.userImage {
+  -webkit-tap-highlight-color: transparent;
+}
+/* Obs: .userImage e .btn-fechar são classes intrusas aqui, 
+   mas mantenha junto por segurança nesta fase. */
+
+/* Reset de Outline/Focus */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+section:focus,
+select:focus,
+article:focus .userImage:focus,
+[role="button"]:focus,
+.btn-fechar:focus {
+  outline: none;
+}
+
+/* Cores de Input Globais */
+input,
+textarea,
+[contenteditable] {
+  caret-color: var(--caret-color);
+}
+
+/* Seleção de texto */
+::selection {
+  background: var(--btn-soft);
+}
+::-moz-selection {
+  background: var(--btn-soft);
+}
+

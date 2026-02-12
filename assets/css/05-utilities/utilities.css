@@ -1,0 +1,38 @@
+.rotate180 {
+  transform: rotate(180deg);
+}
+
+.hidden {
+  display: none !important;
+}
+
+._100percwidth {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.icon-fill {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.disable-input {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Debug */
+.testConfig {
+  background-color: yellow;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+#app-section{
+    padding: 20px;
+    background-color: #ffffff;
+}

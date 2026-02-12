@@ -1,3 +1,8 @@
+.exercicio-item {
+  padding: 10px;
+  border-bottom: 1px solid #cf2020;
+}
+
 .screen-workout-details-style {
   padding-top: 80px;
 }
@@ -28,7 +33,6 @@
   color: var(--primary-color);
 }
 
-
 .headerExercise {
   display: grid;
 
@@ -50,7 +54,6 @@
   font-size: 0.8rem;
   margin-top: 20px;
   margin-bottom: 10px;
-
 }
 
 .rowExercise {
@@ -83,7 +86,6 @@
   /* Garante que preencham a coluna do grid (15fr) */
   text-align: center;
   /* margin: 0 !important;  */
-
 }
 
 .rowExercise input.repsExercise,
@@ -106,9 +108,6 @@
   background-color: transparent;
 }
 
-
-
-
 .rowExercise button.checkExercise {
   display: flex;
   justify-content: center;
@@ -125,8 +124,6 @@
   padding: 10px;
   transform-origin: center;
 }
-
-
 
 .rowExercise button.checkExercise:active {
   background-color: var(--faded-color);
@@ -161,16 +158,13 @@
   /* Volta ao normal */
 }
 
-
 .checkExercise .material-symbols-rounded {
   font-variation-settings:
-    'FILL' 0,
-    'wght' 900,
-    'GRAD' 0,
-    'opsz' 24
+    "FILL" 0,
+    "wght" 900,
+    "GRAD" 0,
+    "opsz" 24;
 }
-
-
 
 button.anteriorExercise {
   /* background-color: white; 
@@ -178,7 +172,6 @@ button.anteriorExercise {
         color: black; */
   cursor: pointer;
 }
-
 
 /* Quando a linha tiver a classe 'concluido', ela fica cinza */
 .rowExercise.concluido {
@@ -200,10 +193,9 @@ button.anteriorExercise {
   /* Desativa interações */
 }
 
-.rowExercise.concluido input::placeholder{
+.rowExercise.concluido input::placeholder {
   color: var(--font-color-dark);
 }
-
 
 /* Quando a linha estiver concluída, muda a cor do botão */
 .rowExercise.concluido .checkExercise {
@@ -217,14 +209,12 @@ button.anteriorExercise {
   /* animation: efeito-elastico 0.6s ease-in-out; */
 }
 
-.rowExercise.concluido> :not(.checkExercise) {
+.rowExercise.concluido > :not(.checkExercise) {
   opacity: 0.6;
   /* Pode baixar até mais que 0.6 para destacar bem o check */
   /* pointer-events: none; */
   /* Garante que ninguém clica nos inputs transparentes */
 }
-
-
 
 .checkExercise.animando {
   animation: efeito-elastico 0.6s ease-in-out;

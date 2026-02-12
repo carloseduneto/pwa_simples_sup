@@ -1,0 +1,15 @@
+h2, h3, h4, h5, h6 {
+  font-family: "Montserrat Alternates", sans-serif;
+}
+
+/* Nota: .titleFont e .titleLoginFont são classes, 
+   mas como são PURAMENTE tipografia, pode deixar aqui por enquanto 
+   ou mover para utilities se forem usadas em muitos lugares diferentes. */
+.titleFont {
+  font-family: "Montserrat Alternates", sans-serif;
+}
+
+.titleLoginFont {
+  font-family: "Anton", sans-serif;
+  font-size: 60px;
+}
