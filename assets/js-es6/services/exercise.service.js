@@ -1,7 +1,6 @@
 // Se estiver usando módulos: import { client } from '../config.js';
 
-import { client } from "../config/config";
-
+import { client } from "../config/config.js";
 
 export const ExerciseService = {
   // LISTAR (READ) - Trazendo o nome do grupo muscular (JOIN)

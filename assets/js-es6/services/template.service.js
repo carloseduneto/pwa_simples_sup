@@ -1,12 +1,14 @@
-import { client } from "../config/config";
+import { client } from "../config/config.js";
 
 // Corrigido: TemplateService (estava Tempalte)
 export const TemplateService = {
   async getAll() {
     const { data, error } = await client
       .from("templates")
-      .select(`id, created_at, nome, descricao, status`)
-      .order("created_at", { ascending: true });
+      .select("id, nome, descricao, status")
+      .order("status", { ascending: true, nullsFirst: true }) // Ativos primeiro
+      .order("nome", { ascending: true }) // Alfabético
+      .limit(500);
 
     if (error) throw error;
     return data;

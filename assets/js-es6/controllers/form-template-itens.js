@@ -1,8 +1,7 @@
-import { TemplateItensService } from "../services/itens-template.service";
+import { TemplateItensService } from "../services/itens-template.service.js";
 import { ExerciseService } from "../services/exercise.service.js";
 import { MuscleGroupService } from "../services/muscle-group.service.js";
-import { TreinoRecomendacoesService } from "../services/treino-recomendacoes.service.js"; 
-
+import { TreinoRecomendacoesService } from "../services/treino-recomendacoes.service.js";
 
 export async function initTemplateItensForm(onNavigate) {
   // --- 1. REFERÊNCIAS ---
@@ -48,7 +47,7 @@ export async function initTemplateItensForm(onNavigate) {
   };
 
   // --- [NOVO] FUNÇÃO MÁGICA: Cria exercício instantaneamente ---
-  const createQuickExercise = async (nomeExercicio) => {
+  const createQuickExercise = async nomeExercicio => {
     const groupId = selectGroup.value;
     if (!groupId) return alert("Selecione um grupo muscular primeiro.");
 
@@ -85,7 +84,7 @@ export async function initTemplateItensForm(onNavigate) {
   };
 
   // --- [NOVO] Renderiza a lista com a opção "Criar" ---
-  const renderList = (list) => {
+  const renderList = list => {
     resultsList.innerHTML = "";
     const termo = inputSearch.value.trim();
 
@@ -99,7 +98,7 @@ export async function initTemplateItensForm(onNavigate) {
       li.style.cursor = "pointer";
       li.style.padding = "10px";
 
-      li.onclick = (e) => {
+      li.onclick = e => {
         e.stopPropagation(); // Evita fechar a lista antes da hora
         createQuickExercise(termo); // Chama a função mágica
       };
@@ -115,7 +114,7 @@ export async function initTemplateItensForm(onNavigate) {
     }
 
     // Cenário 3: Lista normal
-    list.forEach((ex) => {
+    list.forEach(ex => {
       const li = document.createElement("li");
       li.innerText = ex.nome;
       li.onclick = () => selectItem(ex);
@@ -125,7 +124,7 @@ export async function initTemplateItensForm(onNavigate) {
     resultsList.classList.remove("hidden");
   };
 
-  const selectItem = (exercise) => {
+  const selectItem = exercise => {
     inputSearch.value = exercise.nome;
     inputHiddenId.value = exercise.id;
     resultsList.classList.add("hidden");
@@ -146,7 +145,7 @@ export async function initTemplateItensForm(onNavigate) {
       inputSearch.placeholder = "Digite para buscar ou adicionar..."; // Placeholder atualizado
 
       if (selectedId) {
-        const found = exercicios.find((ex) => ex.id == selectedId);
+        const found = exercicios.find(ex => ex.id == selectedId);
         if (found) selectItem(found);
       }
     } catch (error) {
@@ -156,12 +155,12 @@ export async function initTemplateItensForm(onNavigate) {
   };
 
   // --- EVENTOS DO INPUT ---
-  inputSearch.addEventListener("input", (e) => {
+  inputSearch.addEventListener("input", e => {
     const termo = e.target.value.toLowerCase();
     inputHiddenId.value = "";
 
     // Filtra
-    const filtrados = allExercisesCache.filter((ex) =>
+    const filtrados = allExercisesCache.filter(ex =>
       ex.nome.toLowerCase().includes(termo),
     );
     renderList(filtrados);
@@ -175,7 +174,7 @@ export async function initTemplateItensForm(onNavigate) {
     }
   });
 
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", e => {
     if (!inputSearch.contains(e.target) && !resultsList.contains(e.target)) {
       resultsList.classList.add("hidden");
     }
@@ -186,7 +185,7 @@ export async function initTemplateItensForm(onNavigate) {
     const grupos = await MuscleGroupService.getAll();
     selectGroup.innerHTML =
       '<option value="" disabled selected>Selecione o grupo</option>';
-    grupos.forEach((g) => {
+    grupos.forEach(g => {
       selectGroup.innerHTML += `<option value="${g.id}">${g.nome}</option>`;
     });
   } catch (err) {
@@ -199,7 +198,7 @@ export async function initTemplateItensForm(onNavigate) {
       selectRec.innerHTML =
         '<option value="" selected>Selecione o tipo...</option><option value="auto">Automático</option>';
       recs.forEach(
-        (r) =>
+        r =>
           (selectRec.innerHTML += `<option value="${r.id}">${r.name}</option>`),
       );
     }
@@ -256,7 +255,7 @@ export async function initTemplateItensForm(onNavigate) {
     // roteador("templateItens", parentTemplateId);
   };
 
-  form.onsubmit = async (e) => {
+  form.onsubmit = async e => {
     e.preventDefault();
 
     if (!inputHiddenId.value) {

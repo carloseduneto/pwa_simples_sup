@@ -1,4 +1,4 @@
-import { TemplateService } from "../services/template.service";
+import { TemplateService } from "../services/template.service.js";
 
 export async function initTemplateForm(onNavigate) {
   const form = document.getElementById("form-template");

@@ -1,8 +1,8 @@
-import { TemplateService } from "../services/template.service.js"; // Verifique se o caminho e extensão .js estão certos
+import { TemplateService } from "../services/template.service.js";
 import { roteador } from "../router.js";
-import { abrirTemplate } from "../scriptGeneration.js"; // Certifique-se que exportou isso no Passo 3
+// REMOVIDO: import { abrirTemplate } ... (Não precisamos mais dele)
 
-// Variável de controle para limpar eventos anteriores se a função for recarregada
+// Variável de controle para limpar eventos anteriores
 let cleanupListeners = null;
 
 export function initTemplateOptions() {
@@ -10,10 +10,8 @@ export function initTemplateOptions() {
   const backdrop = document.querySelector(".templates-backdrop");
   const dragger = document.querySelector(".tmp-opt-dragger-place");
 
-  // Se os elementos não existirem na página (ex: tela de login), sai da função.
   if (!sheet || !dragger) return;
 
-  // 1. Limpeza de eventos anteriores (Evita "Event Stacking")
   if (cleanupListeners) {
     cleanupListeners();
     cleanupListeners = null;
@@ -24,8 +22,7 @@ export function initTemplateOptions() {
   let longPressTimer;
 
   // --- FUNÇÕES AUXILIARES ---
-  const openMenu = (id) => {
-    // Lógica visual dos botões (Ativar/Inativar)
+  const openMenu = id => {
     const isModoInativo =
       typeof window.EXIBINDO_INATIVOS !== "undefined" &&
       window.EXIBINDO_INATIVOS;
@@ -62,8 +59,7 @@ export function initTemplateOptions() {
     currentTemplateId = null;
   };
 
-  // --- CONFIGURAÇÃO DOS BOTÕES DO MENU (Listeners Locais) ---
-  // Esses listeners estão no elemento 'sheet', que é fixo, então podemos usar onclick ou addEventListener simples.
+  // --- BOTÕES DO MENU ---
 
   // Excluir
   const btnDeleteTemplate = sheet.querySelector(".tmp-opt-item--delete");
@@ -91,7 +87,6 @@ export function initTemplateOptions() {
         localStorage.setItem("editTemplateId", currentTemplateId);
         closeMenu();
         roteador("templateForm");
-        // if (onNavigate) onNavigate("templateForm");
       }
     };
   }
@@ -105,9 +100,8 @@ export function initTemplateOptions() {
         typeof window.EXIBINDO_INATIVOS !== "undefined" &&
         window.EXIBINDO_INATIVOS;
       const novoStatus = isModoInativo ? "active" : "inactive";
-      const acaoTexto = isModoInativo ? "ativar" : "desativar";
 
-      if (!confirm(`Deseja realmente ${acaoTexto} este template?`)) return;
+      if (!confirm(`Deseja alterar o status deste template?`)) return;
 
       try {
         await TemplateService.updateStatus(currentTemplateId, novoStatus);
@@ -118,36 +112,41 @@ export function initTemplateOptions() {
     };
   }
 
-  // Botões de Ação Rápida (Sessão / Itens) - Verificando se existem na DOM
+  // --- AQUI ESTAVA O PROBLEMA DO abrirTemplate ---
+
+  // Botão "Iniciar Sessão" (Play)
   const btnSession = document.getElementById("start-session");
   if (btnSession) {
-    // Remove listener antigo clonando o nó ou apenas sobrescrevendo onclick (mais simples p/ migração)
-    btnSession.onclick = () => abrirTemplate(currentTemplateId);
+    btnSession.onclick = () => {
+      // CORREÇÃO: Chama o roteador direto
+      if (currentTemplateId) {
+        roteador("detalhes", currentTemplateId);
+      }
+    };
   }
 
+  // Botão "Ver Itens" (Lista)
   const btnItensTemplate = document.getElementById("template-itens");
   if (btnItensTemplate) {
     btnItensTemplate.onclick = () => {
       if (currentTemplateId) {
         const idSalvo = currentTemplateId;
         closeMenu();
-        // if (onNavigate) onNavigate("templateItens", idSalvo);
         roteador("templateItens", idSalvo);
       }
     };
   }
 
-  // Fechar ao clicar nas opções (exceto delete)
-  sheet.querySelectorAll(".tmp-opt-item").forEach((item) => {
+  // Fechar ao clicar nas opções genéricas
+  sheet.querySelectorAll(".tmp-opt-item").forEach(item => {
     item.onclick = () => {
       if (!item.classList.contains("tmp-opt-item--delete")) closeMenu();
     };
   });
 
-  // --- LISTENERS GLOBAIS (DOCUMENT) ---
-  // Aqui está a correção principal. Definimos as funções para poder adicionar e remover.
+  // --- LISTENERS GLOBAIS ---
 
-  const handleGlobalClick = (e) => {
+  const handleGlobalClick = e => {
     const btn = e.target.closest(".card-dots");
     if (btn) {
       e.stopPropagation();
@@ -156,7 +155,7 @@ export function initTemplateOptions() {
     if (e.target === backdrop) closeMenu();
   };
 
-  const handleTouchStart = (e) => {
+  const handleTouchStart = e => {
     const item = e.target.closest(".template-item");
     if (item) {
       const btn = item.querySelector(".card-dots");
@@ -169,7 +168,7 @@ export function initTemplateOptions() {
 
   const handleTouchEnd = () => clearTimeout(longPressTimer);
 
-  const handleContextMenu = (e) => {
+  const handleContextMenu = e => {
     const item = e.target.closest(".template-item");
     if (item) {
       e.preventDefault();
@@ -178,23 +177,22 @@ export function initTemplateOptions() {
     }
   };
 
-  // Adiciona os eventos
   document.addEventListener("click", handleGlobalClick);
   document.addEventListener("touchstart", handleTouchStart, { passive: true });
   document.addEventListener("touchend", handleTouchEnd);
   document.addEventListener("touchmove", handleTouchEnd);
   document.addEventListener("contextmenu", handleContextMenu);
 
-  // Lógica do Dragger (Mobile)
+  // Dragger
   let startY = 0;
-  const handleDragStart = (e) => {
+  const handleDragStart = e => {
     startY = e.touches[0].clientY;
   };
-  const handleDragMove = (e) => {
+  const handleDragMove = e => {
     let deltaY = e.touches[0].clientY - startY;
     if (deltaY > 0) sheet.style.transform = `translateY(${deltaY}px)`;
   };
-  const handleDragEnd = (e) => {
+  const handleDragEnd = e => {
     let deltaY = e.changedTouches[0].clientY - startY;
     if (deltaY > 100) closeMenu();
     else sheet.style.transform = "";
@@ -204,19 +202,16 @@ export function initTemplateOptions() {
   dragger.addEventListener("touchmove", handleDragMove);
   dragger.addEventListener("touchend", handleDragEnd);
 
-  // 2. Define a função de limpeza para a próxima execução
   cleanupListeners = () => {
     document.removeEventListener("click", handleGlobalClick);
     document.removeEventListener("touchstart", handleTouchStart);
     document.removeEventListener("touchend", handleTouchEnd);
     document.removeEventListener("touchmove", handleTouchEnd);
     document.removeEventListener("contextmenu", handleContextMenu);
-
     dragger.removeEventListener("touchstart", handleDragStart);
     dragger.removeEventListener("touchmove", handleDragMove);
     dragger.removeEventListener("touchend", handleDragEnd);
   };
 
-  // 3. Ponte para HTML legado (se necessário)
   window.openTemplateOptions = openMenu;
 }

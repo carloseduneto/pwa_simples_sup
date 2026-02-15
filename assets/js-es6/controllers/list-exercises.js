@@ -1,4 +1,4 @@
-import { GlobalLoader } from "../ui-ux/global-loader";
+import { GlobalLoader } from "../ui-ux/global-loader.js";
 import { ExerciseService } from "../services/exercise.service.js";
 
 // Função auxiliar de busca (Fica aqui dentro mesmo, pois só é usada aqui)

@@ -1,147 +1,131 @@
-import {TemplateFilterUX} from "../ui-ux/template-filter.js";
+import { TemplateService } from "../services/template.service.js";
+import { GlobalLoader } from "../ui-ux/global-loader.js";
+// REMOVIDO: import { abrirTemplate } ... (Não existe mais)
 
-// === VARIÁVEIS GLOBAIS DE CONTROLE ===
-let TODOS_TEMPLATES = []; // Guarda a lista bruta que veio do Supabase
-let EXIBINDO_INATIVOS = false; // Controla o estado do botão
+// --- ESTADO LOCAL (Privado do arquivo) ---
+let allTemplatesCache = [];
+let showInactives = false;
 
-//=== 5. CONSULTA TEMPLATES (SEM CACHE) ===
-async function buscarTemplates() {
-  const container = document.getElementById("lista-templates");
-  // container.innerHTML = "Carregando templates...";
-  container.innerHTML =
-    '<div class="espaco-loader">' + '<div class="loader"></div>' + "</div>";
-
-  // [CACHE - LEITURA]
-  if (MEXENDO_NO_CSS) {
-    const cache = localStorage.getItem("cache_templates");
-    if (cache) {
-      console.log("📦 Usando cache local (Templates)");
-      renderizarTemplates(JSON.parse(cache));
-      return;
-    }
-  }
-
-  const { data, error } = await client
-    .from("templates")
-    .select("id, nome, descricao, status")
-
-    // 1º CRITÉRIO: Status (Prioridade máxima)
-    // Isso joga tudo que é 'active' (ou null) para o topo da lista,
-    // e empurra os 'inactive' para o final.
-    .order("status", { ascending: true, nullsFirst: true })
-
-    // 2º CRITÉRIO: Nome (Ordem alfabética dentro do grupo)
-    .order("nome", { ascending: true })
-
-    // Agora o corte de 500 vai pegar todos os ativos primeiro.
-    // Só se houver mais de 500 ATIVOS é que algo ativo ficaria de fora.
-    .limit(500);
-
-  if (error) {
-    container.innerHTML = "Erro ao buscar: " + error.message;
-    return;
-  }
-
-  // [CACHE - GRAVAÇÃO]
-  if (MEXENDO_NO_CSS)
-    localStorage.setItem("cache_templates", JSON.stringify(data));
-
-  console.log("Templates encontrados:", data);
-  TODOS_TEMPLATES = data;
-
-  // --- AQUI ESTAVA FALTANDO ---
-  // O Router matou o clique do botão ao trocar de tela.
-  // O init() religa o fio do botão novo.
-  if (typeof TemplateFilterUX !== "undefined") {
-    TemplateFilterUX.init();
-  }
-  // ---------------------------
-  
-  //   renderizarTemplates(data);
-  aplicarFiltroERenderizar();
-}
-
-
-// === NOVA FUNÇÃO: FILTRO ===
-function aplicarFiltroERenderizar() {
-  const listaFiltrada = TODOS_TEMPLATES.filter(item => {
-    const ehInativo = item.status === "inactive";
-    return EXIBINDO_INATIVOS ? ehInativo : !ehInativo;
-  });
-
-  renderizarTemplates(listaFiltrada);
-
-  // AQUI: Chama o novo arquivo de UX para arrumar o botão
-  if (typeof TemplateFilterUX !== "undefined") {
-    TemplateFilterUX.atualizarVisual();
-  }
-}
-
-// === NOVA FUNÇÃO: AÇÃO DO BOTÃO ===
-function alternarVisualizacaoInativos() {
-  EXIBINDO_INATIVOS = !EXIBINDO_INATIVOS; // Inverte o valor
-  aplicarFiltroERenderizar(); // Re-renderiza a lista
-}
-
-function atualizarBotaoVisual() {
-  const btn = document.getElementById("template-button-inactived");
-
-  // TRAVA DE SEGURANÇA: Se não achar o botão, para a função sem dar erro
-  if (!btn) {
-    console.warn("Botão 'template-button-inactived' não encontrado no HTML.");
-    return;
-  }
-
-  const icon = btn.querySelector(".material-symbols-rounded");
-  const text = btn.querySelector(".btn-text-header");
-
-  if (EXIBINDO_INATIVOS) {
-    // Estilo "Ativado" (Laranja)
-    icon.style.color = "#FF6B00";
-    text.style.color = "#FF6B00";
-    icon.innerHTML = "check";
-    text.innerText = "Ativos"; // Muda texto opcionalmente
-  } else {
-    // Estilo "Normal" (Cinza)
-    icon.style.color = ""; // Volta ao CSS original
-    text.style.color = "#000000";
-    text.innerText = "Inativos";
-    icon.innerHTML = "block";
-  }
-}
-
-// === RENDERIZAÇÃO (Pequeno ajuste no CSS Class) ===
-function renderizarTemplates(lista) {
-  const container = document.getElementById("lista-templates");
+// --- FUNÇÃO DE RENDERIZAÇÃO E FILTRO ---
+// Agora aceita 'onNavigate' como segundo parâmetro para poder navegar ao clicar
+function renderizarListaFiltrada(container, onNavigate) {
   container.innerHTML = "";
 
-  if (!lista || lista.length === 0) {
-    // Mensagem personalizada dependendo do modo
-    const msg = EXIBINDO_INATIVOS ? "Nenhum inativo." : "Nenhum template ativo.";
+  // 1. Filtra
+  const listaExibida = allTemplatesCache.filter(t => {
+    return showInactives ? t.status === "inactive" : t.status !== "inactive";
+  });
+
+  // 2. Feedback Vazio
+  if (listaExibida.length === 0) {
+    const msg = showInactives
+      ? "Nenhum template inativo."
+      : "Nenhum template ativo.";
     container.innerHTML = `<p style="text-align:center; color:#999; margin-top:20px">${msg}</p>`;
     return;
   }
 
-  lista.forEach(item => {
-    const articleExercicio = document.createElement("article");
-
-    // Adiciona classe extra se for inativo para mudar a cor de fundo
+  // 3. Renderiza Cards
+  listaExibida.forEach(item => {
+    const article = document.createElement("article");
     const classeInativo = item.status === "inactive" ? "template-inativo" : "";
-    articleExercicio.className = `template-item ${classeInativo}`;
-    /*html*/
-    articleExercicio.innerHTML = `
+    article.className = `template-item ${classeInativo}`;
+
+    // HTML Interno
+    article.innerHTML = `
       <div class="card-info">
         <h3 class="card-title">${item.nome}</h3>
-        <p class="card-subtitle">${item.descricao}</p>
+        <p class="card-subtitle">${item.descricao || "Sem descrição"}</p>
       </div>
       <button class="card-dots" data-template-id="${item.id}">&#8942;</button>
     `;
 
-    articleExercicio.onclick = (e) => {
+    // Evento de Clique no Card (Iniciar Treino)
+    article.onclick = e => {
+      // Se clicou nos 3 pontinhos, para a propagação (o options-templates.js cuida disso)
       if (e.target.closest(".card-dots")) return;
-      abrirTemplate(item.id);
+
+      // CORREÇÃO: Usa o onNavigate injetado pelo Router
+      if (onNavigate) {
+        onNavigate("detalhes", item.id);
+      } else {
+        console.error("Navegação não disponível.");
+      }
     };
 
-    container.appendChild(articleExercicio);
+    container.appendChild(article);
   });
+}
+
+// --- ATUALIZA O VISUAL DO BOTÃO DE FILTRO ---
+function atualizarBotaoFiltro(btn) {
+  const icon = btn.querySelector(".material-symbols-rounded");
+  const text = btn.querySelector(".btn-text-header");
+
+  // Salva estado globalmente para o menu de opções saber se exibe "Ativar" ou "Inativar"
+  window.EXIBINDO_INATIVOS = showInactives;
+
+  if (showInactives) {
+    // Modo: Vendo Inativos
+    if (icon) {
+      icon.innerText = "check";
+      icon.style.color = "#FF6B00";
+    }
+    if (text) {
+      text.innerText = "Ativos";
+      text.style.color = "#FF6B00";
+    }
+  } else {
+    // Modo: Vendo Ativos (Padrão)
+    if (icon) {
+      icon.innerText = "block";
+      icon.style.color = "";
+    }
+    if (text) {
+      text.innerText = "Inativos";
+      text.style.color = "";
+    }
+  }
+}
+
+// --- FUNÇÃO PRINCIPAL (INIT) ---
+export async function renderizarTemplatesList(onNavigate) {
+  const container = document.getElementById("lista-templates");
+  const btnFilter = document.getElementById("template-button-inactived"); // Botão do Header
+
+  if (!container) return;
+
+  // 1. Configura Botão de Filtro (Se existir no header)
+  if (btnFilter) {
+    // Remove listener antigo
+    const novoBtn = btnFilter.cloneNode(true);
+    btnFilter.parentNode.replaceChild(novoBtn, btnFilter);
+
+    // Sincroniza visual inicial
+    atualizarBotaoFiltro(novoBtn);
+
+    // Click: Alterna estado e re-renderiza
+    novoBtn.onclick = () => {
+      showInactives = !showInactives;
+      atualizarBotaoFiltro(novoBtn);
+      // Passamos o onNavigate novamente para manter o clique funcionando
+      renderizarListaFiltrada(container, onNavigate);
+    };
+  }
+
+  // 2. Loader
+  container.innerHTML = GlobalLoader.getSimple();
+
+  try {
+    // 3. Busca Dados
+    const dados = await TemplateService.getAll();
+
+    allTemplatesCache = dados || [];
+
+    // 4. Renderiza Inicial (Passando onNavigate)
+    renderizarListaFiltrada(container, onNavigate);
+  } catch (error) {
+    console.error("Erro templates:", error);
+    container.innerHTML = `<p style="color:red; text-align:center; padding:20px">Erro ao carregar treinos.</p>`;
+  }
 }

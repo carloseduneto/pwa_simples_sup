@@ -1,4 +1,4 @@
-import { client } from "../config/config";
+import { client } from "../config/config.js";
 
 export const MuscleGroupService = {
   async getAll() {

@@ -2,7 +2,10 @@ import { initExerciseForm } from "./controllers/form-exercises.js";
 import { initTemplateItensForm } from "./controllers/form-template-itens.js";
 import { initTemplateForm } from "./controllers/form-templates.js";
 import { renderizarListaExercicios } from "./controllers/list-exercises.js";
-
+import { initLoginController } from "./controllers/auth-login.js";
+import { renderizarTemplatesList } from "./controllers/list-templates.js";
+import { renderizarListItensTemplate } from "./controllers/list-template-itens.js";
+import { initWorkoutPlayer } from "./controllers/list-workout-player.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -11,22 +14,24 @@ const rotasConfig = {
   // --- TELA DE LOGIN ---
   login: {
     idDiv: "auth-section",
-    tipoHeader: "nenhum", // Opções: 'padrao', 'alternativo', 'nenhum'
+    tipoHeader: "nenhum",
     titulo: "Login",
+    onLoad: () => {
+      initLoginController(); // <--- A chamada que faz a mágica
+      console.log("Tela de Login carregada.");
+    },
   },
 
   // --- TELAS ANTIGAS ---
   templates: {
     idDiv: "screen-templates-list",
-    tipoHeader: "padrao", // Usa o header azulzão normal
-    titulo: "Templates", // Meus Treinos
-    // onLoad: null,
-    // CORREÇÃO:
-    onLoad: () => {
-      // Chama a função que BUSCA os dados no banco
-      if (typeof buscarTemplates === "function") {
-        buscarTemplates();
-      }
+    tipoHeader: "padrao",
+    titulo: "Templates",
+    onLoad: id => {
+      // CORREÇÃO: Usamos a nova função exportada
+      renderizarTemplatesList((rota, param) => {
+        roteador(rota, param);
+      });
     },
   },
   config: {
@@ -44,14 +49,13 @@ const rotasConfig = {
     titulo: "Exercícios",
     // SE voltar daqui, vai para o inicio (ou templates)
     voltarPara: "templates",
-    onLoad: (id) => {
+    onLoad: id => {
       // if (typeof renderizarListaExercicios === "function") {
-        //   renderizarListaExercicios(id);
-        // }
-        renderizarListaExercicios((rotaDestino, paramId) => {
-          roteador(rotaDestino, paramId);
-        });
-
+      //   renderizarListaExercicios(id);
+      // }
+      renderizarListaExercicios((rotaDestino, paramId) => {
+        roteador(rotaDestino, paramId);
+      });
     },
   },
   exercisesAddEdit: {
@@ -62,7 +66,7 @@ const rotasConfig = {
     titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "exercises",
-    onLoad: (id) => {
+    onLoad: id => {
       // AQUI É A MÁGICA:
       // Passamos a função 'roteador' para dentro do controller.
       // O controller vai usá-la como 'onNavigate'.
@@ -79,7 +83,7 @@ const rotasConfig = {
     // titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "templates",
-    onLoad: (id) => {
+    onLoad: id => {
       // if (typeof initTemplateForm === "function") {
       //   initTemplateForm();
       // }
@@ -94,14 +98,14 @@ const rotasConfig = {
     tipoHeader: "drag-handle", // Usa o novo header
     titulo: "Itens do Template", // Ajustei o título
     voltarPara: "templates",
-    onLoad: (id) => {
-      console.log("Router recebeu ID:", id); // Adicione este log para debugar!
-      // CORREÇÃO: Chamamos a função do seu controller de LISTA, passando o ID
-      if (typeof renderizarListItensTemplate === "function") {
-        renderizarListItensTemplate(id);
-      } else {
-        console.error("Função renderizarListItensTemplate não encontrada.");
-      }
+    onLoad: id => {
+      // SALVA O ID NO LOCALSTORAGE PARA GARANTIR
+      if (id) localStorage.setItem("currentTemplateId", id);
+
+      // Agora chama a função passando o callback de navegação
+      renderizarListItensTemplate((rota, param) => {
+        roteador(rota, param);
+      });
     },
   },
   templateItensForm: {
@@ -112,7 +116,7 @@ const rotasConfig = {
     titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "templateItens",
-    onLoad: (id) => {
+    onLoad: id => {
       initTemplateItensForm((rotaDestino, paramId) => {
         roteador(rotaDestino, paramId);
       });
@@ -123,11 +127,13 @@ const rotasConfig = {
   },
   detalhes: {
     idDiv: "screen-workout-details",
-    tipoHeader: "nenhum", // Detalhes geralmente não tem header ou tem um próprio
+    tipoHeader: "nenhum",
     titulo: "Treino em Andamento",
-    onLoad: (id) => {
-      if (typeof renderizarItensDeTemplate === "function")
-        renderizarItensDeTemplate(id);
+    onLoad: id => {
+      // AQUI É A MUDANÇA:
+      initWorkoutPlayer((rota, param) => {
+        roteador(rota, param);
+      }, id);
     },
   },
 };
@@ -229,7 +235,11 @@ function atualizarHeader(config) {
 // 3. ROTEADOR CENTRAL (Versão à Prova de Falhas)
 // ============================================================================
 
-async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
+export async function roteador(
+  nomeRota,
+  paramId = null,
+  adicionarAoHistorico = true,
+) {
   console.log(`Tentando navegar para: ${nomeRota}, ID: ${paramId}`); // Debug para você ver no F12
 
   // 1. SALVAR ANTES DE TUDO (A CORREÇÃO PRINCIPAL) <<<<
@@ -256,7 +266,7 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
   // Lista de IDs de todos os headers que possuem botão de voltar
   const headersIds = ["app-header-alt", "app-header-drag"];
 
-  headersIds.forEach((headerId) => {
+  headersIds.forEach(headerId => {
     const headerEl = document.getElementById(headerId);
 
     // Só mexemos no botão se o header existir no HTML
@@ -284,14 +294,15 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
   });
 
   // 3. Layout (Login vs App)
-  const ehTelaInterna = gerenciarLayoutPrincipal(nomeRota);
-  if (!ehTelaInterna) return;
+  // const ehTelaInterna = gerenciarLayoutPrincipal(nomeRota);
+  // if (!ehTelaInterna) return;
+  gerenciarLayoutPrincipal(nomeRota);
 
   // 4. Carregar HTML se necessário
   await carregarConteudoExterno(config, nomeRota);
 
   // 5. Oculta telas antigas
-  Object.values(rotasConfig).forEach((rotaItem) => {
+  Object.values(rotasConfig).forEach(rotaItem => {
     if (rotaItem.idDiv !== "auth-section") {
       const el = document.getElementById(rotaItem.idDiv);
       if (el) el.classList.add("hidden");
@@ -327,7 +338,7 @@ async function roteador(nomeRota, paramId = null, adicionarAoHistorico = true) {
 // ============================================================================
 
 // Botão Voltar do Navegador
-window.addEventListener("popstate", (event) => {
+window.addEventListener("popstate", event => {
   const estado = event.state;
   if (estado && estado.rota) {
     roteador(estado.rota, estado.id, false);
@@ -337,21 +348,21 @@ window.addEventListener("popstate", (event) => {
 });
 
 // AQUI ESTÁ A CORREÇÃO DO "REFRESH" (F5)
-window.addEventListener("load", () => {
-  const params = new URLSearchParams(window.location.search);
-  const pageUrl = params.get("page");
-  const idUrl = params.get("id");
+// window.addEventListener("load", () => {
+//   const params = new URLSearchParams(window.location.search);
+//   const pageUrl = params.get("page");
+//   const idUrl = params.get("id");
 
-  const pageSalva = localStorage.getItem("app_ultima_rota");
-  const idSalvo = localStorage.getItem("app_ultimo_id");
+//   const pageSalva = localStorage.getItem("app_ultima_rota");
+//   const idSalvo = localStorage.getItem("app_ultimo_id");
 
-  console.log("Memória ao abrir:", pageSalva, idSalvo); // Debug
+//   console.log("Memória ao abrir:", pageSalva, idSalvo); // Debug
 
-  if (pageUrl) {
-    roteador(pageUrl, idUrl, false);
-  } else if (pageSalva) {
-    roteador(pageSalva, idSalvo, false);
-  } else {
-    roteador("templates", null, false);
-  }
-});
+//   if (pageUrl) {
+//     roteador(pageUrl, idUrl, false);
+//   } else if (pageSalva) {
+//     roteador(pageSalva, idSalvo, false);
+//   } else {
+//     roteador("templates", null, false);
+//   }
+// });
