@@ -44,26 +44,31 @@
       <div class="loader"></div>
     </div>
 
-<div id="auth-section">
-  <div class="loginContainer">
-    <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
+    <div id="auth-section">
+      <div class="loginContainer">
+        <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
 
-    <div class="loginInput">
-      <input type="email" id="email" placeholder="Email" class="login" />
-      <input type="password" id="password" placeholder="Senha" class="login" />
+        <div class="loginInput">
+          <input type="email" id="email" placeholder="Email" class="login" />
+          <input
+            type="password"
+            id="password"
+            placeholder="Senha"
+            class="login"
+          />
+        </div>
+
+        <button class="botaoLargo" id="btn-signin">
+          Entrar
+          <span class="material-symbols-rounded"> arrow_forward </span>
+        </button>
+
+        <button disabled class="botaoLargo desativado" id="btn-signup">
+          Criar Conta (Teste)
+          <span class="material-symbols-rounded"> add </span>
+        </button>
+      </div>
     </div>
-
-    <button class="botaoLargo" id="btn-signin">
-      Entrar
-      <span class="material-symbols-rounded"> arrow_forward </span>
-    </button>
-    
-    <button disabled class="botaoLargo desativado" id="btn-signup">
-      Criar Conta (Teste)
-      <span class="material-symbols-rounded"> add </span>
-    </button>
-  </div>
-</div>
 
     <div id="app-section" class="hidden">
       <div class="headerPage" id="app-header">
@@ -78,8 +83,9 @@
             <div class="userDataContent">
               <!-- FIX: Pegar/Verificar o qual o e-mail que o usuário logou -->
               <p>Logado como: <span id="user-email">usuario@email.com</span></p>
-              <button onclick="roteador('exercises')">
-                <span class="material-symbols-rounded"> accessible_menu </span>
+              <!-- <button data-route="exercises" class="nav-item"></button> -->
+              <button data-route="exercises">
+                <span class="material-symbols-rounded">accessible_menu</span>
                 Exercícios
               </button>
               <button onclick="roteador('config')">
@@ -144,7 +150,7 @@
         <button
           type="button"
           class="primary-button primary-button--add"
-          onclick="roteador('templateForm')"
+          data-route="templateForm"
         >
           <span class="material-symbols-rounded">add_2</span>
         </button>
@@ -222,7 +228,7 @@
             <div class="header-content">
               <!-- <span class="logo">MEU TREINO</span> -->
               <button
-                onclick="voltarParaLista()"
+                data-route="templates"
                 class="btn-icon-dynamic-header"
               >
                 <span class="material-symbols-rounded">
@@ -268,7 +274,7 @@
         <span class="material-symbols-rounded"> category_search </span>
         <span>Ver treino</span>
       </div>
-      <div class="tmp-opt-item" onclick="roteador('templateForm')">
+      <div class="tmp-opt-item" data-route="templateForm">
         <span class="material-symbols-rounded"> edit </span>
         <span>Editar</span>
       </div>
@@ -281,36 +287,6 @@
         <span>Excluir</span>
       </div>
     </aside>
-
-    <!-- Config -->
-    <!-- <script src="./assets/js/config.js"></script>
-
-    <script src="./assets/js/router.js"></script>
-    <script src="./assets/js/scriptGeneration.js"></script>
-    <script src="./assets/js/scriptManipulation.js"></script>
-    <script src="./assets/js/scriptUpload.js"></script> -->
-    
-    <!-- UI/UX -->
-    <!-- <script src="./assets/js/ui-ux/dynamic-visibility-header.js"></script>
-    <script src="./assets/js/ui-ux/menu-flutuante-header.js"></script>
-    <script src="./assets/js/ui-ux/global-loader.js"></script>
-    <script src="./assets/js/ui-ux/templates-hidde-show-options.js"></script>
-    <script src="./assets/js/ui-ux/template-filter.js"></script> -->
-
-    <!-- Service -->
-    <!-- <script src="assets/js/services/muscle-group.service.js"></script>
-    <script src="assets/js/services/exercise.service.js"></script>
-    <script src="assets/js/services/template.service.js"></script>
-    <script src="assets/js/services/itens-template.service.js"></script>
-    <script src="assets/js/services/treino-recomendacoes.service.js"></script> -->
-
-    <!-- Controllers -->
-    <!-- <script src="assets/js/controllers/form-templates.js"></script>
-    <script src="assets/js/controllers/list-templates.js"></script>
-    <script src="assets/js/controllers/form-exercises.js"></script>
-    <script src="assets/js/controllers/list-exercises.js"></script>
-    <script src="assets/js/controllers/list-template-itens.js"></script>
-    <script src="assets/js/controllers/form-template-itens.js"></script> -->
 
     <script type="module" src="assets/js-es6/main.js"></script>
   </body>

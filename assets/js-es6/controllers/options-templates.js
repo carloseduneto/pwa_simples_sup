@@ -1,8 +1,6 @@
 import { TemplateService } from "../services/template.service.js";
 import { roteador } from "../router.js";
-// REMOVIDO: import { abrirTemplate } ... (Não precisamos mais dele)
 
-// Variável de controle para limpar eventos anteriores
 let cleanupListeners = null;
 
 export function initTemplateOptions() {
@@ -17,12 +15,15 @@ export function initTemplateOptions() {
     cleanupListeners = null;
   }
 
-  // --- VARIÁVEIS DE ESTADO ---
+  // --- ESTADO ---
   let currentTemplateId = null;
   let longPressTimer;
 
-  // --- FUNÇÕES AUXILIARES ---
+  // --- FUNÇÕES VISUAIS ---
   const openMenu = id => {
+    currentTemplateId = id;
+
+    // Atualiza visual do botão Inativar/Ativar
     const isModoInativo =
       typeof window.EXIBINDO_INATIVOS !== "undefined" &&
       window.EXIBINDO_INATIVOS;
@@ -31,7 +32,6 @@ export function initTemplateOptions() {
     if (btnStatus) {
       const icon = btnStatus.querySelector(".material-symbols-rounded");
       const text = btnStatus.querySelector("span:last-child");
-
       if (isModoInativo) {
         icon.innerText = "check";
         text.innerText = "Ativar";
@@ -41,11 +41,10 @@ export function initTemplateOptions() {
         icon.innerText = "block";
         text.innerText = "Inativar";
         icon.style.color = "";
-        text.style.color = "#000000";
+        text.style.color = "";
       }
     }
 
-    currentTemplateId = id;
     sheet.classList.add("active");
     backdrop.classList.add("active");
     document.body.classList.add("modal-open");
@@ -59,99 +58,85 @@ export function initTemplateOptions() {
     currentTemplateId = null;
   };
 
-  // --- BOTÕES DO MENU ---
+  // --- GERENCIADOR DE CLIQUES DO MENU (DELEGAÇÃO) ---
+  const handleMenuClick = async e => {
+    // Procura qual botão foi clicado (subindo a árvore DOM se clicar no ícone)
+    const item = e.target.closest(".tmp-opt-item");
 
-  // Excluir
-  const btnDeleteTemplate = sheet.querySelector(".tmp-opt-item--delete");
-  if (btnDeleteTemplate) {
-    btnDeleteTemplate.onclick = async () => {
-      if (!currentTemplateId) return;
-      if (!confirm("Deseja realmente excluir este template?")) return;
-      try {
-        await TemplateService.delete(currentTemplateId);
-        location.reload();
-      } catch (err) {
-        alert(`Erro ao excluir: ${err.message}`);
+    if (!item) return; // Clicou no vazio do menu
+
+    // 1. INICIAR TREINO (ID: start-session)
+    if (item.id === "start-session") {
+      if (currentTemplateId) {
+        closeMenu();
+        roteador("detalhes", currentTemplateId);
       }
-    };
-  }
+    }
 
-  // Editar
-  const btnEditTemplate = sheet.querySelector(
-    ".tmp-opt-item[onclick*='templateForm']",
-  );
-  if (btnEditTemplate) {
-    btnEditTemplate.removeAttribute("onclick");
-    btnEditTemplate.onclick = () => {
+    // 2. VER ITENS (ID: template-itens)
+    else if (item.id === "template-itens") {
+      if (currentTemplateId) {
+        const idSalvo = currentTemplateId; // Salva antes de fechar e limpar
+        closeMenu();
+        roteador("templateItens", idSalvo);
+      }
+    }
+
+    // 3. EDITAR (data-route="templateForm")
+    else if (item.dataset.route === "templateForm") {
       if (currentTemplateId) {
         localStorage.setItem("editTemplateId", currentTemplateId);
         closeMenu();
         roteador("templateForm");
       }
-    };
-  }
+    }
 
-  // Desativar/Ativar
-  const btnDisableTemplate = sheet.querySelector(".tmp-opt-item--deactive");
-  if (btnDisableTemplate) {
-    btnDisableTemplate.onclick = async () => {
+    // 4. ATIVAR/INATIVAR (Classe: tmp-opt-item--deactive)
+    else if (item.classList.contains("tmp-opt-item--deactive")) {
       if (!currentTemplateId) return;
+
       const isModoInativo =
         typeof window.EXIBINDO_INATIVOS !== "undefined" &&
         window.EXIBINDO_INATIVOS;
       const novoStatus = isModoInativo ? "active" : "inactive";
+      const acao = isModoInativo ? "ativar" : "desativar";
 
-      if (!confirm(`Deseja alterar o status deste template?`)) return;
-
-      try {
-        await TemplateService.updateStatus(currentTemplateId, novoStatus);
-        location.reload();
-      } catch (err) {
-        alert(`Erro ao atualizar: ${err.message}`);
+      if (confirm(`Deseja realmente ${acao} este template?`)) {
+        try {
+          await TemplateService.updateStatus(currentTemplateId, novoStatus);
+          location.reload();
+        } catch (err) {
+          alert(`Erro: ${err.message}`);
+        }
       }
-    };
-  }
+    }
 
-  // --- AQUI ESTAVA O PROBLEMA DO abrirTemplate ---
-
-  // Botão "Iniciar Sessão" (Play)
-  const btnSession = document.getElementById("start-session");
-  if (btnSession) {
-    btnSession.onclick = () => {
-      // CORREÇÃO: Chama o roteador direto
-      if (currentTemplateId) {
-        roteador("detalhes", currentTemplateId);
+    // 5. EXCLUIR (Classe: tmp-opt-item--delete)
+    else if (item.classList.contains("tmp-opt-item--delete")) {
+      if (!currentTemplateId) return;
+      if (confirm("Deseja realmente excluir este template?")) {
+        try {
+          await TemplateService.delete(currentTemplateId);
+          location.reload();
+        } catch (err) {
+          alert(`Erro: ${err.message}`);
+        }
       }
-    };
-  }
+    }
 
-  // Botão "Ver Itens" (Lista)
-  const btnItensTemplate = document.getElementById("template-itens");
-  if (btnItensTemplate) {
-    btnItensTemplate.onclick = () => {
-      if (currentTemplateId) {
-        const idSalvo = currentTemplateId;
-        closeMenu();
-        roteador("templateItens", idSalvo);
-      }
-    };
-  }
-
-  // Fechar ao clicar nas opções genéricas
-  sheet.querySelectorAll(".tmp-opt-item").forEach(item => {
-    item.onclick = () => {
-      if (!item.classList.contains("tmp-opt-item--delete")) closeMenu();
-    };
-  });
+    // Se for botão comum (não delete/status), fecha o menu
+    // (Opcional, pois a maioria das ações acima já fecha ou recarrega)
+  };
 
   // --- LISTENERS GLOBAIS ---
-
   const handleGlobalClick = e => {
+    // Abre menu ao clicar nos 3 pontinhos
     const btn = e.target.closest(".card-dots");
     if (btn) {
       e.stopPropagation();
       openMenu(btn.dataset.templateId);
     }
+    // Fecha ao clicar fora
     if (e.target === backdrop) closeMenu();
   };
 
@@ -177,13 +162,19 @@ export function initTemplateOptions() {
     }
   };
 
+  // --- REGISTRO DE EVENTOS ---
+
+  // 1. O clique principal dentro do menu
+  sheet.addEventListener("click", handleMenuClick);
+
+  // 2. Eventos globais (abrir, fechar, longpress)
   document.addEventListener("click", handleGlobalClick);
   document.addEventListener("touchstart", handleTouchStart, { passive: true });
   document.addEventListener("touchend", handleTouchEnd);
   document.addEventListener("touchmove", handleTouchEnd);
   document.addEventListener("contextmenu", handleContextMenu);
 
-  // Dragger
+  // 3. Dragger (Arrastar para fechar)
   let startY = 0;
   const handleDragStart = e => {
     startY = e.touches[0].clientY;
@@ -202,7 +193,9 @@ export function initTemplateOptions() {
   dragger.addEventListener("touchmove", handleDragMove);
   dragger.addEventListener("touchend", handleDragEnd);
 
+  // --- LIMPEZA ---
   cleanupListeners = () => {
+    sheet.removeEventListener("click", handleMenuClick);
     document.removeEventListener("click", handleGlobalClick);
     document.removeEventListener("touchstart", handleTouchStart);
     document.removeEventListener("touchend", handleTouchEnd);

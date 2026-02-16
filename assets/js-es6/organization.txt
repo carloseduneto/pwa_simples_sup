@@ -1,0 +1,47 @@
+js-es6
+ ┣ 📂 core              <-- O "Sistema Operacional" do App (Global)
+ ┃ ┣ 📜 config.js
+ ┃ ┣ 📜 router.js
+ ┃ ┗ 📜 main.js
+ ┃
+ ┣ 📂 shared            <-- Coisas usadas por todo mundo
+ ┃ ┣ 📂 services        <-- Services genéricos (ex: API base)
+ ┃ ┣ 📂 ui              <-- UI Global (Loaders, Nav, Header)
+ ┃ ┃ ┣ 📜 global-loader.js
+ ┃ ┃ ┣ 📜 global-navigation.js
+ ┃ ┃ ┣ 📜 menu-flutuante.js
+ ┃ ┃ ┗ 📜 dynamic-header.js
+ ┃
+ ┣ 📂 modules           <-- AQUI É A MÁGICA (Separado por assunto)
+ ┃ ┃
+ ┃ ┣ 📂 auth            <-- Tudo sobre Login/Conta
+ ┃ ┃ ┣ 📜 auth.controller.js  (antigo auth-login.js)
+ ┃ ┃ ┗ 📜 auth.service.js
+ ┃ ┃
+ ┃ ┣ 📂 exercises       <-- Tudo sobre Exercícios
+ ┃ ┃ ┣ 📜 exercises-list.controller.js
+ ┃ ┃ ┣ 📜 exercises-form.controller.js
+ ┃ ┃ ┣ 📜 exercise.service.js
+ ┃ ┃ ┗ 📜 muscle-group.service.js
+ ┃ ┃
+ ┃ ┣ 📂 templates       <-- Tudo sobre criar/listar Treinos
+ ┃ ┃ ┣ 📜 templates-list.controller.js
+ ┃ ┃ ┣ 📜 templates-form.controller.js
+ ┃ ┃ ┣ 📜 template-itens-list.controller.js
+ ┃ ┃ ┣ 📜 template-itens-form.controller.js
+ ┃ ┃ ┣ 📜 template-options.controller.js
+ ┃ ┃ ┣ 📜 template.service.js
+ ┃ ┃ ┗ 📜 itens-template.service.js
+ ┃ ┃
+ ┃ ┣ 📂 workout         <-- O "Player" (Execução do treino)
+ ┃ ┃ ┣ 📜 player.controller.js (antigo list-workout-player)
+ ┃ ┃ ┣ 📜 workout.service.js
+ ┃ ┃ ┣ 📜 workout-draft.service.js
+ ┃ ┃ ┣ 📜 workout-ui.helper.js
+ ┃ ┃ ┣ 📜 user-context.controller.js
+ ┃ ┃ ┗ 📜 recomendacoes.service.js
+ ┃ ┃
+ ┃ ┗ 📂 bi              <-- Seu futuro módulo (exemplo)
+ ┃   ┣ 📜 dashboard.controller.js
+ ┃   ┣ 📜 charts.service.js
+ ┃   ┗ 📜 reports.service.js

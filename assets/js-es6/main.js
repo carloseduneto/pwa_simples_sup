@@ -9,6 +9,7 @@ import { initWorkoutUIHelper } from "./ui-ux/workout-ui-helper.js";
 // Controllers Imports
 import { initTemplateOptions } from "./controllers/options-templates.js";
 import { initUserContextController } from "./controllers/user-context.js";
+import { initGlobalNavigation } from "./controllers/global-navigation.js";
 
 // Services Imports
 import { AuthService } from "./services/auth.service.js";
@@ -19,6 +20,7 @@ initUserMenu(); // Menu flutuante
 initHeaderScroll(); // Scroll do header
 initTemplateOptions(); // Menu de opções (3 pontinhos)
 initWorkoutUIHelper(); // <--- Inicia os listeners de input e check do treino
+initGlobalNavigation();
 
 // --- 2. SISTEMA DE AUTENTICAÇÃO E ROTA ---
 
