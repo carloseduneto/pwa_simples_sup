@@ -68,8 +68,8 @@ export function initTemplateOptions() {
     // 1. INICIAR TREINO (ID: start-session)
     if (item.id === "start-session") {
       if (currentTemplateId) {
-        closeMenu();
         roteador("detalhes", currentTemplateId);
+        closeMenu();
       }
     }
 

@@ -340,7 +340,7 @@ async function enviarTreino(series, onNavigate) {
 
     await WorkoutService.saveSession(dadosParaEnvio);
 
-    alert("Treino concluído com sucesso! 💪");
+    alert("Treino concluído com sucesso!");
     WorkoutDraftService.limparRascunho();
 
     // Remove botão do header para limpar a interface antes de sair

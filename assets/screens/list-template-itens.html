@@ -1,37 +1,20 @@
-<!-- <button onclick="voltarParaLista()" class="navigation-buttons">
-  <span class="material-symbols-rounded"> arrow_back_ios_new </span>
-</button> -->
-
 <div id="itens-template-container" class="exercises-list-wrapper"></div>
 
 <div class="_100percwidth buttonBaseAdd">
-  <button
-    type="button"
-    class="primary-button primary-button--add-center"
-    onclick="adicionarItemTemplate()"
-  >
+  <button id="btn-add-item-template" type="button" class="primary-button primary-button--add-center">
     <span class="material-symbols-rounded">add</span>Adicionar exercício
   </button>
 
-  <button
-    type="button"
-    class="default-form-button default-form-button--cancel hidden"
-    onclick="cancelarReordenacao()"
-  >
+  <button id="btn-cancel-reorder" type="button" class="default-form-button default-form-button--cancel hidden">
     Cancelar
   </button>
 </div>
 
-<button
-  id="btn-start-internal"
-  type="button"
-  class="primary-button primary-button--start"
-  onclick="iniciarTreino()"
->
+<button id="btn-start-internal" type="button" class="primary-button primary-button--start">
   <span class="material-symbols-rounded icon-fill">play_arrow</span>
 </button>
 
-<template class="template-template-list-item">
+<template id="template-template-list-item">
   <div class="exercise-item">
     <div class="exercise-item__info">
       <strong class="exercise-item__name">Nome exercício</strong>
@@ -39,23 +22,15 @@
     </div>
 
     <div class="exercise-item__actions">
-      <button
-        class="exercise-item__btn exercise-item__btn--edit"
-        aria-label="Editar"
-      >
+      <button class="exercise-item__btn exercise-item__btn--edit" aria-label="Editar">
         <span class="material-symbols-rounded">edit</span>
       </button>
 
-      <button
-        class="exercise-item__btn exercise-item__btn--delete"
-        aria-label="Excluir"
-      >
+      <button class="exercise-item__btn exercise-item__btn--delete" aria-label="Excluir">
         <span class="material-symbols-rounded">delete</span>
       </button>
-      <button
-        class="exercise-item__btn exercise-item__btn--drag drag-handle hidden"
-        aria-label="Reordenar"
-      >
+      
+      <button class="exercise-item__btn exercise-item__btn--drag drag-handle hidden" aria-label="Reordenar">
         <span class="material-symbols-rounded">drag_handle</span>
       </button>
     </div>

@@ -127,14 +127,15 @@ export const WorkoutService = {
     const sessaoId = sessaoData.id;
 
     // 2. Prepara as Séries com o ID da Sessão
-    const seriesParaSalvar = payload.series.map(s => ({
+    // IMPORTANTE: Removemos 'realizado' daqui pois não existe na tabela SQL
+    const seriesParaSalvar = payload.series.map((s) => ({
       sessao_id: sessaoId,
       exercicio_id: s.exercicio_id,
       carga: s.carga,
       repeticoes: s.repeticoes,
       ordem: s.ordem,
       tipo: s.tipo,
-      realizado: s.realizado, // Se seu banco suportar essa coluna, senão remova
+      // REMOVIDO: realizado: s.realizado
     }));
 
     // 3. Salva as Séries em Lote

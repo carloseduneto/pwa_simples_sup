@@ -88,11 +88,11 @@
                 <span class="material-symbols-rounded">accessible_menu</span>
                 Exercícios
               </button>
-              <button onclick="roteador('config')">
+              <button data-route="config">
                 <span class="material-symbols-rounded"> settings </span>
                 Configurações
               </button>
-              <button onclick="signOut()" class="signOut">
+              <button onclick="signOut()" class="signOut" id="btn-logout">
                 <span class="material-symbols-rounded rotate180"> logout </span>
                 Sair
               </button>
@@ -191,7 +191,7 @@
       </div>
 
       <div id="screen-config" class="hidden">
-        <button onclick="roteador('templates')">⬅ Voltar ao Início</button>
+        <button data-route="templates">⬅ Voltar ao Início</button>
 
         <p class="testConfig">Aqui você pode editar seus dados...</p>
         <div class="testConfig">Um teste de config</div>
