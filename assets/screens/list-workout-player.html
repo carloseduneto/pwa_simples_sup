@@ -1,0 +1,71 @@
+<!-- App Shell HTML -->
+
+<div class="screen-workout-details-style">
+  <div class="itensTemplate"></div>
+</div>
+
+<template class="template-header-exercise">
+  <div class="headerExercise">
+    <span>SÉRIES</span>
+    <span>ANTERIOR</span>
+    <span>KG</span>
+    <span>REPS</span>
+    <span><span class="material-symbols-rounded"> check </span></span>
+  </div>
+</template>
+
+<template class="template-input-exercise">
+  <div class="rowExercise">
+    <input type="text" class="seriesExercise" />
+    <button class="anteriorExercise"></button>
+    <input type="number" class="kgExercise" />
+    <input type="number" class="repsExercise" />
+    <button class="checkExercise">
+      <span class="material-symbols-rounded"> check </span>
+    </button>
+  </div>
+</template>
+
+<template class="template-smart-header">
+  <section>
+    <header id="main-header" class="smart-header">
+      <div class="header-content">
+        <button data-route="templates" class="btn-icon-dynamic-header">
+          <span class="material-symbols-rounded"> arrow_back_ios_new </span>
+        </button>
+      </div>
+    </header>
+  </section>
+</template>
+
+      <div id="modal-conclusao" class="modal-overlay hidden">
+        <div class="modal-content">
+          <h3>Treino Incompleto</h3>
+          <p>
+            Existem séries preenchidas que não foram marcadas como concluídas.
+          </p>
+          <div class="modal-actions">
+            <button
+              onclick="resolverTreino('completar')"
+              class="btn-success"
+              id="modal-conclusao"
+            >
+              Considerar tudo feito e Salvar
+            </button>
+            <button
+              onclick="resolverTreino('descartar')"
+              class="btn-warning"
+              id="btn-modal-descartar"
+            >
+              Ignorar não marcados e Salvar
+            </button>
+            <button
+              onclick="fecharModal()"
+              class="btn-cancel"
+              id="btn-modal-cancelar"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>

@@ -1,4 +1,4 @@
-import { GlobalLoader } from "../ui-ux/global-loader.js";
+import { GlobalLoader } from "../ui/global-loader.js";
 import { WorkoutService } from "../services/workout.service.js";
 import { WorkoutDraftService } from "../services/workout-draft.service.js";
 import { AuthService } from "../services/auth.service.js";
@@ -47,7 +47,6 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     wrapperTraining.className = "container-treino";
 
     // --- RENDERIZAÇÃO DO CABEÇALHO ---
-    // Injeta o Smart Header (Voltar/Menu) dentro do wrapper
     if (templateSmartHeader) {
       wrapperTraining.insertAdjacentHTML(
         "beforeend",
@@ -55,7 +54,6 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       );
     }
 
-    // Injeta o Título do Treino e Botão Reiniciar
     const headerHtml = `
       <section class="header-itens-template">
          <div class="header-session-content">
@@ -77,10 +75,9 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       wrapperExercises.dataset.exercicioId = item.exercicios.id;
 
       const seriesPassadas = historico.filter(
-        h => h.exercicio_id === item.exercicios.id,
+        (h) => h.exercicio_id === item.exercicios.id,
       );
 
-      // Título
       let titleHtml = `<h4>${item.exercicios.nome}`;
       if (item.tecnica_intensificacao) {
         titleHtml += ` - <em>${item.tecnica_intensificacao}</em>`;
@@ -88,7 +85,6 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       titleHtml += `</h4>`;
       wrapperExercises.insertAdjacentHTML("beforeend", titleHtml);
 
-      // Recomendações
       if (item.treino_recomendacoes) {
         wrapperExercises.insertAdjacentHTML(
           "beforeend",
@@ -101,7 +97,6 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
         );
       }
 
-      // Header Tabela (Kg/Reps)
       if (templateHeaderExercise) {
         wrapperExercises.insertAdjacentHTML(
           "beforeend",
@@ -119,11 +114,9 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       };
 
       if (item.treino_recomendacoes) {
-        // Aquecimento
         for (let i = 0; i < item.treino_recomendacoes.valor; i++) {
           gerarLinha(item.treino_recomendacoes.detalhes[i].label, i);
         }
-        // Séries Reais
         const qtdSeries = contexto?.series_repeticoes?.series || 3;
         const offset = item.treino_recomendacoes.detalhes.length;
         for (let i = 0; i < qtdSeries; i++) {
@@ -135,7 +128,6 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
           gerarLinha(currentIdx + 1, idxHistorico);
         }
       } else {
-        // Séries Fixas
         const qtdSeries = item.series_alvo || 3;
         for (let i = 0; i < qtdSeries; i++) {
           gerarLinha(i + 1, i);
@@ -145,14 +137,10 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       wrapperTraining.appendChild(wrapperExercises);
     }
 
-    // Adiciona o wrapper com os exercícios ao DOM
     contentDiv.appendChild(wrapperTraining);
 
     // --- RESTAURAÇÃO: BOTÃO CONCLUIR NO HEADER ---
-    // Busca o header GLOBAL da aplicação onde o botão deve morar
     const divConteudoHeader = document.querySelector(".header-content");
-
-    // Remove botão antigo se existir (para evitar duplicação ao recarregar a tela)
     const btnAntigo = document.getElementById("concluir-treino-btn");
     if (btnAntigo) btnAntigo.remove();
 
@@ -164,43 +152,21 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     `;
 
     if (divConteudoHeader) {
-      // Insere no header global (Topo direito)
       divConteudoHeader.insertAdjacentHTML("beforeend", btnConcluirHtml);
     } else {
-      // Fallback de segurança: Se não achar o header, põe no final do treino
       wrapperTraining.insertAdjacentHTML(
         "beforeend",
         `<div style="text-align:center; margin-top:20px;">${btnConcluirHtml}</div>`,
       );
     }
 
-    // Modal (Sempre no final do documento para o CSS funcionar)
-    // Usamos insertAdjacentHTML no contentDiv para ficar fora do scroll se possível, ou no wrapper
-    contentDiv.insertAdjacentHTML(
-      "beforeend",
-      `
-        <div id="modal-conclusao" class="modal-overlay hidden">
-            <div class="modal-content">
-                <h3>Treino Incompleto</h3>
-                <p>Existem séries preenchidas que não foram marcadas como concluídas.</p>
-                <div class="modal-actions">
-                    <button id="btn-modal-descartar" class="secondary-button">Salvar Apenas Realizados</button>
-                    <button id="btn-modal-cancelar" class="text-button">Voltar</button>
-                </div>
-            </div>
-        </div>
-    `,
-    );
+    // --- O MODAL FOI REMOVIDO DA INJEÇÃO E AGORA USA O DO INDEX.HTML ---
 
     // --- EVENTOS E LOGICA ---
-
-    // 1. Restaura rascunho dos inputs
     WorkoutDraftService.restaurarDados();
 
-    // 2. Botão Reiniciar (Fica dentro do título do treino)
     const btnReiniciar = document.getElementById("reiniciar-treino-btn");
     if (btnReiniciar) {
-      // Remove listeners antigos clonando
       const novoReiniciar = btnReiniciar.cloneNode(true);
       btnReiniciar.parentNode.replaceChild(novoReiniciar, btnReiniciar);
 
@@ -212,10 +178,8 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       };
     }
 
-    // 3. Botão Concluir (Pode estar no Header ou no Body)
     const btnConcluir = document.getElementById("concluir-treino-btn");
     if (btnConcluir) {
-      // Remove listeners antigos
       const novoConcluir = btnConcluir.cloneNode(true);
       btnConcluir.parentNode.replaceChild(novoConcluir, btnConcluir);
 
@@ -224,10 +188,8 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       };
     }
 
-    // 4. Listener de Input para salvar rascunho
-    // Verifica se a função global ainda existe ou usa o Service
     if (typeof window.salvarInputLocalmente === "function") {
-      wrapperTraining.addEventListener("input", event => {
+      wrapperTraining.addEventListener("input", (event) => {
         if (
           event.target.matches(".kgExercise, .repsExercise, .seriesExercise")
         ) {
@@ -236,7 +198,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       });
     }
 
-    // 5. Configura Modal
+    // Conecta os botões do modal fixo
     setupModalEvents(templateId, onNavigate);
   } catch (error) {
     console.error(error);
@@ -266,7 +228,7 @@ async function processarConclusao(templateId, onNavigate) {
   const seriesParaSalvar = [];
   let temPendencia = false;
 
-  containers.forEach(container => {
+  containers.forEach((container) => {
     const exercicioId = parseInt(container.dataset.exercicioId);
     const rows = container.querySelectorAll(".rowExercise");
 
@@ -295,7 +257,7 @@ async function processarConclusao(templateId, onNavigate) {
           carga: kg,
           repeticoes: reps,
           ordem: index + 1,
-          realizado: foiRealizado,
+          realizado: foiRealizado, // Usado localmente para o Modal, descartado no envio
           tipo: tipo,
         });
       }
@@ -317,7 +279,7 @@ async function processarConclusao(templateId, onNavigate) {
     const modal = document.getElementById("modal-conclusao");
     if (modal) modal.classList.remove("hidden");
   } else {
-    const seriesFiltradas = seriesParaSalvar.filter(s => s.realizado);
+    const seriesFiltradas = seriesParaSalvar.filter((s) => s.realizado);
     await enviarTreino(seriesFiltradas, onNavigate);
   }
 }
@@ -327,12 +289,20 @@ async function enviarTreino(series, onNavigate) {
     alert("Nenhuma série marcada como realizada.");
     return;
   }
-  dadosParaEnvio.series = series;
+
+  // Limpa o atributo 'realizado' antes de passar para o Service,
+  // garantindo que não dê erro de coluna inexistente no banco.
+  const seriesLimpas = series.map((s) => {
+    const { realizado, ...resto } = s;
+    return resto;
+  });
+
+  dadosParaEnvio.series = seriesLimpas;
 
   try {
     const btn = document.getElementById("concluir-treino-btn");
     if (btn) {
-      btn.dataset.originalText = btn.innerHTML; // Salva ícone e texto
+      btn.dataset.originalText = btn.innerHTML;
       btn.innerHTML =
         "<span class='material-symbols-rounded'>hourglass_empty</span> Salvando...";
       btn.disabled = true;
@@ -343,7 +313,6 @@ async function enviarTreino(series, onNavigate) {
     alert("Treino concluído com sucesso!");
     WorkoutDraftService.limparRascunho();
 
-    // Remove botão do header para limpar a interface antes de sair
     if (btn) btn.remove();
 
     if (onNavigate) onNavigate("templates");
@@ -358,19 +327,33 @@ async function enviarTreino(series, onNavigate) {
   }
 }
 
+// Configura os ouvintes para o Modal do HTML
 function setupModalEvents(templateId, onNavigate) {
+  const modal = document.getElementById("modal-conclusao");
+  if (!modal) return;
+
+  const btnCompletar = document.getElementById("btn-modal-completar");
   const btnDescartar = document.getElementById("btn-modal-descartar");
   const btnCancelar = document.getElementById("btn-modal-cancelar");
-  const modal = document.getElementById("modal-conclusao");
+
+  if (btnCompletar) {
+    const novoBtn = btnCompletar.cloneNode(true);
+    btnCompletar.parentNode.replaceChild(novoBtn, btnCompletar);
+    novoBtn.onclick = async () => {
+      modal.classList.add("hidden");
+      // Envia TODAS as séries extraídas do DOM
+      await enviarTreino(dadosParaEnvio.series, onNavigate);
+    };
+  }
 
   if (btnDescartar) {
-    // Clona para limpar eventos anteriores
     const novoBtn = btnDescartar.cloneNode(true);
     btnDescartar.parentNode.replaceChild(novoBtn, btnDescartar);
 
     novoBtn.onclick = async () => {
       modal.classList.add("hidden");
-      const seriesFiltradas = dadosParaEnvio.series.filter(s => s.realizado);
+      // Filtra apenas as que o usuário ativamente checou
+      const seriesFiltradas = dadosParaEnvio.series.filter((s) => s.realizado);
       await enviarTreino(seriesFiltradas, onNavigate);
     };
   }

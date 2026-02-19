@@ -1,0 +1,14 @@
+/* Cor padrão do Bottom Nav (ex: Treino) */
+.theme-workout .nav-item.active {
+  color: #FF6B00; /* Laranja do Treino */
+}
+
+/* Quando você criar o módulo de Nutrição no futuro */
+.theme-diet .nav-item.active {
+  color: #4CAF50; /* Verde da Dieta */
+}
+
+/* Quando você criar o módulo de Relatórios */
+.theme-report .nav-item.active {
+  color: #2196F3; /* Azul do Relatório */
+}

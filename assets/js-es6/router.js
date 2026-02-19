@@ -6,15 +6,20 @@ import { initLoginController } from "./controllers/auth-login.js";
 import { renderizarTemplatesList } from "./controllers/list-templates.js";
 import { renderizarListItensTemplate } from "./controllers/list-template-itens.js";
 import { initWorkoutPlayer } from "./controllers/list-workout-player.js";
+import { BottomNavComponent } from "./ui/bottom-nav.js";
+import { initUserContextController } from "./controllers/user-context.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
 
 const rotasConfig = {
   // --- TELA DE LOGIN ---
+  // Metadados de Rota (Route Meta Fields).
   login: {
     idDiv: "auth-section",
+    html: "assets/screens/auth-login.html", // <-- NOVO
     tipoHeader: "nenhum",
+    bottomNav: "none",
     titulo: "Login",
     onLoad: () => {
       initLoginController(); // <--- A chamada que faz a mágica
@@ -25,9 +30,14 @@ const rotasConfig = {
   // --- TELAS ANTIGAS ---
   templates: {
     idDiv: "screen-templates-list",
+    html: "assets/screens/list-templates.html", // <-- NOVO
     tipoHeader: "padrao",
+    //bottomNav: "workout", // <--- Exibe no contexto de Treino
     titulo: "Templates",
-    onLoad: id => {
+    onLoad: (id) => {
+      // 1. CARREGA O SELETOR DE SEMANAS (Recomendações)
+      initUserContextController();
+
       // CORREÇÃO: Usamos a nova função exportada
       renderizarTemplatesList((rota, param) => {
         roteador(rota, param);
@@ -36,7 +46,9 @@ const rotasConfig = {
   },
   config: {
     idDiv: "screen-config",
+    html: "assets/screens/config.html",
     tipoHeader: "padrao",
+    bottomNav: "none",
     titulo: "Configurações",
     onLoad: null,
   },
@@ -46,10 +58,11 @@ const rotasConfig = {
     idDiv: "screen-exercises",
     html: "assets/screens/list-exercises.html",
     tipoHeader: "alternativo", // <--- AQUI A MÁGICA: Usa o novo header!
+    bottomNav: "none",
     titulo: "Exercícios",
     // SE voltar daqui, vai para o inicio (ou templates)
     voltarPara: "templates",
-    onLoad: id => {
+    onLoad: (id) => {
       // if (typeof renderizarListaExercicios === "function") {
       //   renderizarListaExercicios(id);
       // }
@@ -62,11 +75,12 @@ const rotasConfig = {
     idDiv: "screen-exercises-add-edit",
     html: "assets/screens/form-exercises.html",
     tipoHeader: "alternativo", // Usa o novo header
+    bottomNav: "none",
     // titulo: "Gerenciar Exercício",
     titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "exercises",
-    onLoad: id => {
+    onLoad: (id) => {
       // AQUI É A MÁGICA:
       // Passamos a função 'roteador' para dentro do controller.
       // O controller vai usá-la como 'onNavigate'.
@@ -79,11 +93,12 @@ const rotasConfig = {
     idDiv: "screen-template-add-edit",
     html: "assets/screens/form-templates.html",
     tipoHeader: "alternativo", // Usa o novo header
+    bottomNav: "none",
     titulo: "Add/Edit Template",
     // titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "templates",
-    onLoad: id => {
+    onLoad: (id) => {
       // if (typeof initTemplateForm === "function") {
       //   initTemplateForm();
       // }
@@ -96,9 +111,10 @@ const rotasConfig = {
     idDiv: "screen-template-itens",
     html: "assets/screens/list-template-itens.html",
     tipoHeader: "drag-handle", // Usa o novo header
+    bottomNav: "none",
     titulo: "Itens do Template", // Ajustei o título
     voltarPara: "templates",
-    onLoad: id => {
+    onLoad: (id) => {
       // SALVA O ID NO LOCALSTORAGE PARA GARANTIR
       if (id) localStorage.setItem("currentTemplateId", id);
 
@@ -112,11 +128,12 @@ const rotasConfig = {
     idDiv: "screen-template-itens-form",
     html: "assets/screens/form-template-itens.html",
     tipoHeader: "alternativo", // Usa o novo header
+    bottomNav: "none",
     // titulo: "Gerenciar Exercício",
     titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "templateItens",
-    onLoad: id => {
+    onLoad: (id) => {
       initTemplateItensForm((rotaDestino, paramId) => {
         roteador(rotaDestino, paramId);
       });
@@ -127,9 +144,11 @@ const rotasConfig = {
   },
   detalhes: {
     idDiv: "screen-workout-details",
+    html: "assets/screens/list-workout-player.html",
     tipoHeader: "nenhum",
+    bottomNav: "none",
     titulo: "Treino em Andamento",
-    onLoad: id => {
+    onLoad: (id) => {
       // AQUI É A MUDANÇA:
       initWorkoutPlayer((rota, param) => {
         roteador(rota, param);
@@ -266,7 +285,7 @@ export async function roteador(
   // Lista de IDs de todos os headers que possuem botão de voltar
   const headersIds = ["app-header-alt", "app-header-drag"];
 
-  headersIds.forEach(headerId => {
+  headersIds.forEach((headerId) => {
     const headerEl = document.getElementById(headerId);
 
     // Só mexemos no botão se o header existir no HTML
@@ -301,8 +320,13 @@ export async function roteador(
   // 4. Carregar HTML se necessário
   await carregarConteudoExterno(config, nomeRota);
 
+  // 4.1 Garante que a nav existe e atualiza o estado visual dela
+  await BottomNavComponent.renderizar();
+  // PASSAMOS O CONTEXTO AQUI:
+  BottomNavComponent.atualizarEstado(nomeRota, config.bottomNav);
+
   // 5. Oculta telas antigas
-  Object.values(rotasConfig).forEach(rotaItem => {
+  Object.values(rotasConfig).forEach((rotaItem) => {
     if (rotaItem.idDiv !== "auth-section") {
       const el = document.getElementById(rotaItem.idDiv);
       if (el) el.classList.add("hidden");
@@ -338,7 +362,7 @@ export async function roteador(
 // ============================================================================
 
 // Botão Voltar do Navegador
-window.addEventListener("popstate", event => {
+window.addEventListener("popstate", (event) => {
   const estado = event.state;
   if (estado && estado.rota) {
     roteador(estado.rota, estado.id, false);

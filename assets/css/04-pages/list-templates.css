@@ -87,7 +87,7 @@
   /* Padding nas bordas evita que os cards encostem na tela */
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 60px;
+  margin-bottom: 100px;
 }
 
 @media (min-width: 600px) {

@@ -44,12 +44,36 @@
       <div class="loader"></div>
     </div>
 
-    <div id="auth-section"></div>
+    <div id="auth-section">
+      <div class="loginContainer">
+        <h1 class="titleLoginFont">GESTÃO DE TREINO</h1>
+
+        <div class="loginInput">
+          <input type="email" id="email" placeholder="Email" class="login" />
+          <input
+            type="password"
+            id="password"
+            placeholder="Senha"
+            class="login"
+          />
+        </div>
+
+        <button class="botaoLargo" id="btn-signin">
+          Entrar
+          <span class="material-symbols-rounded"> arrow_forward </span>
+        </button>
+
+        <button disabled class="botaoLargo desativado" id="btn-signup">
+          Criar Conta (Teste)
+          <span class="material-symbols-rounded"> add </span>
+        </button>
+      </div>
+    </div>
 
     <div id="app-section" class="hidden">
       <div class="headerPage" id="app-header">
         <div>
-          <h2 id="header-title"></h2>
+          <h2 id="header-title">Aqui vai o título da página</h2>
         </div>
         <div class="userPlace" id="userContainer">
           <div class="userImage" id="btnUser"></div>
@@ -108,16 +132,129 @@
         </div>
       </div>
 
-      <!-- Screens section -->
-      <div id="screen-templates-list"></div>
-      <div id="bottom-nav-container"></div>
+      <div id="screen-templates-list">
+        <!-- <h3>Seus Treinos</h3> -->
+        <header class="template-header--actions">
+          <div id="container-recomendacoes"></div>
+          <button
+            id="template-button-inactived"
+            onclick="alternarVisualizacaoInativos()"
+            class="btn-template-inactive-active"
+          >
+            <span class="material-symbols-rounded">block</span>
+            <span class="btn-text-header">Inativos</span>
+          </button>
+        </header>
+
+        <div id="lista-templates"></div>
+        <button
+          type="button"
+          class="primary-button primary-button--add"
+          data-route="templateForm"
+        >
+          <span class="material-symbols-rounded">add_2</span>
+        </button>
+        <!-- Bottom Navigation -->
+        <!-- <nav class="bottom-nav">
+          <div class="nav-item active">
+            <svg viewBox="0 0 24 24" class="nav-icon">
+              <path
+              d="M20.57 14.86L22 13.43L20.57 12L17 15.57L8.43 7L12 3.43L10.57 2L9.14 3.43L7.71 2L5.57 4.14L4.14 2.71L2.71 4.14L4.14 5.57L2 7.71L3.43 9.14L2 10.57L3.43 12L7 8.43L15.57 17L12 20.57L13.43 22L14.86 20.57L16.29 22L18.43 19.86L19.86 21.29L21.29 19.86L19.86 18.43L22 16.29L20.57 14.86Z"
+              fill="currentColor"
+              />
+            </svg>
+            <span>Treino</span>
+          </div>
+
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24" class="nav-icon">
+              <path
+                d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3M12,8V13L16.28,15.54L17,14.33L13.5,12.25V8H12Z"
+                fill="currentColor"
+                />
+              </svg>
+              <span>Histórico</span>
+            </div>
+          </nav> -->
+      </div>
+
       <div id="screen-template-add-edit" class="hidden"></div>
+
       <div id="screen-template-itens" class="hidden"></div>
+
       <div id="screen-template-itens-form" class="hidden"></div>
-      <div id="screen-workout-details" class="hidden"></div>
-      <div id="screen-config" class="hidden"></div>
+
+      <div id="screen-workout-details" class="hidden">
+        <div class="screen-workout-details-style">
+          <div class="itensTemplate"></div>
+        </div>
+      </div>
+
+      <div id="screen-config" class="hidden">
+        <button data-route="templates">⬅ Voltar ao Início</button>
+
+        <p class="testConfig">Aqui você pode editar seus dados...</p>
+        <div class="testConfig">Um teste de config</div>
+      </div>
+
       <div id="screen-exercises" class="hidden"></div>
       <div id="screen-exercises-add-edit" class="hidden"></div>
+
+      <template class="template-header-exercise">
+        <div class="headerExercise">
+          <span>SÉRIES</span>
+          <span>ANTERIOR</span>
+          <span>KG</span>
+          <span>REPS</span>
+          <span><span class="material-symbols-rounded"> check </span></span>
+        </div>
+      </template>
+
+      <template class="template-input-exercise">
+        <div class="rowExercise">
+          <input type="text" class="seriesExercise" />
+          <button class="anteriorExercise"></button>
+          <input type="number" class="kgExercise" />
+          <input type="number" class="repsExercise" />
+          <button class="checkExercise">
+            <span class="material-symbols-rounded"> check </span>
+          </button>
+        </div>
+      </template>
+
+      <template class="template-smart-header">
+        <section>
+          <header id="main-header" class="smart-header">
+            <div class="header-content">
+              <!-- <span class="logo">MEU TREINO</span> -->
+              <button
+                data-route="templates"
+                class="btn-icon-dynamic-header"
+              >
+                <span class="material-symbols-rounded">
+                  arrow_back_ios_new
+                </span>
+              </button>
+            </div>
+          </header>
+        </section>
+      </template>
+
+      <div id="modal-conclusao" class="modal-overlay hidden">
+        <div class="modal-content">
+          <h3>Treino Incompleto</h3>
+          <p>Existem séries preenchidas que não foram marcadas como concluídas.</p>
+          <div class="modal-actions">
+            <button onclick="resolverTreino('completar')"  class="btn-success" id="modal-conclusao">
+              Considerar tudo feito e Salvar
+            </button>
+            <button onclick="resolverTreino('descartar')" class="btn-warning" id="btn-modal-descartar">
+              Ignorar não marcados e Salvar
+            </button>
+            <button onclick="fecharModal()" class="btn-cancel" id="btn-modal-cancelar">Cancelar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="templates-backdrop"></div>

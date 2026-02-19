@@ -1,4 +1,4 @@
-import { GlobalLoader } from "../ui-ux/global-loader.js";
+import { GlobalLoader } from "../ui/global-loader.js";
 import { TemplateItensService } from "../services/itens-template.service.js";
 
 // 1. Variável Global para controlar o "Fiscal" e o Estado

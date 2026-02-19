@@ -1,5 +1,5 @@
 import { TemplateService } from "../services/template.service.js";
-import { GlobalLoader } from "../ui-ux/global-loader.js";
+import { GlobalLoader } from "../ui/global-loader.js";
 // REMOVIDO: import { abrirTemplate } ... (Não existe mais)
 
 // --- ESTADO LOCAL (Privado do arquivo) ---
@@ -12,7 +12,7 @@ function renderizarListaFiltrada(container, onNavigate) {
   container.innerHTML = "";
 
   // 1. Filtra
-  const listaExibida = allTemplatesCache.filter(t => {
+  const listaExibida = allTemplatesCache.filter((t) => {
     return showInactives ? t.status === "inactive" : t.status !== "inactive";
   });
 
@@ -26,7 +26,7 @@ function renderizarListaFiltrada(container, onNavigate) {
   }
 
   // 3. Renderiza Cards
-  listaExibida.forEach(item => {
+  listaExibida.forEach((item) => {
     const article = document.createElement("article");
     const classeInativo = item.status === "inactive" ? "template-inativo" : "";
     article.className = `template-item ${classeInativo}`;
@@ -41,7 +41,7 @@ function renderizarListaFiltrada(container, onNavigate) {
     `;
 
     // Evento de Clique no Card (Iniciar Treino)
-    article.onclick = e => {
+    article.onclick = (e) => {
       // Se clicou nos 3 pontinhos, para a propagação (o options-templates.js cuida disso)
       if (e.target.closest(".card-dots")) return;
 

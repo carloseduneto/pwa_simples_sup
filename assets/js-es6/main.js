@@ -2,9 +2,9 @@ import "./config/config.js"; // Config carrega primeiro (Client Supabase)
 import "./router.js"; // Router carrega depois
 
 // UI/UX Imports
-import { initHeaderScroll } from "./ui-ux/dynamic-visibility-header.js";
-import { initUserMenu } from "./ui-ux/menu-flutuante-header.js";
-import { initWorkoutUIHelper } from "./ui-ux/workout-ui-helper.js";
+import { initHeaderScroll } from "./ui/dynamic-visibility-header.js";
+import { initUserMenu } from "./ui/menu-flutuante-header.js";
+import { initWorkoutUIHelper } from "./ui/workout-ui-helper.js";
 
 // Controllers Imports
 import { initTemplateOptions } from "./controllers/options-templates.js";
@@ -27,7 +27,7 @@ initGlobalNavigation();
 // --- SISTEMA DE AUTENTICAÇÃO E ROTA ---
 
 // Variável para evitar loop de redirecionamento
-let primeiraCarga = true; 
+let primeiraCarga = true;
 
 AuthService.onAuthStateChange((event, session) => {
   console.log("Evento de autenticação:", event); // Debug para ver o evento no F12
@@ -37,45 +37,44 @@ AuthService.onAuthStateChange((event, session) => {
 
   if (session) {
     console.log("✅ Usuário logado:", session.user.email);
-    
+
     // Atualiza UI Global
     const emailDisplay = document.getElementById("user-email");
     if (emailDisplay) emailDisplay.innerText = session.user.email;
-    
+
     // --- LÓGICA DE REDIRECIONAMENTO INTELIGENTE ---
     if (primeiraCarga) {
       primeiraCarga = false; // Trava para não rodar de novo
-      initUserContextController(); 
+      // initUserContextController();
 
-        // 1. Verifica se tem algo na URL (Link compartilhado)
-        const params = new URLSearchParams(window.location.search);
-        const pageUrl = params.get("page");
-        const idUrl = params.get("id");
+      // 1. Verifica se tem algo na URL (Link compartilhado)
+      const params = new URLSearchParams(window.location.search);
+      const pageUrl = params.get("page");
+      const idUrl = params.get("id");
 
-        // 2. Verifica memória (F5)
-        const rotaSalva = localStorage.getItem("app_ultima_rota");
-        const idSalvo = localStorage.getItem("app_ultimo_id");
+      // 2. Verifica memória (F5)
+      const rotaSalva = localStorage.getItem("app_ultima_rota");
+      const idSalvo = localStorage.getItem("app_ultimo_id");
 
-        // DECISÃO:
-        if (pageUrl) {
-            // Prioridade 1: URL
-            roteador(pageUrl, idUrl);
-        } else if (rotaSalva && rotaSalva !== "login") {
-            // Prioridade 2: Memória (mas ignora se for 'login', pq ele já tá logado)
-            roteador(rotaSalva, idSalvo);
-        } else {
-            // Prioridade 3: Home
-            roteador("templates");
-        }
-    } 
+      // DECISÃO:
+      if (pageUrl) {
+        // Prioridade 1: URL
+        roteador(pageUrl, idUrl);
+      } else if (rotaSalva && rotaSalva !== "login") {
+        // Prioridade 2: Memória (mas ignora se for 'login', pq ele já tá logado)
+        roteador(rotaSalva, idSalvo);
+      } else {
+        // Prioridade 3: Home
+        roteador("templates");
+      }
+    }
     // Se não for primeira carga (ex: login manual), manda pra home se estiver na tela de login
     else {
-        const authSection = document.getElementById("auth-section");
-        if (authSection && !authSection.classList.contains("hidden")) {
-            roteador("templates");
-        }
+      const authSection = document.getElementById("auth-section");
+      if (authSection && !authSection.classList.contains("hidden")) {
+        roteador("templates");
+      }
     }
-
   } else {
     console.log("🔒 Usuário deslogado");
     primeiraCarga = false; // Destrava
