@@ -1,0 +1,91 @@
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  font-family: sans-serif;
+}
+
+.list-item + .list-item {
+  border-top: 1px solid #ccc;
+}
+
+.list-item__info {
+  display: flex;
+  flex-direction: column; /* Coloca nome em cima do grupo */
+}
+
+.list-item__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.list-item__subtitle {
+  font-size: 0.85rem;
+  color: #888; /* Cor cinza da imagem */
+  margin-top: 4px;
+}
+
+.list-item__actions {
+  display: flex;
+}
+
+/* Estilos base (o que é igual para todos os botões) */
+.list-item__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: opacity 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modificador para o botão de Editar */
+.list-item__btn--edit {
+  color: #000000; /* Preto */
+}
+
+/* Modificador para o botão de Excluir */
+.list-item__btn--delete {
+  color: #d32f2f; /* Vermelho (ex: Material Design Red) */
+}
+
+/* Efeito de hover comum */
+.list-item__btn:hover {
+  opacity: 0.6;
+}
+
+.list-item__badge{
+  /* border: 1px solid var(--highlight-text); */
+  opacity: 0.8;
+  color: var(--highlight-text);
+  padding: 0px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  /* background-color: var(--bg-brand-light); */
+}
+
+.list-item__badge--highlight {
+  border: 1px solid var(--highlight-text);
+  opacity: 0.8;
+  color: var(--highlight-text);
+  padding: 0px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: var(--bg-brand-light);
+}
+
+.list-item__date {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 4px;
+  display: inline-block;
+  width: 35px;
+  /* background-color: aqua; */
+  text-align: right;
+}

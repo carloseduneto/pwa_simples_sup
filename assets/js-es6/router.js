@@ -8,6 +8,7 @@ import { renderizarListItensTemplate } from "./controllers/list-template-itens.j
 import { initWorkoutPlayer } from "./controllers/list-workout-player.js";
 import { BottomNavComponent } from "./ui/bottom-nav.js";
 import { initUserContextController } from "./controllers/user-context.js";
+import { initWorkoutHistory } from "./controllers/list-workout-history.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -54,6 +55,20 @@ const rotasConfig = {
   },
 
   // --- TELAS NOVAS ---
+  workoutHistory: {
+    idDiv: "screen-workout-history",
+    html: "assets/screens/list-workout-history.html",
+    tipoHeader: "alternativo",
+    bottomNav: "none",
+    titulo: "Histórico de Treinos",
+    onLoad: (id) => {
+      // AQUI É A MUDANÇA:
+      initWorkoutHistory((rota, param) => {
+        roteador(rota, param);
+      });
+    },
+  },
+
   exercises: {
     idDiv: "screen-exercises",
     html: "assets/screens/list-exercises.html",
