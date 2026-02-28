@@ -33,9 +33,10 @@ const rotasConfig = {
     idDiv: "screen-templates-list",
     html: "assets/screens/list-templates.html", // <-- NOVO
     tipoHeader: "padrao",
-    //bottomNav: "workout", // <--- Exibe no contexto de Treino
+    tema: "orange",
+    // bottomNav: "workout", // <--- Exibe no contexto de Treino
     titulo: "Templates",
-    onLoad: (id) => {
+    onLoad: id => {
       // 1. CARREGA O SELETOR DE SEMANAS (Recomendações)
       initUserContextController();
 
@@ -61,7 +62,7 @@ const rotasConfig = {
     tipoHeader: "alternativo",
     bottomNav: "none",
     titulo: "Histórico de Treinos",
-    onLoad: (id) => {
+    onLoad: id => {
       // AQUI É A MUDANÇA:
       initWorkoutHistory((rota, param) => {
         roteador(rota, param);
@@ -77,7 +78,7 @@ const rotasConfig = {
     titulo: "Exercícios",
     // SE voltar daqui, vai para o inicio (ou templates)
     voltarPara: "templates",
-    onLoad: (id) => {
+    onLoad: id => {
       // if (typeof renderizarListaExercicios === "function") {
       //   renderizarListaExercicios(id);
       // }
@@ -95,7 +96,7 @@ const rotasConfig = {
     titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "exercises",
-    onLoad: (id) => {
+    onLoad: id => {
       // AQUI É A MÁGICA:
       // Passamos a função 'roteador' para dentro do controller.
       // O controller vai usá-la como 'onNavigate'.
@@ -113,7 +114,7 @@ const rotasConfig = {
     // titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "templates",
-    onLoad: (id) => {
+    onLoad: id => {
       // if (typeof initTemplateForm === "function") {
       //   initTemplateForm();
       // }
@@ -129,7 +130,7 @@ const rotasConfig = {
     bottomNav: "none",
     titulo: "Itens do Template", // Ajustei o título
     voltarPara: "templates",
-    onLoad: (id) => {
+    onLoad: id => {
       // SALVA O ID NO LOCALSTORAGE PARA GARANTIR
       if (id) localStorage.setItem("currentTemplateId", id);
 
@@ -148,7 +149,7 @@ const rotasConfig = {
     titulo: "",
     // SE voltar daqui, volta para a lista, não para o histórico
     voltarPara: "templateItens",
-    onLoad: (id) => {
+    onLoad: id => {
       initTemplateItensForm((rotaDestino, paramId) => {
         roteador(rotaDestino, paramId);
       });
@@ -163,7 +164,7 @@ const rotasConfig = {
     tipoHeader: "nenhum",
     bottomNav: "none",
     titulo: "Treino em Andamento",
-    onLoad: (id) => {
+    onLoad: id => {
       // AQUI É A MUDANÇA:
       initWorkoutPlayer((rota, param) => {
         roteador(rota, param);
@@ -171,6 +172,19 @@ const rotasConfig = {
     },
   },
 };
+
+
+// function aplicarTemaPorHorario() {
+//   const hora = new Date().getHours();
+//   if (hora >= 18 || hora < 6) {
+//     document.documentElement.setAttribute("data-mode", "dark");
+//   } else {
+//     document.documentElement.removeAttribute("data-mode");
+//   }
+// }
+
+// // Executa no momento em que o app carrega
+// aplicarTemaPorHorario();
 
 // ============================================================================
 // 2. FUNÇÕES AUXILIARES
@@ -300,7 +314,7 @@ export async function roteador(
   // Lista de IDs de todos os headers que possuem botão de voltar
   const headersIds = ["app-header-alt", "app-header-drag"];
 
-  headersIds.forEach((headerId) => {
+  headersIds.forEach(headerId => {
     const headerEl = document.getElementById(headerId);
 
     // Só mexemos no botão se o header existir no HTML
@@ -339,9 +353,11 @@ export async function roteador(
   await BottomNavComponent.renderizar();
   // PASSAMOS O CONTEXTO AQUI:
   BottomNavComponent.atualizarEstado(nomeRota, config.bottomNav);
+  // APLICA O TEMA NA RAIZ DO DOCUMENTO
+  document.documentElement.setAttribute("data-theme", config.tema || "orange");
 
   // 5. Oculta telas antigas
-  Object.values(rotasConfig).forEach((rotaItem) => {
+  Object.values(rotasConfig).forEach(rotaItem => {
     if (rotaItem.idDiv !== "auth-section") {
       const el = document.getElementById(rotaItem.idDiv);
       if (el) el.classList.add("hidden");

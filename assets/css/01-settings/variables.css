@@ -50,6 +50,34 @@
   --color-lynch-950: #23272e;
 }
 
+:root {
+  --color-havelock-blue-50: #f2f6fc;
+  --color-havelock-blue-100: #e1ebf8;
+  --color-havelock-blue-200: #c9dbf4;
+  --color-havelock-blue-300: #a4c5ec;
+  --color-havelock-blue-400: #79a6e1;
+  --color-havelock-blue-500: #5987d8;
+  --color-havelock-blue-600: #456dcb;
+  --color-havelock-blue-700: #3b5aba;
+  --color-havelock-blue-800: #354a98;
+  --color-havelock-blue-900: #2f4179;
+  --color-havelock-blue-950: #21294a;
+}
+
+:root {
+  --color-emerald-50: #f2fbf5;
+  --color-emerald-100: #e1f7e9;
+  --color-emerald-200: #c4eed3;
+  --color-emerald-300: #96dfb1;
+  --color-emerald-400: #61c786;
+  --color-emerald-500: #44be71;
+  --color-emerald-600: #2c8d50;
+  --color-emerald-700: #266f41;
+  --color-emerald-800: #225937;
+  --color-emerald-900: #1e492f;
+  --color-emerald-950: #0b2817;
+}
+
 /* ==========================================================
    CAMADA 2.A: SEMÂNTICA DA MARCA (LARANJA)
    Isso define como o Laranja se comporta no Claro vs Escuro.
@@ -57,7 +85,7 @@
    ========================================================== */
 
 /* Comportamento de Marca no Tema Claro (Padrão) */
-:root {
+:root[data-theme="orange"] {
   --bg-brand-light: var(--color-orange-50);
   --text-on-brand: #ffffff;
   --text-brand: var(--color-orange-600);
@@ -86,8 +114,87 @@
   --status-success: var(--color-green-500);
 }
 
+/* Sobrescrita do módulo de Treino (Laranja) no Modo Escuro */
+:root[data-theme="orange"][data-mode="dark"] {
+  --bg-brand-light: var(--color-orange-900);
+  --text-brand: var(--color-orange-200);
+  --caret-color: var(--color-orange-200);
+  --highlight-text: var(--color-orange-200);
+
+  /* Fundos dos cards ficam escuros, textos ficam claros */
+  --card-background: var(--color-orange-800);
+  --card-background-hover: var(--color-orange-700);
+  --card-title: var(--color-orange-200);
+  --card-subtitle: var(--color-orange-300);
+
+  --btn-soft: var(--color-orange-900);
+  --btn-soft-hover: var(--color-orange-800);
+}
+
+:root[data-theme="havelock-blue"] {
+  --bg-brand-light: var(--color-havelock-blue-50);
+  --text-on-brand: #ffffff;
+  --text-brand: var(--color-havelock-blue-600);
+  --caret-color: var(--color-havelock-blue-500);
+  --highlight-text: var(--color-havelock-blue-500);
+
+  --switch-active-bg: var(--color-havelock-blue-500);
+  --switch-active-knob: #ffffff;
+
+  --btn-primary: var(--color-havelock-blue-500);
+  --btn-primary-hover: var(--color-havelock-blue-600);
+  --btn-primary-disabled: var(--color-havelock-blue-200);
+
+  /* O segredo: fundo quase branco, texto quase preto */
+  --card-background: var(--color-havelock-blue-100);
+  --card-background-hover: var(--color-havelock-blue-200);
+
+  /* Cores para o texto (essencial mudar para escuro agora) */
+  --card-title: var(--color-havelock-blue-800);
+  --card-subtitle: var(--color-havelock-blue-600);
+
+  --btn-soft: var(--color-havelock-blue-100);
+  --btn-soft-hover: var(--color-havelock-blue-200);
+
+  /* Status */
+  --status-danger: var(--color-red-500);
+  --status-success: var(--color-green-500);
+
+}
+
+:root[data-theme="emerald"] {
+  --bg-brand-light: var(--color-emerald-50);
+  --text-on-brand: #ffffff;
+  --text-brand: var(--color-emerald-600);
+  --caret-color: var(--color-emerald-500);
+  --highlight-text: var(--color-emerald-500);
+
+  --switch-active-bg: var(--color-emerald-500);
+  --switch-active-knob: #ffffff;
+
+  --btn-primary: var(--color-emerald-500);
+  --btn-primary-hover: var(--color-emerald-600);
+  --btn-primary-disabled: var(--color-emerald-200);
+
+  /* O segredo: fundo quase branco, texto quase preto */
+  --card-background: var(--color-emerald-100);
+  --card-background-hover: var(--color-emerald-200);
+
+  /* Cores para o texto (essencial mudar para escuro agora) */
+  --card-title: var(--color-emerald-800);
+  --card-subtitle: var(--color-emerald-600);
+
+  --btn-soft: var(--color-emerald-100);
+  --btn-soft-hover: var(--color-emerald-200);
+
+  /* Status */
+  --status-danger: var(--color-red-500);
+  --status-success: var(--color-green-500);
+
+}
+
 /* Comportamento de Marca no Tema Escuro */
-[data-theme="dark"] {
+[data-theme="dark2"] {
   --bg-brand-light: var(--color-orange-950);
   --text-brand: var(--color-orange-400);
   /* Laranja mais claro para ler no escuro */
@@ -123,6 +230,22 @@
 
   --btn-neutral: var(--color-dove-gray-200);
   --btn-neutral-hover: var(--color-dove-gray-300);
+}
+
+/* Sobrescrita estrutural: Modo Escuro */
+:root[data-mode="dark"] {
+  --bg-main: var(--color-dove-gray-900);
+  --bg-surface: var(--color-dove-gray-800);
+
+  --text-main: var(--color-dove-gray-50);
+  --text-secondary: var(--color-dove-gray-400);
+
+  --input-bg: var(--color-dove-gray-800);
+  --input-bg-hover: var(--color-dove-gray-700);
+  --input-border: var(--color-dove-gray-700);
+
+  --btn-neutral: var(--color-dove-gray-800);
+  --btn-neutral-hover: var(--color-dove-gray-700);
 }
 
 /* TESTE: Dove Gray - Modo Claro */
