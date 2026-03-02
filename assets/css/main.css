@@ -16,6 +16,9 @@
 @import url('03-components/nav-themes.css');
 @import url('03-components/list-item.css');
 
+@import url('03-components/retractable-input.css');
+
+
 
 @import url('04-pages/form-template-itens.css');
 @import url('04-pages/list-exercises.css');
@@ -25,6 +28,7 @@
 @import url('04-pages/workout-buttons.css');
 @import url('04-pages/workout-runner.css');
 @import url('04-pages/list-workout-history.css');
+@import url('04-pages/_list_generic.css');
 
 
 @import url('05-utilities/utilities.css');

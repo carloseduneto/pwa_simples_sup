@@ -104,3 +104,9 @@ import { BodyAvaliacoesService } from "./services/body-avaliacoes.service.js";
     console.error("Erro ao buscar avaliações corporais:", error);
   }
 })();
+
+import { initInputGroupedForms } from "./ui/input-grouped-form.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  initInputGroupedForms();
+});

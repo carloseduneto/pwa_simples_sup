@@ -1,0 +1,31 @@
+/* Estado inicial fechado */
+.input-grouped-form--input-short {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+/* Animação do ícone */
+.input-grouped-form--retractable-icon {
+    transition: transform 0.3s ease;
+}
+
+/* Área clicável */
+.input-grouped-form--retractable-area {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+/* Estado aberto (controlado pela classe .is-open no elemento pai) */
+.input-grouped-form.is-open .input-grouped-form--input-short {
+    max-height: 200px;
+    /* Defina um valor que seja maior que a altura real do conteúdo */
+}
+
+/* O ícone arrow_back_ios_new aponta para a esquerda. 
+   Rotacionar -90deg faz ele apontar para cima. 
+   Ajuste os graus conforme a direção desejada. */
+.input-grouped-form.is-open .input-grouped-form--retractable-icon {
+    transform: rotate(-90deg);
+}

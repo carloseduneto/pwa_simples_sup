@@ -34,23 +34,18 @@
   --color-red-500: #ff4d4d;
   --color-white: #ffffff;
 
-  --color-black-eigengrau: #16161D;
-  --color-black-coal: #0D0D0C;
+  --color-black-eigengrau: #16161d;
+  --color-black-coal: #0d0d0c;
   --color-black-carbon: #1c1c1c;
   --color-black-tech: #292929;
   --color-black-graphite: #333333;
-
-
-
 
   --color-black-onyx: #0f0f0f;
   --color-black-jet: #343a46;
   --color-black-obsidian: #23272e;
 
   --color-black: var(--color-black-onyx);
-
 }
-
 
 :root {
   --color-lynch-50: #f6f7f9;
@@ -103,13 +98,16 @@
 /* Comportamento de Marca no Tema Claro (Padrão) */
 :root[data-theme="orange"] {
   --bg-brand-light: var(--color-orange-50);
-  --text-on-brand: #ffffff;
+  --text-on-brand: var(--color-white);
   --text-brand: var(--color-orange-600);
   --caret-color: var(--color-orange-500);
   --highlight-text: var(--color-orange-500);
 
+  --text-white: var(--color-white);
+  --text-black: var(--color-black);
+
   --switch-active-bg: var(--color-orange-500);
-  --switch-active-knob: #ffffff;
+  --switch-active-knob: var(--color-white);
 
   --btn-primary: var(--color-orange-500);
   --btn-primary-hover: var(--color-orange-600);
@@ -138,6 +136,9 @@
   --caret-color: var(--color-orange-200);
   --highlight-text: var(--color-orange-200);
 
+  --text-white: var(--color-black);
+  --text-black: var(--color-white);
+
   /* Fundos dos cards ficam escuros, textos ficam claros */
   --card-background: var(--color-orange-800);
   --card-background-hover: var(--color-orange-700);
@@ -146,18 +147,21 @@
 
   --btn-soft: var(--color-orange-900);
   --btn-soft-hover: var(--color-orange-800);
-    --btn-soft-text: var(--color-orange-200);
+  --btn-soft-text: var(--color-orange-200);
 }
 
 :root[data-theme="havelock-blue"] {
   --bg-brand-light: var(--color-havelock-blue-50);
-  --text-on-brand: #ffffff;
+  --text-on-brand: var(--color-white);
   --text-brand: var(--color-havelock-blue-600);
   --caret-color: var(--color-havelock-blue-500);
   --highlight-text: var(--color-havelock-blue-500);
 
+  --text-white: var(--color-white);
+  --text-black: var(--color-black);
+
   --switch-active-bg: var(--color-havelock-blue-500);
-  --switch-active-knob: #ffffff;
+  --switch-active-knob: var(--color-white);
 
   --btn-primary: var(--color-havelock-blue-500);
   --btn-primary-hover: var(--color-havelock-blue-600);
@@ -178,18 +182,20 @@
   /* Status */
   --status-danger: var(--color-red-500);
   --status-success: var(--color-green-500);
-
 }
 
 :root[data-theme="emerald"] {
   --bg-brand-light: var(--color-emerald-50);
-  --text-on-brand: #ffffff;
+  --text-on-brand: var(--color-white);
   --text-brand: var(--color-emerald-600);
   --caret-color: var(--color-emerald-500);
   --highlight-text: var(--color-emerald-500);
 
+  --text-white: var(--color-white);
+  --text-black: var(--color-black);
+
   --switch-active-bg: var(--color-emerald-500);
-  --switch-active-knob: #ffffff;
+  --switch-active-knob: var(--color-white);
 
   --btn-primary: var(--color-emerald-500);
   --btn-primary-hover: var(--color-emerald-600);
@@ -210,7 +216,6 @@
   /* Status */
   --status-danger: var(--color-red-500);
   --status-success: var(--color-green-500);
-
 }
 
 /* Comportamento de Marca no Tema Escuro */
@@ -239,7 +244,7 @@
   /* Ajustado para var do Dove */
 
   --bg-main: var(--color-dove-gray-50);
-  --bg-surface: #ffffff;
+  --bg-surface: var(--color-white);
 
   --text-main: var(--color-dove-gray-900);
   --text-secondary: var(--color-dove-gray-500);
@@ -247,6 +252,8 @@
   --input-bg: var(--color-dove-gray-100);
   --input-bg-hover: var(--color-dove-gray-100);
   --input-border: var(--color-dove-gray-200);
+
+  --border: var(--color-dove-gray-200);
 
   --btn-neutral: var(--color-dove-gray-200);
   --btn-neutral-hover: var(--color-dove-gray-300);
@@ -274,7 +281,7 @@
   /* Ajustado para var do Dove */
 
   --bg-main: var(--color-lynch-50);
-  --bg-surface: #ffffff;
+  --bg-surface: var(--color-white);
 
   --text-main: var(--color-lynch-900);
   --text-secondary: var(--color-lynch-500);

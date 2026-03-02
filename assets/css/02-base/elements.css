@@ -64,3 +64,13 @@ textarea,
   background: var(--btn-soft);
 }
 
+.nao-selecionavel, .dont-select, button, a, textarea, [role="button"], section, select, article, .material-symbols-rounded {
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox antigo */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge antigo */
+  user-select: none;
+  /* Padrão moderno (Chrome, Edge, Opera, Firefox) */
+}
