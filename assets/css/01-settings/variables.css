@@ -32,7 +32,23 @@
   /* --- Outras Cores Auxiliares --- */
   --color-green-500: #2ecc71;
   --color-red-500: #ff4d4d;
-  --color-white: #ffffff
+  --color-white: #ffffff;
+
+  --color-black-eigengrau: #16161D;
+  --color-black-coal: #0D0D0C;
+  --color-black-carbon: #1c1c1c;
+  --color-black-tech: #292929;
+  --color-black-graphite: #333333;
+
+
+
+
+  --color-black-onyx: #0f0f0f;
+  --color-black-jet: #343a46;
+  --color-black-obsidian: #23272e;
+
+  --color-black: var(--color-black-onyx);
+
 }
 
 
@@ -109,6 +125,7 @@
 
   --btn-soft: var(--color-orange-100);
   --btn-soft-hover: var(--color-orange-200);
+  --btn-soft-text: var(--color-orange-800);
 
   --status-danger: var(--color-red-500);
   --status-success: var(--color-green-500);
@@ -129,6 +146,7 @@
 
   --btn-soft: var(--color-orange-900);
   --btn-soft-hover: var(--color-orange-800);
+    --btn-soft-text: var(--color-orange-200);
 }
 
 :root[data-theme="havelock-blue"] {
@@ -155,6 +173,7 @@
 
   --btn-soft: var(--color-havelock-blue-100);
   --btn-soft-hover: var(--color-havelock-blue-200);
+  --btn-soft-text: var(--color-havelock-blue-800);
 
   /* Status */
   --status-danger: var(--color-red-500);
@@ -186,6 +205,7 @@
 
   --btn-soft: var(--color-emerald-100);
   --btn-soft-hover: var(--color-emerald-200);
+  --btn-soft-text: var(--color-emerald-800);
 
   /* Status */
   --status-danger: var(--color-red-500);

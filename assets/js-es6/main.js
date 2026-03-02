@@ -81,3 +81,26 @@ AuthService.onAuthStateChange((event, session) => {
     roteador("login");
   }
 });
+
+import { BodySchemaService } from "./services/body-schema.sevice.js";
+//Teste body-schema
+(async () => {
+  try {
+    const schemas = await BodySchemaService.getAll();
+    console.log("Esquemas corporais:", schemas);
+  } catch (error) {
+    console.error("Erro ao buscar esquemas corporais:", error);
+  }
+})();
+
+import { BodyAvaliacoesService } from "./services/body-avaliacoes.service.js";
+
+//Teste body-avaliacoes
+(async () => {
+  try {
+    const avaliacoes = await BodyAvaliacoesService.getLastRegistered();
+    console.log("Avaliações corporais:", avaliacoes);
+  } catch (error) {
+    console.error("Erro ao buscar avaliações corporais:", error);
+  }
+})();
