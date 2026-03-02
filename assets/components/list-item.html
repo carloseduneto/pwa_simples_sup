@@ -1,9 +1,43 @@
+<!-- Item lista + actions -->
 <div class="list-item">
   <div class="list-item__info">
-    <strong class="list-item__title">Nome do treino - Dia da semana</strong>
-    <span class="list-item__subtitle">Grupo muscular • Grupo muscular • Grupo</span>
+    <div class="flex-row-space-between">
+      <strong class="list-item__title">Título</strong>
+    </div>
+    <span class="list-item__subtitle">Subtítulo</span>
   </div>
 
-  <span class="list-item__badge">S 4</span>
-  <span class="list-item__date">01/01</span>
+  <div class="list-item__actions">
+    <button class="list-item__btn list-item__btn--edit" aria-label="Editar">
+      <span class="material-symbols-rounded">edit</span>
+    </button>
+
+    <button class="list-item__btn list-item__btn--delete" aria-label="Excluir">
+      <span class="material-symbols-rounded">delete</span>
+    </button>
+  </div>
+</div>
+<!-- Item lista + summary + actions -->
+ <div class="list-item">
+  <div class="list-item__info">
+    <div class="flex-row-space-between">
+
+      <strong class="list-item__title">Título</strong>
+      <div class="summary">
+        <span class="list-item__badge">S 4</span>
+        <span class="list-item__date">01/01</span>
+      </div>
+    </div>
+    <span class="list-item__subtitle">Subtítulo</span>
+  </div>
+
+  <div class="list-item__actions">
+    <button class="list-item__btn list-item__btn--edit" aria-label="Editar">
+      <span class="material-symbols-rounded">edit</span>
+    </button>
+
+    <button class="list-item__btn list-item__btn--delete" aria-label="Excluir">
+      <span class="material-symbols-rounded">delete</span>
+    </button>
+  </div>
 </div>

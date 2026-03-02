@@ -82,7 +82,7 @@ AuthService.onAuthStateChange((event, session) => {
   }
 });
 
-import { BodySchemaService } from "./services/body-schema.sevice.js";
+import { BodySchemaService } from "./services/body-schema.service.js";
 //Teste body-schema
 (async () => {
   try {

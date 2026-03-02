@@ -4,6 +4,7 @@
   align-items: center;
   padding: 12px 0;
   font-family: sans-serif;
+  
 }
 
 .list-item + .list-item {
@@ -13,6 +14,7 @@
 .list-item__info {
   display: flex;
   flex-direction: column; /* Coloca nome em cima do grupo */
+  width: 100%;
 }
 
 .list-item__title {

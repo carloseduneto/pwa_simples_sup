@@ -19,7 +19,7 @@ export const BodyAvaliacoesService = {
     const { data, error } = await client
       .from("body_avaliacoes")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("data_registro", { ascending: false });
 
     if (error) {
       console.error("Erro ao buscar avaliações corporais:", error);

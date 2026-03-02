@@ -36,3 +36,9 @@
     padding: 20px;
     background-color: #ffffff;
 }
+
+.flex-row-space-between{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
