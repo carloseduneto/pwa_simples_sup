@@ -14,34 +14,61 @@
 </button>
 
 <div class="input-grouped-form">
-  <span class="input-grouped-form--titulo">Nome grupo</span>
-  <div class="input-grouped-form">
-    <label for="input-large">Parâmetro 1</label>
-    <input
-      type="text"
-      id="input-large"
-      placeholder="xxxxx"
-      required
-      class="default-form-input"
-    />
+  <div class="input-grouped-form__static">
+    <span class="input-grouped-form__titulo">Nome grupo</span>
+    <div class="input-grouped-form__input-static">
+      <label for="input-large" class="input-grouped-form__input-static-text">Parâmetro 1</label>
+      <input
+        type="text"
+        id="input-large"
+        placeholder="xxxxx"
+        required
+        class="default-form-input input-grouped-form__input-static-input"
+      />
+    </div>
+        <div class="input-grouped-form__input-static">
+      <label for="input-large" class="input-grouped-form__input-static-text">Parâmetro 1</label>
+      <input
+        type="text"
+        id="input-large"
+        placeholder="xxxxx"
+        required
+        class="input-grouped-form__input-static-input"
+      />
+    </div>
   </div>
+
+  <!--  -->
+  
 </div>
 
 <div class="input-grouped-form">
-  <div class="input-grouped-form--retractable-area">
-
-    <span class="input-grouped-form--titulo dont-select">Nome grupo retrátil</span>
-    <span class="material-symbols-rounded input-grouped-form--retractable-icon dont-select">arrow_back_ios_new</span>
+  <div class="input-grouped-form__retractable-area">
+    <span class="input-grouped-form__titulo dont-select">Nome grupo retrátil</span>
+    <span class="material-symbols-rounded input-grouped-form__retractable-icon">arrow_back_ios_new</span>
   </div>
-  <div class="input-grouped-form--input-short">
-    <label for="input-short">Parâmetro 1</label>
-    <input
-      type="text"
-      id="input-short"
-      placeholder="xxxxx"
-      required
-      class="input-short"
-    />
+  <div class="input-grouped-form__input-hidden">
+    <div class="input-grouped-form__input-group">
+      <label for="input-short" class="input-grouped-form__text">Parâmetro 1</label>
+      <input
+        type="text"
+        id="input-short"
+        placeholder="xxxxx"
+        required
+        class="input-grouped-form__input"
+        data-mask="cm"
+      />
+    </div>
+        <div class="input-grouped-form__input-group">
+      <label for="input-short" class="input-grouped-form__text">Parâmetro 1</label>
+      <input
+        type="text"
+        id="input-short"
+        placeholder="xxxxx"
+        required
+        class="input-grouped-form__input"
+      />
+    </div>
   </div>
 </div>
 

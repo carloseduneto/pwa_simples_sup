@@ -4,7 +4,6 @@
   align-items: center;
   padding: 12px 0;
   font-family: sans-serif;
-  
 }
 
 .list-item + .list-item {
@@ -24,7 +23,7 @@
   color: var(--text-black);
 }
 
-.list-item__subtitle{
+.list-item__subtitle {
   font-size: 0.85rem;
   color: var(--text-muted); /* Cor cinza da imagem */
   margin-top: 4px;
@@ -62,7 +61,7 @@
   opacity: 0.6;
 }
 
-.list-item__badge{
+.list-item__badge {
   /* border: 1px solid var(--highlight-text); */
   opacity: 0.8;
   color: var(--highlight-text);
@@ -84,7 +83,7 @@
   background-color: var(--bg-brand-light);
 }
 
-.list-item__date{
+.list-item__date {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 4px;
@@ -94,9 +93,137 @@
   text-align: right;
 }
 
-.list-item__title-complement{
+.list-item__title-complement {
   font-size: 0.75rem;
   color: var(--text-muted); /* Cor cinza da imagem */
   margin-top: 4px;
   font-weight: 400;
 }
+
+/* Estado inicial fechado */
+.input-grouped-form__input-hidden {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  /* padding: 10px; */
+}
+
+/* Animação do ícone */
+.input-grouped-form__retractable-icon {
+  transition: transform 0.3s ease;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 300,
+    "GRAD" 0,
+    "opsz" 24;
+  font-size: 1.2rem;
+}
+
+.input-grouped-form__static {
+  padding: 10px;
+  font-size: 0.9rem;
+  /* background-color: lightblue; */
+  color: var(--text-black);
+}
+
+.input-grouped-form__input-static {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Área clicável */
+.input-grouped-form__retractable-area {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  /* background-color: aqua; */
+}
+
+/* Estado aberto (controlado pela classe .is-open no elemento pai) */
+.input-grouped-form.is-open .input-grouped-form__input-hidden {
+  max-height: 210px;
+  /* Defina um valor que seja maior que a altura real do conteúdo */
+}
+
+/* O ícone arrow_back_ios_new aponta para a esquerda. 
+   Rotacionar -90deg faz ele apontar para cima. 
+   Ajuste os graus conforme a direção desejada. */
+.input-grouped-form.is-open .input-grouped-form__retractable-icon {
+  transform: rotate(-90deg);
+}
+
+.input-grouped-form__input-group {
+  /* padding: 10px; */
+  padding-left: 10px;
+  padding-right: 10px;
+  display: flex;
+  flex-direction: row;
+  
+}
+
+.input-grouped-form__static .input-grouped-form__titulo {
+  font-size: 0.8rem;
+  /* font-weight: 700; */
+  color: var(--text-black);
+  padding-bottom: 8px;
+}
+
+.input-grouped-form__titulo {
+  font-size: 0.8rem;
+  /* font-weight: 700; */
+  color: var(--text-black);
+  width: 70%;
+}
+
+.input-grouped-form__text {
+  /* flex: 1; */
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 0.9rem;
+  /* background-color: aquamarine; */
+  width: 70%;
+}
+
+.input-grouped-form__input {
+  /* flex: 1; */
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 0.9rem;
+  /* background-color: lightcoral; */
+  border: none;
+  width: 30%;
+  text-align: right;
+}
+
+.input-grouped-form__input-static-text {
+  /* flex: 1; */
+  /* padding: 8px; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  /* background-color: aquamarine; */
+  width: 70%;
+}
+
+.input-grouped-form__input-static-input {
+  /* flex: 1; */
+  /* padding: 8px; */
+  font-size: 0.9rem;
+  /* background-color: lightcoral; */
+  width: 80%;
+  text-align: left;
+    display: block;
+    /* width: 100%; */
+    /* margin-bottom: 10px; */
+    padding: 15px;
+    background-color: var(--input-bg);
+    border-radius: 13px;
+    font-size: 16px;
+    border: none;
+    color: var(--text-black);
+    /* font-weight: 500; */
+}
+

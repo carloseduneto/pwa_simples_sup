@@ -5,7 +5,7 @@ export function initInputGroupedForms() {
 
   document.addEventListener("click", event => {
     const retractableArea = event.target.closest(
-      ".input-grouped-form--retractable-area",
+      ".input-grouped-form__retractable-area",
     );
 
     if (!retractableArea) return;
