@@ -9,7 +9,8 @@ import { initWorkoutPlayer } from "./controllers/list-workout-player.js";
 import { BottomNavComponent } from "./ui/bottom-nav.js";
 import { initUserContextController } from "./controllers/user-context.js";
 import { initWorkoutHistory } from "./controllers/list-workout-history.js";
-import { initBodyAssessmentList } from "./controllers/list-body-assessment.controller.js";
+import { initBodyAssessmentList } from "./modules/body-assessment/list-body-assessment.controller.js";
+import { initBodyAssessmentForm } from "./modules/body-assessment/form-body-assessment.controller.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -174,7 +175,7 @@ const rotasConfig = {
   },
   bodyAssessmentList: {
     idDiv: "screen-body-assessment",
-    html: "assets/screens/list-body-assessment.html",
+    html: "assets/js-es6/modules/body-assessment/list-body-assessment.html",
     tipoHeader: "alternativo",
     bottomNav: "none",
     tema: "havelock-blue",
@@ -184,6 +185,21 @@ const rotasConfig = {
       initBodyAssessmentList((rota, param) => {
         roteador(rota, param);
       }, id);
+    },
+  },
+  bodyAssessmentForm: {
+    idDiv: "screen-body-assessment-form",
+    html: "assets/js-es6/modules/body-assessment/form-body-assessment.html",
+    tipoHeader: "alternativo",
+    voltarPara: "bodyAssessmentList",
+    bottomNav: "none",
+    tema: "havelock-blue",
+    titulo: "Add/Editar Avaliação Corporal",
+    onLoad: (id) => {
+      // AQUI É A MUDANÇA:
+      initBodyAssessmentForm((rota, param) => {
+        roteador(rota, param);
+      });
     },
   },
 };

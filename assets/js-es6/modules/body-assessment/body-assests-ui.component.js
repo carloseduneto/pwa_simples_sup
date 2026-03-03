@@ -18,3 +18,4 @@ export function initInputGroupedForms() {
 
   isInitialized = true;
 }
+

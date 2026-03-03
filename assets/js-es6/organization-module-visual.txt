@@ -1,0 +1,22 @@
+O VS Code tem recursos nativos que resolvem essa poluição visual sem que você precise instalar extensões.
+
+A primeira abordagem, e a mais eficiente para o seu cenário, é ativar o **File Nesting** (Aninhamento de Arquivos). Essa função agrupa arquivos relacionados criando uma árvore expansível, como se o HTML funcionasse como uma capa protetora que guarda a sua própria lógica.
+
+1. Abra as configurações do VS Code (`Ctrl` + `,`).
+2. Busque por `explorer.fileNesting.enabled` e ative.
+3. Em `explorer.fileNesting.patterns`, adicione um novo padrão. Digite `*.html` no item e `${capture}.controller.js` no valor.
+
+Isso faz com que o `list-body-assessment.controller.js` desapareça da lista principal e vire um item expansível "dentro" do `list-body-assessment.html`. A sua pasta ficará enxuta, mostrando apenas os blocos principais.
+
+A segunda opção é alterar o critério de organização do explorador de arquivos.
+
+1. Nas configurações, busque por `explorer.sortOrder`.
+2. Mude de `default` (ordem alfabética) para `type`.
+
+O VS Code vai separar os arquivos pela extensão. Todos os ícones laranjas (HTML) ficarão agrupados juntos, e os amarelos (JS) logo abaixo, criando uma fronteira visual clara entre interface e comportamento sem precisar de subpastas.
+
+A terceira frente é o ajuste na convenção de nomes. A dispersão na imagem ocorre porque os prefixos variam entre `body-`, `form-` e `list-`. Ao inverter a nomenclatura e usar o nome da funcionalidade como raiz, a ordem alfabética começa a trabalhar para você.
+
+Se você renomear `form-body-assessment.html` para `body-assessment-form.html` e o controlador correspondente para `body-assessment-form.controller.js`, eles ficarão colados um no outro no explorador. Arquivos que funcionam juntos devem ser lidos juntos de cima para baixo.
+
+Gostaria de configurar as regras avançadas do File Nesting para embutir também os serviços e utilitários debaixo de um arquivo principal de entrada do módulo?

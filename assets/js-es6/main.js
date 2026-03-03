@@ -82,7 +82,7 @@ AuthService.onAuthStateChange((event, session) => {
   }
 });
 
-import { BodySchemaService } from "./services/body-schema.service.js";
+import { BodySchemaService } from "./modules/body-assessment/body-schema.service.js";
 //Teste body-schema
 (async () => {
   try {
@@ -93,7 +93,7 @@ import { BodySchemaService } from "./services/body-schema.service.js";
   }
 })();
 
-import { BodyAvaliacoesService } from "./services/body-avaliacoes.service.js";
+import { BodyAvaliacoesService } from "./modules/body-assessment/body-avaliacoes.service.js";
 
 //Teste body-avaliacoes
 (async () => {
@@ -105,7 +105,7 @@ import { BodyAvaliacoesService } from "./services/body-avaliacoes.service.js";
   }
 })();
 
-import { initInputGroupedForms } from "./ui/input-grouped-form.js";
+import { initInputGroupedForms } from "./modules/body-assessment/body-assests-ui.component.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initInputGroupedForms();

@@ -104,7 +104,7 @@
 .input-grouped-form__input-hidden {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out;
+  transition: max-height 0.3s ease-in-out;
   /* padding: 10px; */
 }
 
@@ -145,7 +145,7 @@
 
 /* Estado aberto (controlado pela classe .is-open no elemento pai) */
 .input-grouped-form.is-open .input-grouped-form__input-hidden {
-  max-height: 210px;
+  max-height: 1200px;
   /* Defina um valor que seja maior que a altura real do conteúdo */
 }
 
@@ -227,3 +227,109 @@
     /* font-weight: 500; */
 }
 
+
+
+
+/* 1. Ajuste do Container Principal do Grupo */
+.input-grouped-form {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* 2. Cabeçalho (Título) */
+/* Removemos o padding excessivo daqui para não duplicar com o corpo */
+.input-grouped-form__static,
+.input-grouped-form__retractable-area {
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.input-grouped-form__titulo {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-black);
+  margin: 0;
+}
+
+/* 3. Área de Conteúdo (Onde os inputs moram) */
+/* Aqui unificamos o estilo para as divs que o gerador cria */
+.input-grouped-form__inputs,
+.input-grouped-form__input-hidden {
+  padding: 0 15px 10px 15px; /* Alinhado horizontalmente com o título */
+}
+
+/* 4. Estilo "Large" (Estático - Campos de Dados Básicos) */
+.input-grouped-form__input-static {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.input-grouped-form__input-static-text {
+  font-size: 0.9rem;
+  color: var(--text-black);
+  width: 35%; /* Ajustado para caber o input ao lado */
+}
+
+.input-grouped-form__input-static-input {
+  flex: 1; /* Ocupa o restante do espaço */
+  padding: 12px 15px;
+  background-color: var(--input-bg);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  border: none;
+  color: var(--text-black);
+  outline: none;
+}
+
+/* 5. Estilo "Short" (Campos de Biometria/Perímetros) */
+.input-grouped-form__input-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  /* border-bottom: 1px solid rgba(0,0,0,0.05); Linha sutil separadora */
+  padding: 5px 0;
+}
+
+.input-grouped-form__input-group  + .input-grouped-form__input-group  {
+  border-top: 1px solid var(--border); /* Linha entre os grupos, usando a variável de cor de borda */
+}
+
+.input-grouped-form__text {
+  font-size: 0.9rem;
+  color: var(--text-black);
+  width: 70%;
+}
+
+.input-grouped-form__input {
+  width: 30%;
+  text-align: right;
+  font-size: 0.95rem;
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  font-weight: 500;
+}
+
+/* 6. Correção da Animação e Setas */
+.input-grouped-form__input-hidden {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.8s cubic-bezier(0, 1, 0, 1);
+}
+
+.input-grouped-form.is-open .input-grouped-form__input-hidden {
+  max-height: 1500px;
+}
+
+/* 0 Select */
+.form-body-assessment__select-option{
+  width: 100px;
+  /* background-color: aqua; */
+}
