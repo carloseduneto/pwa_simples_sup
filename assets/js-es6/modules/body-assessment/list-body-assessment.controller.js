@@ -33,7 +33,7 @@ export async function initBodyAssessmentList(onNavigate) {
         dobra_subescapular: avaliacao.value.dobra_subescapular,
         dobra_suprailiaca: avaliacao.value.dobra_suprailiaca,
         dobra_abdominal: avaliacao.value.dobra_abdominal,
-      }
+      };
 
       const valor = calcularFaulkner(dobras);
 
@@ -54,22 +54,57 @@ export async function initBodyAssessmentList(onNavigate) {
     container.innerHTML = htmlLista;
 
     // Monitorar os cliques nos botões recém-criados
-    container.addEventListener("click", (e) => {
+    container.onclick = async (e) => {
+      const avaliacaoNome = e.target.closest(".list-item__title")?.innerText;
+      console.log("Item clicado:", avaliacaoNome);
       const btnEdit = e.target.closest(".list-item__btn--edit");
       const btnDelete = e.target.closest(".list-item__btn--delete");
-
+      
       if (btnEdit) {
         const id = btnEdit.dataset.id;
         console.log("Editar avaliação:", id);
+        
         // onNavigate("rotaEdicao", id);
+        localStorage.setItem("editBodyAssessmentId", id);
+        // roteador("exercisesAddEdit");
+        if (onNavigate) onNavigate("bodyAssessmentForm");
       }
-
+      
       if (btnDelete) {
         const id = btnDelete.dataset.id;
         console.log("Excluir avaliação:", id);
         // Lógica de exclusão
+        // --- Botão Excluir ---
+
+        // 1. Sobe a árvore até encontrar o cartão inteiro da lista
+        const cartao = btnDelete.closest(".list-item");
+
+        // 2. Desce na árvore a partir do cartão para achar o título
+        // Usamos querySelector porque estamos buscando para baixo
+        let avaliacaoNome = "esta avaliação"; // Texto de fallback de segurança
+
+        if (cartao) {
+          const tituloElement = cartao.querySelector(".list-item__title");
+          if (tituloElement) {
+            // Pegamos apenas o texto antes do ponto (•), usando split
+            avaliacaoNome = tituloElement.innerText.split("•")[0].trim();
+          }
+          // avaliacaoNome = tituloElement ? tituloElement.innerText : avaliacaoNome;
+        }
+
+        const confirmacao = confirm(
+          `Deseja realmente excluir ${avaliacaoNome}?`,
+        );
+        if (confirmacao) {
+          try {
+            await BodyAvaliacoesService.delete(id);
+            initBodyAssessmentList(onNavigate);
+          } catch (err) {
+            alert("Erro ao excluir: " + err.message);
+          }
+        }
       }
-    });
+    };
   } catch (error) {
     console.error("Falha ao buscar avaliações:", error);
     container.innerHTML =

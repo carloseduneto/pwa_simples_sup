@@ -50,6 +50,7 @@ export function gerarGrupoInputs({
                 type="${param.tipo}" 
                 id="${param.id}" 
                 placeholder="${param.placeholder || "-"}" 
+                data-destino="${param.destino || ""}"
                 value="${param.valor || ""}"
                 class="input-grouped-form__input-static-input" 
                 ${atributoStep}
@@ -72,6 +73,7 @@ export function gerarGrupoInputs({
         inputmode="decimal"
         id="${param.id}" 
         placeholder="0,00" 
+        data-destino="${param.destino || ""}"
         value="${param.valor || ""}"
         class="input-grouped-form__input mask-decimal" 
         data-unidade="${unidade}"

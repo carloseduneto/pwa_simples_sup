@@ -179,7 +179,7 @@ const rotasConfig = {
     tipoHeader: "alternativo",
     bottomNav: "none",
     tema: "havelock-blue",
-    titulo: "Avaliação Corporal",
+    titulo: "Avaliações Físicas",
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
       initBodyAssessmentList((rota, param) => {
