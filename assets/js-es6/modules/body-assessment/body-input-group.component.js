@@ -42,7 +42,7 @@ export function gerarGrupoInputs({
           : "";
 
         if (param.layout === "input-large") {
-          /*html*/ 
+          /*html*/
           return `
             <div class="input-grouped-form__input-static">
               <label for="${param.id}" class="input-grouped-form__input-static-text">${param.label}</label>
@@ -57,22 +57,29 @@ export function gerarGrupoInputs({
               />
             </div>
           `;
+          // No bloco do "else" (formulário de edição) dentro do .map:
         } else {
+          const atributoStep = param.step ? `step="${param.step}"` : "";
+          const unidade = param.unidade || ""; // Pega a unidade do JSON
           /*html*/
+          // No bloco do formulário de edição (input-short):
           return `
-            <div class="input-grouped-form__input-group">
-              <label for="${param.id}" class="input-grouped-form__text">${param.label}</label>
-              <input 
-                type="${param.tipo}" 
-                id="${param.id}" 
-                placeholder="${param.placeholder || "-"}" 
-                value="${param.valor || ""}"
-                class="input-grouped-form__input" 
-                ${atributoStep}
-                ${atributoMascara}
-              />
-            </div>
-          `;
+  <div class="input-grouped-form__input-group">
+    <label for="${param.id}" class="input-grouped-form__text">${param.label}</label>
+    <div class="input-grouped-form__input-wrapper">
+      <input 
+        type="text" 
+        inputmode="decimal"
+        id="${param.id}" 
+        placeholder="0,00" 
+        value="${param.valor || ""}"
+        class="input-grouped-form__input mask-decimal" 
+        data-unidade="${unidade}"
+      />
+      ${unidade ? `<span class="input-grouped-form__unit">${unidade}</span>` : ""}
+    </div>
+  </div>
+`;
         }
       }
     })

@@ -2,6 +2,7 @@ import { initInputGroupedForms } from "./body-assests-ui.component.js";
 import { BodyAvaliacoesService } from "./body-avaliacoes.service.js";
 import { BodySchemaService } from "./body-schema.service.js";
 import { gerarGrupoInputs } from "./body-input-group.component.js"; // Faltava esta importação
+import { aplicarMascaraDecimal } from "./body-assests-ui.component.js";
 
 export function initBodyAssessmentForm() {
   const selectElement = document.getElementById("body-schema-select");
@@ -64,6 +65,13 @@ export function initBodyAssessmentForm() {
     initInputGroupedForms();
   }
 
+  // Listener colocado dentro do escopo correto
+  containerItens.addEventListener("input", (event) => {
+    if (event.target.classList.contains("mask-decimal")) {
+      aplicarMascaraDecimal(event.target);
+    }
+  });
+
   // Escuta as trocas no dropdown para renderizar um novo formulário se o usuário mudar a opção
   selectElement.addEventListener("change", (event) => {
     const selectedOption = event.target.selectedOptions[0];
@@ -74,5 +82,5 @@ export function initBodyAssessmentForm() {
   });
 
   carregarEsquemas();
-  
+
 }

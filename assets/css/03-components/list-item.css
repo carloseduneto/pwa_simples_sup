@@ -307,14 +307,33 @@
   width: 70%;
 }
 
-.input-grouped-form__input {
+/* Container que agrupa input + unidade */
+.input-grouped-form__input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Alinha tudo à direita */
   width: 30%;
+  position: relative;
+}
+
+/* O input em si */
+.input-grouped-form__input {
+  width: 100%;
   text-align: right;
-  font-size: 0.95rem;
+  padding-right: 5px; /* Espaço para não encostar na unidade */
   border: none;
   background: transparent;
-  padding: 8px 0;
+  font-size: 0.95rem;
   font-weight: 500;
+  color: var(--text-black);
+}
+
+/* A unidade (kg, cm, etc) */
+.input-grouped-form__unit {
+  font-size: 0.85rem;
+  color: var(--text-muted); /* Cor mais sutil para a unidade */
+  pointer-events: none; /* Garante que clicar na unidade foque o input */
+  white-space: nowrap;
 }
 
 /* 6. Correção da Animação e Setas */
