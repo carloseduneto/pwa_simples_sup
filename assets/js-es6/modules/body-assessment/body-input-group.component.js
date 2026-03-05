@@ -45,10 +45,11 @@ export function gerarGrupoInputs({
           /*html*/
           return `
             <div class="input-grouped-form__input-static">
-              <label for="${param.id}" class="input-grouped-form__input-static-text">${param.label}</label>
+              <label for="body-assessment-${param.id}" class="input-grouped-form__input-static-text">${param.label}</label>
               <input 
                 type="${param.tipo}" 
-                id="${param.id}" 
+                id="body-assessment-${param.id}" 
+                name="${param.id}"
                 placeholder="${param.placeholder || "-"}" 
                 data-destino="${param.destino || ""}"
                 value="${param.valor || ""}"
@@ -62,16 +63,17 @@ export function gerarGrupoInputs({
         } else {
           const atributoStep = param.step ? `step="${param.step}"` : "";
           const unidade = param.unidade || ""; // Pega a unidade do JSON
-          /*html*/
           // No bloco do formulário de edição (input-short):
+          /*html*/
           return `
   <div class="input-grouped-form__input-group">
-    <label for="${param.id}" class="input-grouped-form__text">${param.label}</label>
+    <label for="body-assessment-${param.id}" class="input-grouped-form__text">${param.label}</label>
     <div class="input-grouped-form__input-wrapper">
       <input 
         type="text" 
         inputmode="decimal"
-        id="${param.id}" 
+        id="body-assessment-${param.id}" 
+        name="${param.id}"
         placeholder="0,00" 
         data-destino="${param.destino || ""}"
         value="${param.valor || ""}"

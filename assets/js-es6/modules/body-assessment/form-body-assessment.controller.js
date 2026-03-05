@@ -117,6 +117,9 @@ export async function initBodyAssessmentForm(onNavigate) {
 
   async function carregarEsquemas() {
     try {
+      // Limpa as opções velhas antes de desenhar as novas
+      selectElement.innerHTML = "";
+      
       const esquemas = await BodySchemaService.getAll();
 
       esquemas.forEach((esquema) => {
@@ -150,6 +153,22 @@ export async function initBodyAssessmentForm(onNavigate) {
     if (btnSave) {
       btnSave.classList.remove("skeleton-button");
       btnSave.innerText = "Salvar";
+    }
+
+    // Preenchimento automático da data atual
+    const inputData = document.getElementById("body-assessment-data_registro");
+
+    if (inputData) {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+
+      // getMonth começa do zero (Janeiro é 0). Somamos 1.
+      // padStart(2, "0") garante que o número terá 2 casas, preenchendo com zero à esquerda se precisar.
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const dia = String(hoje.getDate()).padStart(2, "0");
+
+      // Monta a string exata que o HTML exige: "2026-03-05"
+      inputData.value = `${ano}-${mes}-${dia}`;
     }
   }
 
@@ -192,7 +211,12 @@ export async function initBodyAssessmentForm(onNavigate) {
       const inputs = containerItens.querySelectorAll("input, select");
 
       inputs.forEach((input) => {
-        const chave = input.id;
+        // const chave = input.id;
+        if(!input.name) return;
+
+        const chave = input.name; // Agora o "name" é a chave que liga ao banco de dados
+
+        
         const destino = input.dataset.destino;
 
         if (!chave || !destino) return;

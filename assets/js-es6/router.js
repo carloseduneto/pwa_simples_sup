@@ -194,7 +194,8 @@ const rotasConfig = {
     voltarPara: "bodyAssessmentList",
     bottomNav: "none",
     tema: "havelock-blue",
-    titulo: "Add/Editar Avaliação Corporal",
+    // titulo: "Add/Editar Avaliação Corporal",
+    titulo: "",
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
       initBodyAssessmentForm((rota, param) => {
