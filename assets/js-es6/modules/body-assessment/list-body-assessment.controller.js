@@ -55,21 +55,34 @@ export async function initBodyAssessmentList(onNavigate) {
 
     // Monitorar os cliques nos botões recém-criados
     container.onclick = async (e) => {
-      const avaliacaoNome = e.target.closest(".list-item__title")?.innerText;
-      console.log("Item clicado:", avaliacaoNome);
+      // 1. Encontra o elemento pai que contém os dados, não importa onde foi o clique
+      const itemContainer = e.target.closest(".list-item");
+
+      // Se clicou fora de um item (no espaço vazio do container), encerra
+      if (!itemContainer) return;
+
+      // 2. Extrai o ID uma única vez
+      const id = itemContainer.dataset.id;
+
+      if(id){
+        console.log("Ir para detalhes da avaliação:", id);
+        localStorage.setItem("detailBodyAssessmentId", id);
+        if (onNavigate) onNavigate("bodyAssessmentDetail");
+      }
+
       const btnEdit = e.target.closest(".list-item__btn--edit");
       const btnDelete = e.target.closest(".list-item__btn--delete");
-      
+
       if (btnEdit) {
         const id = btnEdit.dataset.id;
         console.log("Editar avaliação:", id);
-        
+
         // onNavigate("rotaEdicao", id);
         localStorage.setItem("editBodyAssessmentId", id);
         // roteador("exercisesAddEdit");
         if (onNavigate) onNavigate("bodyAssessmentForm");
       }
-      
+
       if (btnDelete) {
         const id = btnDelete.dataset.id;
         console.log("Excluir avaliação:", id);
@@ -104,7 +117,7 @@ export async function initBodyAssessmentList(onNavigate) {
           }
         }
       }
-    };
+    };;;;
   } catch (error) {
     console.error("Falha ao buscar avaliações:", error);
     container.innerHTML =

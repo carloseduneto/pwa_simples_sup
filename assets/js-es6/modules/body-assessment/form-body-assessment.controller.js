@@ -61,7 +61,6 @@ export async function initBodyAssessmentForm(onNavigate) {
     containerItens.innerHTML = "";
 
     // 2. Mapeamento: converte a estrutura do Banco para a estrutura do Gerador
-    // 2. Mapeamento: converte a estrutura do Banco para a estrutura do Gerador
     const htmlCompleto = schemaJson
       .map((secaoDb) => {
         const parametrosMapeados = secaoDb.campos.map((campoDb) => ({
