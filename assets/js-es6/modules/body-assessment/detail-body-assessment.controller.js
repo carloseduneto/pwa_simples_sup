@@ -41,18 +41,22 @@ export async function initBodyAssessmentDetail(onNavigate) {
     const htmlCompleto = esquemaUsado.schema
       .map((secaoDb) => {
         const parametrosMapeados = secaoDb.campos.map((campoDb) => {
+
+          const camposAgrupados = agruparCampos(
+            secaoDb.campos,
+            avaliacao.value,
+            avaliacao
+          );
+          console.log("Campos agrupados", camposAgrupados);
+
           // Lógica de extração: Onde está o dado desta chave?
           let valorRecuperado = null;
 
-          
-          
           if (campoDb.destino === "tabela") {
             valorRecuperado = avaliacao[campoDb.chave];
           } else if (campoDb.destino === "json" && avaliacao.value) {
             valorRecuperado = avaliacao.value[campoDb.chave];
           }
-          const camposAgrupados = agruparCampos(secaoDb.campos, valorRecuperado.value);
-          console.log("Campos agrupados", camposAgrupados);
 
           // Formatação amigável para leitura
           if (valorRecuperado !== null && valorRecuperado !== undefined) {
@@ -96,77 +100,82 @@ export async function initBodyAssessmentDetail(onNavigate) {
   }
 }
 
-function agruparCampos(campos, valoresAvaliacao) {
+function agruparCampos(campos, valoresAvaliacao, avaliacao) {
+  console.log("Campos", campos);
+  console.log("Avaliação", valoresAvaliacao);
   const jaProcessados = {};
   const resultado = [];
-  
+  let valor_esq = 0;
+  let valor_dir = 0;
+
   for (let i = 0; i < campos.length; i++) {
     if (campos[i].par) {
+      const sufixo = campos[i].chave.split("_").at(-1);
       if (campos[i].par in jaProcessados) {
-        // // o que fazer aqui?
-        // mini_json={}
-        // item_mini_json = * body_schema.schema.label_par será uma chave de id
-        // item_mini_json = *  body_schema.schema.step
-        // item_mini_json = * body_schema.schema.layout
-        // item_mini_json = * body_schema.schema.destino
-        // item_mini_json = * body_schema.schema.unidade
-        // item_mini_json = * body_schema.schema.tipo_html
-        // item_mini_json = * se body_avaliacoes.value = body_schema.schema.chave item_mini_json =  → Regista em uma chave nova chamada valor_dir ou valor_esq (extraído do último termo da chave de body_avaliacoes.value que pode ter sufixo _esq ou _dir)
-        // append.jaProcessados(item_mini_json)
-
-        // if ("esq" in campos[i].valor) {
-          //   valor_esquerda = campos[i].valor;
-        //   jaProcessados[campos[i].par].valor_esq(valor_esquerda)
-        // } else {
-          //   valor_direita = campos[i].valor;
-          //   jaProcessados[campos[i].par].valor_esq(valor_direita)
-          // }
-          
-
-        
-
         jaProcessados[campos[i].par].chaves.push(campos[i].chave);
-
+        sufixo === "esq"
+          ? (jaProcessados[campos[i].par].valor_esq =
+              valoresAvaliacao[campos[i].chave])
+          : (jaProcessados[campos[i].par].valor_dir =
+              valoresAvaliacao[campos[i].chave]);
       } else {
+        if (sufixo === "esq") {
+          valor_esq = valoresAvaliacao[campos[i].chave];
+        } else {
+          valor_dir = valoresAvaliacao[campos[i].chave];
+        }
 
         const novoGrupo = {
           label_par: campos[i].label_par,
           unidade: campos[i].unidade,
-          tipo: campos[i].tipo,
-          valor_esq: sufixo === "esq" ? valor : null,
-          valor_dir: sufixo === "dir" ? valor : null,
+          tipo_html: campos[i].tipo_html,
+          valor_esq: valor_esq,
+          valor_dir: valor_dir,
           chaves: [],
+          destino: campos[i].destino,
+          chave_par: campos[i].par
         };
-
-        const sufixo = campos[i].chave.split("_").at(-1);
-
-        if (campos[i].label = valoresAvaliacao.campos[i].label && sufixo === "esq"){
-          valor_esq = valoresAvaliacao.campos[i].label;
-        }else{
-          valor_dir = valoresAvaliacao.campos[i].label;
-        }
-          // Aqui registra o nome do par de membros para futuras consultas em iterações do for
-          jaProcessados[campos[i].par] = novoGrupo;
+        // Aqui registra o nome do par de membros para futuras consultas em iterações do for
+        jaProcessados[campos[i].par] = novoGrupo;
 
         // Adiciona as chaves do campos já processados
         jaProcessados[campos[i].par].chaves.push(campos[i].chave);
 
         resultado.push(novoGrupo);
 
-        //deve ter um jeito certo de fazer isso, tô usando a lógica apenas
-
 
       }
 
-      // append.jaProcessados(resultado)
     } else {
-      // campo simples, sem par
-      // o que fazer aqui?
-      // Mantém os valores do jeito que tá mesmo, não faz nenhum tratamento
-      // append.resultadot(mantidos)
-      resultado.push(campos[i]);
+      
+      console.log("Aqui é o que tem em Campos[i]", avaliacao)
+      // if (campos[i].destino !== "json"){
+      //   campos[i].valor = valoresAvaliacao[campos[i].chave]
+      // }
+        // campos[i].chave.valor = valoresAvaliacao[campos[i].chave];
+      if (campos[i].destino === "json") {
+        campos[i].valor = valoresAvaliacao[campos[i].chave];
+      } else if (campos[i].destino === "tabela") {
+        // de onde viria o valor aqui?
+        campos[i][campos[i].chave] = avaliacao[campos[i].chave];
+      }
+
+        resultado.push(campos[i]);
     }
   }
 
+  resultado.sort((a, b) => {
+    const textoA = a.label_par || a.label;
+    const textoB = b.label_par || b.label;
+    return textoA.localeCompare(textoB);
+  });
+
+  resultado.sort((a, b) => {
+    const aPar = a.label_par ? 1 : 0;
+    const bPar = b.label_par ? 1 : 0;
+    return aPar - bPar; // simples primeiro, pares depois
+  });
+
+  
   return resultado;
 }
