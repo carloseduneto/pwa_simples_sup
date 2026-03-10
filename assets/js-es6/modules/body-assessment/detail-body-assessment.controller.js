@@ -37,72 +37,70 @@ export async function initBodyAssessmentDetail(onNavigate) {
       throw new Error("Modelo de avaliação não encontrado para este registro.");
     }
 
+    // const camposAgrupados2 = agruparCampos(
+    //   esquemaUsado.schema.campo,
+    //   avaliacao.value,
+    //   avaliacao,
+    // );
+
+    // for (let i = 0; i < esquemaUsado.schema.length; i++) {
+    //   console.log("esquema usado:", esquemaUsado.schema[i]);
+    //   const camposAgrupados = agruparCampos(
+    //     esquemaUsado.schema[i].campos,
+    //     avaliacao.value,
+    //     avaliacao,
+    //   );
+    //   // console.log("campos agrupaods", camposAgrupados);
+    // }
+
     // 4. Cruzamento e Renderização
     const htmlCompleto = esquemaUsado.schema
       .map((secaoDb) => {
-        const parametrosMapeados = secaoDb.campos.map((campoDb) => {
-          const camposAgrupados = agruparCampos(
-            secaoDb.campos,
-            avaliacao.value,
-            avaliacao,
-          );
+        // const parametrosMapeados = secaoDb.campos.map((campoDb) => {
+        //   // console.log("Campos agrupados", camposAgrupados);
 
-          // console.log("Campos agrupados", camposAgrupados);
+        //   // Lógica de extração: Onde está o dado desta chave?
+        //   let valorRecuperado2 = null;
 
-          // Lógica de extração: Onde está o dado desta chave?
-          let valorRecuperado2 = null;
+        //   if (campoDb.destino === "tabela") {
+        //     valorRecuperado2 = avaliacao[campoDb.chave];
+        //   } else if (campoDb.destino === "json" && avaliacao.value) {
+        //     valorRecuperado2 = avaliacao.value[campoDb.chave];
+        //   }
 
-          if (campoDb.destino === "tabela") {
-            valorRecuperado2 = avaliacao[campoDb.chave];
-          } else if (campoDb.destino === "json" && avaliacao.value) {
-            valorRecuperado2 = avaliacao.value[campoDb.chave];
-          }
+        //   // Formatação amigável para leitura
+        //   if (valorRecuperado2 !== null && valorRecuperado2 !== undefined) {
+        //     if (campoDb.tipo_html === "date") {
+        //       // Converte YYYY-MM-DD para DD/MM/YYYY
+        //       valorRecuperado2 = valorRecuperado2
+        //         .split("T")[0]
+        //         .split("-")
+        //         .reverse()
+        //         .join("/");
+        //     } else if (typeof valorRecuperado2 === "number") {
+        //       // Troca ponto por vírgula na exibição
+        //       valorRecuperado2 = valorRecuperado2.toString().replace(".", ",");
+        //     }
+        //   }
 
-          // Formatação amigável para leitura
-          if (valorRecuperado2 !== null && valorRecuperado2 !== undefined) {
-            if (campoDb.tipo_html === "date") {
-              // Converte YYYY-MM-DD para DD/MM/YYYY
-              valorRecuperado2 = valorRecuperado2
-                .split("T")[0]
-                .split("-")
-                .reverse()
-                .join("/");
-            } else if (typeof valorRecuperado2 === "number") {
-              // Troca ponto por vírgula na exibição
-              valorRecuperado2 = valorRecuperado2.toString().replace(".", ",");
-            }
-          }
+        //   // Entrega o pacote pronto para o componente de leitura
+        //   return {
+        //     label: campoDb.label,
+        //     valor: valorRecuperado2,
+        //     unidade: campoDb.unidade || "",
+        //   };
+        // });
 
-          let valorRecuperado = null;
-
-          //Corrigir para pegar dados da fonte de dados tratada
-          if (valorRecuperado !== null && valorRecuperado !== undefined) {
-            if (camposAgrupados.tipo_html === "date") {
-              // Converte YYYY-MM-DD para DD/MM/YYYY
-              valorRecuperado = valorRecuperado
-                .split("T")[0]
-                .split("-")
-                .reverse()
-                .join("/");
-            } else if (typeof valorRecuperado === "number") {
-              // Troca ponto por vírgula na exibição
-              valorRecuperado = valorRecuperado.toString().replace(".", ",");
-            }
-          }
-
-          // Entrega o pacote pronto para o componente de leitura
-          return {
-            label: campoDb.label,
-            valor: valorRecuperado2,
-            unidade: campoDb.unidade || "",
-            parametrosAgrupados: camposAgrupados,
-          };
-        });
+        const camposAgrupados = agruparCampos(
+          secaoDb.campos,
+          avaliacao.value,
+          avaliacao,
+        );
 
         return gerarGrupoInputs({
           titulo: secaoDb.secao,
           retratil: secaoDb.retratil,
-          parametros: parametrosMapeados,
+          parametros: camposAgrupados,
           modoLeitura: true,
         });
       })
@@ -196,7 +194,7 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
 }
 
 function formatarValor(tipo, valor) {
-  console.log("Tipo e valor: ",tipo, valor);
+  // console.log("Tipo e valor: ",tipo, valor);
   //Corrigir para pegar dados da fonte de dados tratada
   if (tipo === "date") {
     // Converte YYYY-MM-DD para DD/MM/YYYY
