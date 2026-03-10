@@ -6,9 +6,11 @@ export function gerarGrupoInputs({
   parametros = [],
   modoLeitura = false,
 }) {
+  console.log("Parametros: ", parametros);
   // 1. Monta o cabeçalho do grupo (Estático vs Retrátil)
   let cabecalhoHtml = "";
   if (retratil) {
+    /*html*/
     cabecalhoHtml = `
       <div class="input-grouped-form__retractable-area">
         <span class="input-grouped-form__titulo dont-select">${titulo}</span>
@@ -16,6 +18,7 @@ export function gerarGrupoInputs({
       </div>
     `;
   } else {
+    /*html*/
     cabecalhoHtml = `
       <div class="input-grouped-form__static">
         <span class="input-grouped-form__titulo">${titulo}</span>
@@ -28,6 +31,7 @@ export function gerarGrupoInputs({
     .map((param) => {
       if (modoLeitura) {
         // Visualização de detalhes
+        /*html*/
         return `
         <div class="input-grouped-form__input-group">
           <span class="input-grouped-form__text">${param.label}</span>

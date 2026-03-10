@@ -41,26 +41,43 @@ export async function initBodyAssessmentDetail(onNavigate) {
     const htmlCompleto = esquemaUsado.schema
       .map((secaoDb) => {
         const parametrosMapeados = secaoDb.campos.map((campoDb) => {
-
           const camposAgrupados = agruparCampos(
             secaoDb.campos,
             avaliacao.value,
-            avaliacao
+            avaliacao,
           );
-          console.log("Campos agrupados", camposAgrupados);
+
+          // console.log("Campos agrupados", camposAgrupados);
 
           // Lógica de extração: Onde está o dado desta chave?
-          let valorRecuperado = null;
+          let valorRecuperado2 = null;
 
           if (campoDb.destino === "tabela") {
-            valorRecuperado = avaliacao[campoDb.chave];
+            valorRecuperado2 = avaliacao[campoDb.chave];
           } else if (campoDb.destino === "json" && avaliacao.value) {
-            valorRecuperado = avaliacao.value[campoDb.chave];
+            valorRecuperado2 = avaliacao.value[campoDb.chave];
           }
 
           // Formatação amigável para leitura
-          if (valorRecuperado !== null && valorRecuperado !== undefined) {
+          if (valorRecuperado2 !== null && valorRecuperado2 !== undefined) {
             if (campoDb.tipo_html === "date") {
+              // Converte YYYY-MM-DD para DD/MM/YYYY
+              valorRecuperado2 = valorRecuperado2
+                .split("T")[0]
+                .split("-")
+                .reverse()
+                .join("/");
+            } else if (typeof valorRecuperado2 === "number") {
+              // Troca ponto por vírgula na exibição
+              valorRecuperado2 = valorRecuperado2.toString().replace(".", ",");
+            }
+          }
+
+          let valorRecuperado = null;
+
+          //Corrigir para pegar dados da fonte de dados tratada
+          if (valorRecuperado !== null && valorRecuperado !== undefined) {
+            if (camposAgrupados.tipo_html === "date") {
               // Converte YYYY-MM-DD para DD/MM/YYYY
               valorRecuperado = valorRecuperado
                 .split("T")[0]
@@ -76,8 +93,9 @@ export async function initBodyAssessmentDetail(onNavigate) {
           // Entrega o pacote pronto para o componente de leitura
           return {
             label: campoDb.label,
-            valor: valorRecuperado,
+            valor: valorRecuperado2,
             unidade: campoDb.unidade || "",
+            parametrosAgrupados: camposAgrupados,
           };
         });
 
@@ -101,8 +119,8 @@ export async function initBodyAssessmentDetail(onNavigate) {
 }
 
 function agruparCampos(campos, valoresAvaliacao, avaliacao) {
-  console.log("Campos", campos);
-  console.log("Avaliação", valoresAvaliacao);
+  // console.log("Campos", campos);
+  // console.log("Avaliação", valoresAvaliacao);
   const jaProcessados = {};
   const resultado = [];
   let valor_esq = 0;
@@ -133,7 +151,7 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
           valor_dir: valor_dir,
           chaves: [],
           destino: campos[i].destino,
-          chave_par: campos[i].par
+          chave_par: campos[i].par,
         };
         // Aqui registra o nome do par de membros para futuras consultas em iterações do for
         jaProcessados[campos[i].par] = novoGrupo;
@@ -142,25 +160,23 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
         jaProcessados[campos[i].par].chaves.push(campos[i].chave);
 
         resultado.push(novoGrupo);
-
-
       }
-
     } else {
-      
-      console.log("Aqui é o que tem em Campos[i]", avaliacao)
+      // console.log("Aqui é o que tem em Campos[i]", avaliacao);
       // if (campos[i].destino !== "json"){
       //   campos[i].valor = valoresAvaliacao[campos[i].chave]
       // }
-        // campos[i].chave.valor = valoresAvaliacao[campos[i].chave];
+      // campos[i].chave.valor = valoresAvaliacao[campos[i].chave];
       if (campos[i].destino === "json") {
         campos[i].valor = valoresAvaliacao[campos[i].chave];
       } else if (campos[i].destino === "tabela") {
         // de onde viria o valor aqui?
-        campos[i][campos[i].chave] = avaliacao[campos[i].chave];
+        // campos[i][campos[i].chave] = avaliacao[campos[i].chave];
+        campos[i].valor = avaliacao[campos[i].chave];
       }
+      campos[i].valor = formatarValor(campos[i].tipo_html, campos[i].valor);
 
-        resultado.push(campos[i]);
+      resultado.push(campos[i]);
     }
   }
 
@@ -176,6 +192,19 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
     return aPar - bPar; // simples primeiro, pares depois
   });
 
-  
   return resultado;
+}
+
+function formatarValor(tipo, valor) {
+  console.log("Tipo e valor: ",tipo, valor);
+  //Corrigir para pegar dados da fonte de dados tratada
+  if (tipo === "date") {
+    // Converte YYYY-MM-DD para DD/MM/YYYY
+    valor = valor.split("T")[0].split("-").reverse().join("/");
+  } else if (tipo === "number") {
+    // Troca ponto por vírgula na exibição
+    valor = valor.toString().replace(".", ",");
+  }
+
+  return valor;
 }
