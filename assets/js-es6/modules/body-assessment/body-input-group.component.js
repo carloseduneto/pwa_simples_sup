@@ -26,18 +26,59 @@ export function gerarGrupoInputs({
     `;
   }
 
+  let miniHeaderParHtml = "";
+  let headerJaMostrado = false;
+
   // 2. Monta a lista de inputs ou spans (O laço de repetição lida com o aninhamento)
   const itensHtml = parametros
     .map((param) => {
       if (modoLeitura) {
-        // Visualização de detalhes
-        /*html*/
-        return `
-        <div class="input-grouped-form__input-group">
+        if (param.label !== undefined && param.valor !== undefined) {
+          // Visualização de detalhes simples
+          /*html*/
+          return `
+          <div class="input-grouped-form__input-group">
           <span class="input-grouped-form__text">${param.label}</span>
           <span class="input-grouped-form__value" style="font-weight: bold;">${param.valor || "-"} ${param.unidade || ""}</span>
-        </div>
-      `;
+          </div>
+          `;
+        } else if (
+          param.label_par !== undefined &&
+          param.valor_esq !== undefined &&
+          param.valor_dir !== undefined
+        ) {
+          if (param.label_par && !headerJaMostrado) {
+            /*html*/
+            miniHeaderParHtml = `
+            <div class="input-grouped-form__left-right-header">
+            <div></div>
+            <div>Esquerdo</div>
+            <div>Direito</div>
+            </div>
+            `;
+          }
+          // Visualização de detalhes duplos
+          /*html*/
+          let dadosPares = `
+          
+          
+          <div class="input-grouped-form__input-group input-grouped-form__left-right-data">
+          <span class="input-grouped-form__text">${param.label_par}</span>
+          <span class="input-grouped-form__value" style="font-weight: bold;">
+          ${param.valor_esq || "-"} ${param.unidade || ""} 
+          </span>
+          <span class="input-grouped-form__value" style="font-weight: bold;">
+          ${param.valor_dir || "-"}  ${param.unidade || ""}
+          </span>
+          </div>
+          `;
+          const detalhesDuplos = !headerJaMostrado
+            ? miniHeaderParHtml + dadosPares
+            : dadosPares;
+          headerJaMostrado = true;
+
+          return detalhesDuplos;
+        }
       } else {
         // Formulário de edição
         const atributoStep = param.step ? `step="${param.step}"` : "";

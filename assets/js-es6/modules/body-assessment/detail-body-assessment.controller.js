@@ -131,9 +131,9 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
         jaProcessados[campos[i].par].chaves.push(campos[i].chave);
         sufixo === "esq"
           ? (jaProcessados[campos[i].par].valor_esq =
-              valoresAvaliacao[campos[i].chave])
+              formatarValor("number",valoresAvaliacao[campos[i].chave]))
           : (jaProcessados[campos[i].par].valor_dir =
-              valoresAvaliacao[campos[i].chave]);
+              formatarValor("number",valoresAvaliacao[campos[i].chave]));
       } else {
         if (sufixo === "esq") {
           valor_esq = valoresAvaliacao[campos[i].chave];
@@ -153,10 +153,12 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
         };
         // Aqui registra o nome do par de membros para futuras consultas em iterações do for
         jaProcessados[campos[i].par] = novoGrupo;
-
+        
         // Adiciona as chaves do campos já processados
         jaProcessados[campos[i].par].chaves.push(campos[i].chave);
-
+        novoGrupo.valor_dir = formatarValor(novoGrupo.tipo_html, novoGrupo.valor_dir);
+        novoGrupo.valor_esq = formatarValor(novoGrupo.tipo_html, novoGrupo.valor_esq);
+        
         resultado.push(novoGrupo);
       }
     } else {
@@ -199,7 +201,7 @@ function formatarValor(tipo, valor) {
   if (tipo === "date") {
     // Converte YYYY-MM-DD para DD/MM/YYYY
     valor = valor.split("T")[0].split("-").reverse().join("/");
-  } else if (tipo === "number") {
+  } else if (tipo === "number"  && valor!==null) {
     // Troca ponto por vírgula na exibição
     valor = valor.toString().replace(".", ",");
   }
