@@ -168,10 +168,10 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
       // }
       // campos[i].chave.valor = valoresAvaliacao[campos[i].chave];
       if (campos[i].destino === "json") {
+        // Aqui define o valor que vem do JSONB
         campos[i].valor = valoresAvaliacao[campos[i].chave];
       } else if (campos[i].destino === "tabela") {
-        // de onde viria o valor aqui?
-        // campos[i][campos[i].chave] = avaliacao[campos[i].chave];
+        //Aqui define o valor que vem da tabela
         campos[i].valor = avaliacao[campos[i].chave];
       }
       campos[i].valor = formatarValor(campos[i].tipo_html, campos[i].valor);
@@ -180,12 +180,14 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
     }
   }
 
+  //Ordenar por ordem alfabética
   resultado.sort((a, b) => {
     const textoA = a.label_par || a.label;
     const textoB = b.label_par || b.label;
     return textoA.localeCompare(textoB);
   });
-
+  
+  //Ordenar simples primeiros pares depois
   resultado.sort((a, b) => {
     const aPar = a.label_par ? 1 : 0;
     const bPar = b.label_par ? 1 : 0;

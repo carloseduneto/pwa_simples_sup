@@ -12,6 +12,7 @@ import { initWorkoutHistory } from "./controllers/list-workout-history.js";
 import { initBodyAssessmentList } from "./modules/body-assessment/list-body-assessment.controller.js";
 import { initBodyAssessmentForm } from "./modules/body-assessment/form-body-assessment.controller.js";
 import { initBodyAssessmentDetail } from "./modules/body-assessment/detail-body-assessment.controller.js";
+import { initBodyAssessmentCompare } from "./modules/body-assessment/compare-body-assessment.controller.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -216,6 +217,22 @@ const rotasConfig = {
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
       initBodyAssessmentDetail((rota, param) => {
+        roteador(rota, param);
+      });
+    },
+  },
+  bodyAssessmentCompare: {
+    idDiv: "screen-body-assessment-compare",
+    html: "assets/js-es6/modules/body-assessment/compare-body-assessment.html",
+    tipoHeader: "alternativo",
+    voltarPara: "bodyAssessmentList",
+    bottomNav: "none",
+    tema: "havelock-blue",
+    // titulo: "Add/Editar Avaliação Corporal",
+    titulo: "Comparar avaliação",
+    onLoad: (id) => {
+      // AQUI É A MUDANÇA:
+      initBodyAssessmentCompare((rota, param) => {
         roteador(rota, param);
       });
     },
