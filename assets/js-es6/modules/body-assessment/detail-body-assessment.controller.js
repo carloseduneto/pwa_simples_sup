@@ -97,6 +97,7 @@ export async function initBodyAssessmentDetail(onNavigate) {
           avaliacao,
         );
 
+        
         return gerarGrupoInputs({
           titulo: secaoDb.secao,
           retratil: secaoDb.retratil,
