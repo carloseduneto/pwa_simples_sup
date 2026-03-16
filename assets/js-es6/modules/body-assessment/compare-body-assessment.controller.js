@@ -21,7 +21,7 @@ export async function initBodyAssessmentCompare(onNavigate) {
 
   // 1. Captura a intenção de navegação
   // const avaliacaoId = localStorage.getItem("detailBodyAssessmentId");
-  const avaliacaoId1 = 11;
+  const avaliacaoId1 = 2;
   const avaliacaoId2 = 13;
 
   if (!avaliacaoId1 && !avaliacaoId2) {
@@ -63,12 +63,15 @@ export async function initBodyAssessmentCompare(onNavigate) {
           avaliacaoNova,
         );
 
+        console.log("camposAgrupados", camposAgrupados);
+
         // return gerarGrupoInputs({
         //   titulo: secaoDb.secao,
         //   retratil: secaoDb.retratil,
         //   parametros: camposAgrupados,
         //   modoLeitura: true,
         // });
+        return camposAgrupados;
       })
       .join("");
 
@@ -77,6 +80,8 @@ export async function initBodyAssessmentCompare(onNavigate) {
     // initInputGroupedForms();
     console.log("avaliacao antiga:", avaliacaoAntiga);
     console.log("avaliacao nova", avaliacaoNova);
+
+    console.log("htmlCompleto", htmlCompleto);
   } catch (error) {
     console.error("Erro ao carregar detalhes da avaliação:", error);
     containerItens.innerHTML =
@@ -93,86 +98,257 @@ function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
     "avaliacaoNova",
     avaliacaoNova,
   );
+  const resultado = [];
 
-  for (let i = 0; i < campos.length; i++) {}
+  for (let i = 0; i < campos.length; i++) {
+    let valor_antigo, valor_novo;
+    if (campos[i].destino === "json") {
+      // Aqui define o valor que vem do JSONB
+      valor_antigo = avaliacaoAntiga.value[campos[i].chave];
+      valor_novo = avaliacaoNova.value[campos[i].chave];
+    } else if (campos[i].destino === "tabela") {
+      //Aqui define o valor que vem da tabela
+      valor_antigo = avaliacaoAntiga[campos[i].chave];
+      valor_novo = avaliacaoNova[campos[i].chave];
+    }
 
-  let objetoSimples = {};
-  return "";
-}
+    console.log(valor_antigo, valor_novo);
 
-function objectGenerator() {
-  let valor_antigo = avaliacaoAntiga.value[campos[i].chave];
-  let valor_novo = avaliacaoNova.value[campos[i].chave];
-  let dif_perc = ((valor_novo - valor_antigo) / valor_antigo) * 100;
-  let dif_unit = valor_novo - valor_antigo;
+    if (
+      !campos[i].label_par &&
+      (typeof valor_antigo == "number" || typeof valor_novo == "number")
+    ) {
+      let dif_perc =
+        valor_antigo == null || valor_novo == null
+          ? "-"
+          : difPercentualAntigoNovo(valor_antigo, valor_novo);
+      let dif_unit =
+        valor_antigo == null || valor_novo == null
+          ? "-"
+          : difUnidadeAntigoNovo(valor_antigo, valor_novo);
 
-  dif_perc = formatarValor("number", dif_perc);
-  dif_unit = formatarValor("number", dif_unit);
+      dif_perc = formatarValor("number", dif_perc);
+      dif_unit = formatarValor("number", dif_unit);
 
-  let objetoSimples = {
-    label: campos[i].label,
-    unidade: campos[i].unidade,
-    tipo_html: campos[i].tipo_html,
-    destino: campos[i].destino,
-    valor_antigo: formatarValor(
-      campos[i].tipo_html,
-      avaliacaoAntiga.value[campos[i].chave],
-    ),
-    valor_novo: formatarValor(
-      campos[i].tipo_html,
-      avaliacaoNova.value[campos[i].chave],
-    ),
-    dif_perc: dif_perc,
-    dif_unit: dif_unit,
-  };
+      let objetoSimples = {
+        label: campos[i].label,
+        unidade: campos[i].unidade,
+        tipo_html: campos[i].tipo_html,
+        destino: campos[i].destino,
+        valor_antigo: formatarValor(
+          campos[i].tipo_html,
+          avaliacaoAntiga.value[campos[i].chave],
+        ),
+        valor_novo: formatarValor(
+          campos[i].tipo_html,
+          avaliacaoNova.value[campos[i].chave],
+        ),
+        dif_perc: dif_perc,
+        dif_unit: dif_unit,
+      };
 
-  const sufixo = campos[i].chave.split("_").at(-1);
+      resultado.push(objetoSimples);
+    } else if (campos[i].label_par) {
+      const sufixo = campos[i].chave.split("_").at(-1);
 
-  let valor_antigo_esq, valor_novo_esq, dif_perc_esq, dif_unit_esq;
-  let valor_antigo_dir, valor_novo_dir, dif_perc_dir, dif_unit_dir;
+      let valor_antigo_esq, valor_novo_esq, dif_perc_esq, dif_unit_esq;
+      let valor_antigo_dir, valor_novo_dir, dif_perc_dir, dif_unit_dir;
 
-  if (sufixo === "esq") {
-    valor_antigo_esq = valor_antigo;
-    valor_novo_esq = valor_novo;
-    dif_perc_esq =
-      ((valor_novo_esq - valor_antigo_esq) / valor_antigo_esq) * 100;
-    dif_unit_esq = valor_novo_esq - valor_antigo_esq;
-  } else if (sufixo === "dir") {
-    valor_antigo_dir = valor_antigo;
-    valor_novo_dir = valor_novo;
-    dif_perc_dir =
-      ((valor_novo_dir - valor_antigo_dir) / valor_antigo_dir) * 100;
-    dif_unit_dir = valor_novo_dir - valor_antigo_dir;
+      if (sufixo === "esq") {
+        // Calcula esquerda
+        valor_antigo_esq = valor_antigo;
+        valor_novo_esq = valor_novo;
+        dif_perc_esq =
+          valor_antigo_esq == null || valor_novo_esq == null
+            ? "-"
+            : difPercentualAntigoNovo(valor_antigo_esq, valor_novo_esq);
+        dif_unit_esq =
+          valor_antigo_esq == null || valor_novo_esq == null
+            ? "-"
+            : difUnidadeAntigoNovo(valor_antigo_esq, valor_novo_esq);
+
+        //Busca valores para já calcular direita
+        const chaveDir = campos[i].chave.replace("_esq", "_dir");
+        valor_antigo_dir = avaliacaoAntiga.value[chaveDir];
+        valor_novo_dir = avaliacaoNova.value[chaveDir];
+
+        //Calcula direita
+        dif_perc_dir =
+          valor_antigo_dir == null || valor_novo_dir == null
+            ? "-"
+            : difPercentualAntigoNovo(valor_antigo_dir, valor_novo_dir);
+        dif_unit_dir =
+          valor_antigo_dir == null || valor_novo_dir == null
+            ? "-"
+            : difUnidadeAntigoNovo(valor_antigo_dir, valor_novo_dir);
+      }
+      if (sufixo === "dir") {
+        continue;
+      }
+
+      valor_antigo_esq = formatarValor("number", valor_antigo_esq);
+      valor_novo_esq = formatarValor("number", valor_novo_esq);
+      dif_perc_esq = formatarValor("number", dif_perc_esq);
+      dif_unit_esq = formatarValor("number", dif_unit_esq);
+      valor_antigo_dir = formatarValor("number", valor_antigo_dir);
+      valor_novo_dir = formatarValor("number", valor_novo_dir);
+      dif_perc_dir = formatarValor("number", dif_perc_dir);
+      dif_unit_dir = formatarValor("number", dif_unit_dir);
+
+      let objetoPares = {
+        label: campos[i].label_par,
+        label_par: campos[i].label_par,
+        unidade: campos[i].unidade,
+        tipo_html: campos[i].tipo_html,
+        destino: campos[i].destino,
+        valor_antigo: `${valor_antigo_esq}/${valor_antigo_dir}`,
+        valor_novo: `${valor_novo_esq}/${valor_novo_dir}`,
+        dif_perc:
+          dif_perc_esq === dif_perc_dir
+            ? dif_perc_esq
+            : `${dif_perc_esq}/${dif_perc_dir}`,
+        dif_unit:
+          dif_unit_esq === dif_unit_dir
+            ? dif_unit_esq
+            : `${dif_unit_esq}/${dif_unit_dir}`,
+        chaves: [],
+        chave_par: campos[i].par,
+      };
+      resultado.push(objetoPares);
+    } else {
+      let objetoBase = {
+        label: campos[i].label,
+        tipo_html: campos[i].tipo_html,
+        destino: campos[i].destino,
+        valor_antigo: valor_antigo,
+        valor_novo: valor_novo,
+      };
+
+      resultado.push(objetoBase);
+    }
   }
 
-  valor_antigo_esq = formatarValor("number", valor_antigo_esq);
-  valor_novo_esq = formatarValor("number", valor_novo_esq);
-  dif_perc_esq = formatarValor("number", dif_perc_esq);
-  dif_unit_esq = formatarValor("number", dif_unit_esq);
-  valor_antigo_dir = formatarValor("number", valor_antigo_dir);
-  valor_novo_dir = formatarValor("number", valor_novo_dir);
-  dif_perc_dir = formatarValor("number", dif_perc_dir);
-  dif_unit_dir = formatarValor("number", dif_unit_dir);
+  function difPercentualAntigoNovo(valor_antigo, valor_novo) {
+    let resultado = ((valor_novo - valor_antigo) / valor_antigo) * 100;
+    resultado = Number(resultado.toFixed(2));
+    return resultado;
+  }
 
-  let objetoPares = {
-    label: campos[i].label_par,
-    unidade: campos[i].unidade,
-    tipo_html: campos[i].tipo_html,
-    destino: campos[i].destino,
-    valor_antigo: `${valor_antigo_esq}/${valor_antigo_dir}`,
-    valor_novo: `${valor_novo_esq}/${valor_novo_dir}`,
-    dif_perc:
-      dif_perc_esq === dif_perc_dir
-        ? dif_perc_esq
-        : `${dif_perc_esq}/${dif_perc_dir}`,
-    dif_unit:
-      dif_unit_esq === dif_unit_dir
-        ? dif_unit_esq
-        : `${dif_unit_esq}/${dif_unit_dir}`,
-    chaves: [],
-    chave_par: campos[i].par,
-  };
+  function difUnidadeAntigoNovo(valor_antigo, valor_novo) {
+    let resultado = valor_novo - valor_antigo;
+    resultado = Number(resultado.toFixed(2));
+    return resultado;
+  }
+
+  resultado.sort((a, b) => {
+    const textoA = a.label_par || a.label;
+    const textoB = b.label_par || b.label;
+    return textoA.localeCompare(textoB);
+  });
+
+  resultado.sort((a, b) => {
+    const aPar = a.label_par ? 1 : 0;
+    const bPar = b.label_par ? 1 : 0;
+    return aPar - bPar; // simples primeiro, pares depois
+  });
+
+  return resultado;
 }
+
+// function objectGenerator() {
+//   // const resultado = [];
+
+//   if (!campos[i].label_par) {
+//     let valor_antigo = avaliacaoAntiga.value[campos[i].chave];
+//     let valor_novo = avaliacaoNova.value[campos[i].chave];
+//     let dif_perc = difPercentualAntigoNovo(valor_antigo, valor_novo);
+//     let dif_unit = difUnidadeAntigoNovo(valor_antigo, valor_novo);
+
+//     dif_perc = formatarValor("number", dif_perc);
+//     dif_unit = formatarValor("number", dif_unit);
+
+//     let objetoSimples = {
+//       label: campos[i].label,
+//       unidade: campos[i].unidade,
+//       tipo_html: campos[i].tipo_html,
+//       destino: campos[i].destino,
+//       valor_antigo: formatarValor(
+//         campos[i].tipo_html,
+//         avaliacaoAntiga.value[campos[i].chave],
+//       ),
+//       valor_novo: formatarValor(
+//         campos[i].tipo_html,
+//         avaliacaoNova.value[campos[i].chave],
+//       ),
+//       dif_perc: dif_perc,
+//       dif_unit: dif_unit,
+//     };
+
+//     resultado.push(objetoSimples);
+//   } else if (campos[i].label_par) {
+//     const sufixo = campos[i].chave.split("_").at(-1);
+
+//     let valor_antigo_esq, valor_novo_esq, dif_perc_esq, dif_unit_esq;
+//     let valor_antigo_dir, valor_novo_dir, dif_perc_dir, dif_unit_dir;
+
+//     if (sufixo === "esq") {
+//       // Calcula esquerda
+//       valor_antigo_esq = valor_antigo;
+//       valor_novo_esq = valor_novo;
+//       dif_perc_esq = difPercentualAntigoNovo(valor_antigo_esq, valor_novo_esq);
+//       dif_unit_esq = difUnidadeAntigoNovo(valor_antigo_esq, valor_novo_esq);
+
+//       //Busca valores para já calcular direita
+//       const chaveDir = campos[i].chave.replace("_esq", "_dir");
+//       valor_antigo_dir = avaliacaoAntiga.value[chaveDir];
+//       valor_novo_dir = avaliacaoNova.value[chaveDir];
+
+//       //Calcula direita
+//       dif_perc_dir = difPercentualAntigoNovo(valor_antigo_dir, valor_novo_dir);
+//       dif_unit_dir = difUnidadeAntigoNovo(valor_antigo_dir, valor_novo_dir);
+//     }
+//     if (sufixo === "dir") {
+//       // continue
+//     }
+
+//     valor_antigo_esq = formatarValor("number", valor_antigo_esq);
+//     valor_novo_esq = formatarValor("number", valor_novo_esq);
+//     dif_perc_esq = formatarValor("number", dif_perc_esq);
+//     dif_unit_esq = formatarValor("number", dif_unit_esq);
+//     valor_antigo_dir = formatarValor("number", valor_antigo_dir);
+//     valor_novo_dir = formatarValor("number", valor_novo_dir);
+//     dif_perc_dir = formatarValor("number", dif_perc_dir);
+//     dif_unit_dir = formatarValor("number", dif_unit_dir);
+
+//     let objetoPares = {
+//       label: campos[i].label_par,
+//       unidade: campos[i].unidade,
+//       tipo_html: campos[i].tipo_html,
+//       destino: campos[i].destino,
+//       valor_antigo: `${valor_antigo_esq}/${valor_antigo_dir}`,
+//       valor_novo: `${valor_novo_esq}/${valor_novo_dir}`,
+//       dif_perc:
+//         dif_perc_esq === dif_perc_dir
+//           ? dif_perc_esq
+//           : `${dif_perc_esq}/${dif_perc_dir}`,
+//       dif_unit:
+//         dif_unit_esq === dif_unit_dir
+//           ? dif_unit_esq
+//           : `${dif_unit_esq}/${dif_unit_dir}`,
+//       chaves: [],
+//       chave_par: campos[i].par,
+//     };
+//     resultado.push(objetoPares);
+//   }
+
+//   function difPercentualAntigoNovo(valor_antigo, valor_novo) {
+//     return ((valor_antigo - valor_novo) / valor_antigo) * 100;
+//   }
+
+//   function difUnidadeAntigoNovo(valor_antigo, valor_novo) {
+//     return valor_novo - valor_antigo;
+//   }
+// }
 
 function agruparCampos(campos, valoresAvaliacao, avaliacao) {
   // console.log("Campos", campos);
