@@ -5,6 +5,9 @@ import { initInputGroupedForms } from "./body-assests-ui.component.js";
 import { BodyAvaliacoesService } from "./body-avaliacoes.service.js";
 import { BodySchemaService } from "./body-schema.service.js";
 import { gerarGrupoInputs } from "./body-input-group.component.js";
+import { gerarGrupoComparacao } from "./body-input-group.component.js";
+
+
 
 export async function initBodyAssessmentCompare(onNavigate) {
   const container = document.getElementById(
@@ -21,7 +24,7 @@ export async function initBodyAssessmentCompare(onNavigate) {
 
   // 1. Captura a intenção de navegação
   // const avaliacaoId = localStorage.getItem("detailBodyAssessmentId");
-  const avaliacaoId1 = 2;
+  const avaliacaoId1 = 11;
   const avaliacaoId2 = 13;
 
   if (!avaliacaoId1 && !avaliacaoId2) {
@@ -65,23 +68,22 @@ export async function initBodyAssessmentCompare(onNavigate) {
 
         console.log("camposAgrupados", camposAgrupados);
 
-        // return gerarGrupoInputs({
-        //   titulo: secaoDb.secao,
-        //   retratil: secaoDb.retratil,
-        //   parametros: camposAgrupados,
-        //   modoLeitura: true,
-        // });
-        return camposAgrupados;
+        return gerarGrupoComparacao({
+          titulo: secaoDb.secao,
+          retratil: secaoDb.retratil,
+          parametros: camposAgrupados,
+        });
+        // return camposAgrupados;
       })
       .join("");
 
     // // 5. Injeta na tela e ativa as sanfonas
-    // containerItens.innerHTML = htmlCompleto;
+    containerItens.innerHTML = htmlCompleto;
     // initInputGroupedForms();
     console.log("avaliacao antiga:", avaliacaoAntiga);
     console.log("avaliacao nova", avaliacaoNova);
 
-    console.log("htmlCompleto", htmlCompleto);
+    // console.log("htmlCompleto", htmlCompleto);
   } catch (error) {
     console.error("Erro ao carregar detalhes da avaliação:", error);
     containerItens.innerHTML =
@@ -90,14 +92,14 @@ export async function initBodyAssessmentCompare(onNavigate) {
 }
 
 function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
-  console.log(
-    "campos:",
-    campos,
-    "avaliacaoAntiga",
-    avaliacaoAntiga,
-    "avaliacaoNova",
-    avaliacaoNova,
-  );
+  // console.log(
+  //   "campos:",
+  //   campos,
+  //   "avaliacaoAntiga",
+  //   avaliacaoAntiga,
+  //   "avaliacaoNova",
+  //   avaliacaoNova,
+  // );
   const resultado = [];
 
   for (let i = 0; i < campos.length; i++) {
@@ -110,9 +112,13 @@ function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
       //Aqui define o valor que vem da tabela
       valor_antigo = avaliacaoAntiga[campos[i].chave];
       valor_novo = avaliacaoNova[campos[i].chave];
+      if (campos[i].tipo_html == "date") {
+        valor_antigo = formatarValor("date", valor_antigo);
+        valor_novo = formatarValor("date", valor_novo);
+      }
     }
 
-    console.log(valor_antigo, valor_novo);
+    // console.log(valor_antigo, valor_novo);
 
     if (
       !campos[i].label_par &&
@@ -155,30 +161,32 @@ function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
       let valor_antigo_dir, valor_novo_dir, dif_perc_dir, dif_unit_dir;
 
       if (sufixo === "esq") {
+        //Busca valores para calcular a esquerda
+        valor_antigo_esq = valor_antigo ?? "-";
+        valor_novo_esq = valor_novo ?? "-";
         // Calcula esquerda
-        valor_antigo_esq = valor_antigo;
-        valor_novo_esq = valor_novo;
         dif_perc_esq =
-          valor_antigo_esq == null || valor_novo_esq == null
+          valor_antigo_esq == "-" || valor_novo_esq == "-"
             ? "-"
             : difPercentualAntigoNovo(valor_antigo_esq, valor_novo_esq);
         dif_unit_esq =
-          valor_antigo_esq == null || valor_novo_esq == null
+          valor_antigo_esq == "-" || valor_novo_esq == "-"
             ? "-"
             : difUnidadeAntigoNovo(valor_antigo_esq, valor_novo_esq);
 
         //Busca valores para já calcular direita
         const chaveDir = campos[i].chave.replace("_esq", "_dir");
-        valor_antigo_dir = avaliacaoAntiga.value[chaveDir];
-        valor_novo_dir = avaliacaoNova.value[chaveDir];
+        valor_antigo_dir =
+          avaliacaoAntiga.value[chaveDir] ?? "-";
+        valor_novo_dir = avaliacaoNova.value[chaveDir] ?? "-" ;
 
         //Calcula direita
         dif_perc_dir =
-          valor_antigo_dir == null || valor_novo_dir == null
+          valor_antigo_dir == "-" || valor_novo_dir == "-"
             ? "-"
             : difPercentualAntigoNovo(valor_antigo_dir, valor_novo_dir);
         dif_unit_dir =
-          valor_antigo_dir == null || valor_novo_dir == null
+          valor_antigo_dir == "-" || valor_novo_dir == "-"
             ? "-"
             : difUnidadeAntigoNovo(valor_antigo_dir, valor_novo_dir);
       }

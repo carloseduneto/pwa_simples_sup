@@ -410,3 +410,44 @@
 .input-grouped-form__value{
   white-space: nowrap;
 }
+
+.input-grouped-form__comparacao-row {
+  display: grid;
+  grid-template-columns: 6fr 5fr 5fr 5fr;
+}
+
+.input-grouped-form__comparacao-row--basic-data{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.input-grouped-form__comparacao-row--basic-data .input-grouped-form__value{
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500 ;
+}
+
+.input-grouped-form__comparacao-row .input-grouped-form__value{
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500 ;  
+}
+.input-grouped-form__comparacao-row .input-grouped-form__text{
+  font-size: 0.9rem;
+  /* flex-wrap: nowrap; */
+  hyphens: auto;
+  word-break: break-word;
+  width: 100%;
+}
+
+.input-grouped-form__left-right-header-comparacao{
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  padding-top: 20px;
+}
+
+.input-grouped-form__left-right-header-comparacao--title{
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}

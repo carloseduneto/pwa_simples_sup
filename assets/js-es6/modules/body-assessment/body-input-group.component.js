@@ -1,4 +1,5 @@
 // assets/js-es6/components/input-group.js
+import { buttonLargeIconText } from "../../components/buttons.js";
 
 export function gerarGrupoInputs({
   titulo,
@@ -8,6 +9,7 @@ export function gerarGrupoInputs({
 }) {
   console.log("Parametros: ", parametros);
   // 1. Monta o cabeçalho do grupo (Estático vs Retrátil)
+
   let cabecalhoHtml = "";
   if (retratil) {
     /*html*/
@@ -39,7 +41,7 @@ export function gerarGrupoInputs({
           return `
           <div class="input-grouped-form__input-group">
           <span class="input-grouped-form__text">${param.label}</span>
-          <span class="input-grouped-form__value" style="font-weight: bold;">${param.valor || "-"} ${param.unidade || ""}</span>
+          <span class="input-grouped-form__value">${param.valor || "-"} ${param.unidade || ""}</span>
           </div>
           `;
         } else if (
@@ -64,10 +66,10 @@ export function gerarGrupoInputs({
           
           <div class="input-grouped-form__input-group input-grouped-form__left-right-data">
           <span class="input-grouped-form__text">${param.label_par}</span>
-          <span class="input-grouped-form__value" style="font-weight: bold;">
+          <span class="input-grouped-form__value">
           ${param.valor_esq || "-"} ${param.unidade || ""} 
           </span>
-          <span class="input-grouped-form__value" style="font-weight: bold;">
+          <span class="input-grouped-form__value">
           ${param.valor_dir || "-"}  ${param.unidade || ""}
           </span>
           </div>
@@ -135,6 +137,116 @@ export function gerarGrupoInputs({
     .join("");
 
   // 3. Empacota tudo
+  return `
+    <div class="input-grouped-form">
+      ${cabecalhoHtml}
+      <div class="${retratil ? "input-grouped-form__input-hidden" : "input-grouped-form__inputs"}">
+        ${itensHtml}
+      </div>
+    </div>
+  `;
+}
+
+export function gerarGrupoComparacao({
+  titulo,
+  retratil = false,
+  parametros = [],
+}) {
+  let selectDatebutton = buttonLargeIconText(
+    "btn-assesment-date",
+    "edit_calendar",
+    "Período",
+  );
+  console.log("Parametros: ", parametros);
+  // 1. Monta o cabeçalho do grupo (Estático vs Retrátil)
+  let cabecalhoHtml = "";
+  if (retratil) {
+    /*html*/
+    cabecalhoHtml = `
+      <div class="input-grouped-form__retractable-area">
+        <span class="input-grouped-form__titulo dont-select">${titulo}</span>
+        <span class="material-symbols-rounded input-grouped-form__retractable-icon">arrow_back_ios_new</span>
+      </div>
+    `;
+  } else {
+    /*html*/
+    cabecalhoHtml = `
+      <div class="input-grouped-form__static">
+        <span class="input-grouped-form__titulo">${titulo}</span>
+      </div>
+    `;
+  }
+
+  let miniHeaderParHtml = "";
+  let headerJaMostrado = false;
+
+  // 2. Monta a lista de inputs ou spans (O laço de repetição lida com o aninhamento)
+  const itensHtml = parametros
+    .map((param) => {
+      if (
+        param.label !== undefined &&
+        param.valor_antigo !== undefined &&
+        param.valor_novo !== undefined &&
+        !param.label_par
+      ) {
+        if (param.destino == "tabela") {
+          return `
+          <div class="input-grouped-form__input-group input-grouped-form__comparacao-row--basic-data">
+          <span class="input-grouped-form__text">${param.label}</span>
+          <span class="input-grouped-form__value">${param.valor_antigo || "-"}${param.unidade || ""}</span>
+          <span class="input-grouped-form__value">${param.valor_novo || "-"}${param.unidade || ""}</span>
+          </div>
+          `;
+        }
+        // Visualização de detalhes simples
+        /*html*/
+        return `
+          <div class="input-grouped-form__input-group input-grouped-form__comparacao-row">
+          <span class="input-grouped-form__text">${param.label}</span>
+          <span class="input-grouped-form__value">${param.valor_antigo || "-"}${param.unidade || ""}</span>
+          <span class="input-grouped-form__value">${param.valor_novo || "-"}${param.unidade || ""}</span>
+          <span class="input-grouped-form__value">${param.dif_perc || "-"}%</span>
+          </div>
+          `;
+      } else if (
+        param.label_par !== undefined &&
+        param.valor_antigo !== undefined &&
+        param.valor_novo !== undefined
+      ) {
+        if (param.label_par && !headerJaMostrado) {
+          /*html*/
+          miniHeaderParHtml = `
+            <div class="input-grouped-form__left-right-header-comparacao">
+            <div></div>
+            <div class="input-grouped-form__left-right-header-comparacao--title">← Esq · Dir →</div>
+            </div>
+            `;
+        }
+        // Visualização de detalhes duplos
+        /*html*/
+        let dadosPares = `
+          
+          
+          <div class="input-grouped-form__input-group input-grouped-form__comparacao-row">
+          <span class="input-grouped-form__text">${param.label_par}</span>
+          <span class="input-grouped-form__value">${param.valor_antigo || "-"}${param.unidade || ""}</span>
+          <span class="input-grouped-form__value">${param.valor_novo || "-"}${param.unidade || ""}</span>
+          <span class="input-grouped-form__value">${param.dif_perc || "-"}%</span>
+          </div>
+          `;
+        const detalhesDuplos = !headerJaMostrado
+          ? miniHeaderParHtml + dadosPares
+          : dadosPares;
+        headerJaMostrado = true;
+
+        return detalhesDuplos;
+      }
+    })
+    .join("");
+
+  // 3. Empacota tudo
+  // Botão de seleção de data
+  // ${selectDatebutton}
   return `
     <div class="input-grouped-form">
       ${cabecalhoHtml}
