@@ -28,7 +28,7 @@
 @import url('04-pages/workout-buttons.css');
 @import url('04-pages/workout-runner.css');
 @import url('04-pages/list-workout-history.css');
-@import url('04-pages/_list_generic.css');
+@import url('04-pages/list_generic.css');
 
 
 @import url('05-utilities/utilities.css');

@@ -274,7 +274,7 @@ export async function initBodyAssessmentForm(onNavigate) {
       const inputs = containerItens.querySelectorAll("input, select");
 
       inputs.forEach((input) => {
-        const chave = input.id;
+        const chave = input.name;
         const destino = input.dataset.destino;
         let valorPreenchido = input.value.trim();
 
