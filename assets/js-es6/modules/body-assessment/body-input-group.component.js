@@ -205,7 +205,9 @@ export function gerarGrupoComparacao({
           <span class="input-grouped-form__text">${param.label}</span>
           <span class="input-grouped-form__value">${param.valor_antigo || "-"}${param.unidade || ""}</span>
           <span class="input-grouped-form__value">${param.valor_novo || "-"}${param.unidade || ""}</span>
-          <span class="input-grouped-form__value">${param.dif_perc || "-"}%</span>
+          <span class="input-grouped-form__value compare_assesment_perc">${param.dif_perc || "-"}%</span>
+          <span class="input-grouped-form__value compare_assesment_unit hidden">${param.dif_unit || "-"}${param.unidade || ""}</span>
+
           </div>
           `;
       } else if (
@@ -231,7 +233,8 @@ export function gerarGrupoComparacao({
           <span class="input-grouped-form__text">${param.label_par}</span>
           <span class="input-grouped-form__value">${param.valor_antigo || "-"}${param.unidade || ""}</span>
           <span class="input-grouped-form__value">${param.valor_novo || "-"}${param.unidade || ""}</span>
-          <span class="input-grouped-form__value">${param.dif_perc || "-"}%</span>
+          <span class="input-grouped-form__value compare_assesment_perc">${param.dif_perc || "-"}%</span>
+          <span class="input-grouped-form__value compare_assesment_unit hidden">${param.dif_unit || "-"}${param.unidade || ""}</span>
           </div>
           `;
         const detalhesDuplos = !headerJaMostrado

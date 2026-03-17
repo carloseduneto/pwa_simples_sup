@@ -89,6 +89,22 @@ export async function initBodyAssessmentCompare(onNavigate) {
     containerItens.innerHTML =
       '<p style="color:red; text-align:center;">Erro ao carregar os dados desta avaliação.</p>';
   }
+
+  const btnPerc = document.getElementById("id-perc");
+  const btnUnit = document.getElementById("id-unit");
+
+  const spansPerc = document.querySelectorAll(".compare_assesment_perc");
+  const spansUnit = document.querySelectorAll(".compare_assesment_unit");
+
+  btnUnit.addEventListener("click", () => {
+    spansPerc.forEach((span) => span.classList.add("hidden"));
+    spansUnit.forEach((span) => span.classList.remove("hidden"));
+  });
+
+  btnPerc.addEventListener("click", () => {
+    spansPerc.forEach((span) => span.classList.remove("hidden"));
+    spansUnit.forEach((span) => span.classList.add("hidden"));
+  });
 }
 
 function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
