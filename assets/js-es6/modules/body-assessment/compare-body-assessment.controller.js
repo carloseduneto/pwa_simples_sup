@@ -99,11 +99,23 @@ export async function initBodyAssessmentCompare(onNavigate) {
   btnUnit.addEventListener("click", () => {
     spansPerc.forEach((span) => span.classList.add("hidden"));
     spansUnit.forEach((span) => span.classList.remove("hidden"));
-  });
 
+    //Troca estilo dos botões
+    btnPerc.classList.remove("button-short-icon-label--active");
+    btnUnit.classList.remove("button-short-icon-label--inactive");
+    btnPerc.classList.add("button-short-icon-label--inactive");
+    btnUnit.classList.add("button-short-icon-label--active");
+  });
+  
   btnPerc.addEventListener("click", () => {
     spansPerc.forEach((span) => span.classList.remove("hidden"));
     spansUnit.forEach((span) => span.classList.add("hidden"));
+    
+    //Troca estilo dos botões
+    btnPerc.classList.remove("button-short-icon-label--inactive");
+    btnUnit.classList.remove("button-short-icon-label--active");
+    btnPerc.classList.add("button-short-icon-label--active");
+    btnUnit.classList.add("button-short-icon-label--inactive");
   });
 }
 

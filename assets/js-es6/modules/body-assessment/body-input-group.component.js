@@ -1,5 +1,6 @@
 // assets/js-es6/components/input-group.js
 import { buttonLargeIconText } from "../../components/buttons.js";
+import { buttonShortIconLabel } from "../../components/buttons.js";
 
 export function gerarGrupoInputs({
   titulo,
@@ -147,11 +148,48 @@ export function gerarGrupoInputs({
   `;
 }
 
+let unitPercToggleAreaShowed = false;
+let intervalDateAreaShowed = false;
+
 export function gerarGrupoComparacao({
   titulo,
   retratil = false,
   parametros = [],
 }) {
+
+  if (!retratil) {
+    unitPercToggleAreaShowed = false;
+    intervalDateAreaShowed = false;
+  }
+  let selectIntervalDate = `
+  <div class="flex-row-justify-end">
+  ${buttonShortIconLabel(
+    "interval-body-assessment",
+    "edit_calendar",
+    "Período",
+  )}
+  </div>
+`;
+
+  let percToggleButton = buttonShortIconLabel(
+    "id-perc",
+    "percent",
+    "Percentual",
+  );
+  let unitToggleButton = buttonShortIconLabel(
+    "id-unit",
+    "straighten",
+    "Unidades",
+    "inactive",
+  );
+
+  let unitPercToggleArea = `
+      <div class="flex-row-space-evenly sticky-area">
+      ${percToggleButton}
+      ${unitToggleButton}
+      </div>
+  `;
+
   let selectDatebutton = buttonLargeIconText(
     "btn-assesment-date",
     "edit_calendar",
@@ -190,13 +228,15 @@ export function gerarGrupoComparacao({
         !param.label_par
       ) {
         if (param.destino == "tabela") {
-          return `
+          let data = `
           <div class="input-grouped-form__input-group input-grouped-form__comparacao-row--basic-data">
           <span class="input-grouped-form__text">${param.label}</span>
           <span class="input-grouped-form__value">${param.valor_antigo || "-"}${param.unidade || ""}</span>
           <span class="input-grouped-form__value">${param.valor_novo || "-"}${param.unidade || ""}</span>
           </div>
           `;
+
+          return data;
         }
         // Visualização de detalhes simples
         /*html*/
@@ -250,12 +290,37 @@ export function gerarGrupoComparacao({
   // 3. Empacota tudo
   // Botão de seleção de data
   // ${selectDatebutton}
-  return `
-    <div class="input-grouped-form">
-      ${cabecalhoHtml}
-      <div class="${retratil ? "input-grouped-form__input-hidden" : "input-grouped-form__inputs"}">
-        ${itensHtml}
-      </div>
-    </div>
+
+  /*html*/
+  let data = `
+  <div class="input-grouped-form">
+  ${cabecalhoHtml}
+  <div class="${retratil ? "input-grouped-form__input-hidden" : "input-grouped-form__inputs"}">
+  ${itensHtml}
+  </div>
+  </div>
   `;
+
+  console.log(
+    "retratil:",
+    retratil,
+    "toggleMostrado:",
+    unitPercToggleAreaShowed,
+  );
+
+  data =
+    !intervalDateAreaShowed && !retratil ? selectIntervalDate + data : data;
+
+  if (!retratil && intervalDateAreaShowed == false) {
+    intervalDateAreaShowed = true;
+  }
+
+  data =
+    !unitPercToggleAreaShowed && retratil ? unitPercToggleArea + data : data;
+
+  if (retratil && unitPercToggleAreaShowed == false) {
+    unitPercToggleAreaShowed = true;
+  }
+
+  return data;
 }

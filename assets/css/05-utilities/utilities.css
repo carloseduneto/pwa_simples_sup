@@ -43,6 +43,12 @@
   justify-content: space-between;
 }
 
+.flex-row-space-evenly{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
 .flex-row{
   display: flex;
   flex-direction: row;
@@ -63,4 +69,20 @@
     "wght" 100,
     "GRAD" 0,
     "opsz" 24;
+}
+
+.sticky-area {
+  position: sticky; /* Define o comportamento de "grudar" */
+  top: 0;           /* Onde ele deve grudar (no caso, encostado no topo) */
+  z-index: 100;    /* Garante que ele fique por cima dos outros elementos ao rolar */
+  /* top: 20px; */
+  background-color: var(--color-white);
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.flex-row-justify-end{
+  display: flex;
+  justify-content: end;
+  padding: 15px;
 }

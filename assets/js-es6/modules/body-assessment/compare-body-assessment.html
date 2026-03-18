@@ -3,9 +3,68 @@
     id="compare-body-assessment-container"
     class="warper-screen generic-detail"
   >
-   <button id="id-perc">%</button>
+    <!-- <div class="flex-row-space-evenly sticky-area">
+      <button
+        id="id-perc"
+        class="button-short-icon-label button-short-icon-label--active"
+      >
+      <span class="material-symbols-rounded"> percent </span>
+      <span>Percentual</span>
+    </button>
+    
+    <button
+    id="id-unit"
+    class="button-short-icon-label button-short-icon-label--inactive"
+    >
+    <span class="material-symbols-rounded"> straighten </span>
+    <span>Unidades</span>
+      </button>
+    </div> -->
 
-<button id="id-unit">Unit</button> 
+    <div id="modal-conclusao" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h3>Selecione o período</h3>
+        <p>Selecione avaliações para comparar.</p>
+        <div class="modal-actions">
+          <select
+            id=""
+            style="
+              padding: 8px;
+              width: 100%;
+              border-radius: 8px;
+              border: 1px solid #ccc;
+            "
+            class="input-select-context-recomendacoes"
+          >
+            <option value="" disabled selected>18/03/2026</option>
+          </select>
+          <select
+            id=""
+            style="
+              padding: 8px;
+              width: 100%;
+              border-radius: 8px;
+              border: 1px solid #ccc;
+            "
+            class="input-select-context-recomendacoes"
+          >
+            <option value="" disabled selected>
+              Selecione outra avaliação
+            </option>
+          </select>
+
+          <button
+            id=""
+            class="button-short-icon-label button-short-icon-label--active"
+          >
+            <span class="material-symbols-rounded"> compare_arrows </span>
+            <span>Comparar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divisor -->
     <div class="compare-body-assessment-itens"></div>
   </div>
 </div>
