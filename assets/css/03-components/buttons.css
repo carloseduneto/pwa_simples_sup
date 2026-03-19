@@ -124,7 +124,7 @@ button {
 }
 
 .button-short-icon-label {
-  width: 40%;
+  width: 9rem;
   font-weight: 700;
   border-radius: 13px;
   display: flex;

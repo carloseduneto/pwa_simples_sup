@@ -7,9 +7,11 @@ import { BodySchemaService } from "./body-schema.service.js";
 import { gerarGrupoInputs } from "./body-input-group.component.js";
 import { gerarGrupoComparacao } from "./body-input-group.component.js";
 
-
-
-export async function initBodyAssessmentCompare(onNavigate) {
+export async function initBodyAssessmentCompare(
+  onNavigate,
+  avaliacao1Html = null,
+  avaliacao2Html = null,
+) {
   const container = document.getElementById(
     "compare-body-assessment-container",
   );
@@ -23,9 +25,12 @@ export async function initBodyAssessmentCompare(onNavigate) {
   containerItens.innerHTML = GlobalLoader.getSimple();
 
   // 1. Captura a intenção de navegação
-  // const avaliacaoId = localStorage.getItem("detailBodyAssessmentId");
-  const avaliacaoId1 = 11;
-  const avaliacaoId2 = 13;
+  let avaliacaoId1 = !avaliacao1Html
+    ? localStorage.getItem("detailBodyAssessmentId")
+    : avaliacao1Html;
+
+  avaliacaoId1 = !avaliacaoId1 ? 11 : avaliacaoId1;
+  const avaliacaoId2 = !avaliacao2Html ? 13 : avaliacao2Html;
 
   if (!avaliacaoId1 && !avaliacaoId2) {
     containerItens.innerHTML = "<p>ID da avaliação não encontrado.</p>";
@@ -106,17 +111,129 @@ export async function initBodyAssessmentCompare(onNavigate) {
     btnPerc.classList.add("button-short-icon-label--inactive");
     btnUnit.classList.add("button-short-icon-label--active");
   });
-  
+
   btnPerc.addEventListener("click", () => {
     spansPerc.forEach((span) => span.classList.remove("hidden"));
     spansUnit.forEach((span) => span.classList.add("hidden"));
-    
+
     //Troca estilo dos botões
     btnPerc.classList.remove("button-short-icon-label--inactive");
     btnUnit.classList.remove("button-short-icon-label--active");
     btnPerc.classList.add("button-short-icon-label--active");
     btnUnit.classList.add("button-short-icon-label--inactive");
   });
+
+  // Modal período area
+  const modal = document.getElementById("modal-body-assessment-compare");
+  if (!modal) return;
+  const btnSelectInterval = document.getElementById(
+    "button-select-interval-body-assessment-compare",
+  );
+
+  const btnCancelar = document.getElementById(
+    "btn-modal-body-assessment-compare-cancel",
+  );
+
+  const btnComparar = document.getElementById(
+    "body-assessment-compare-button--action",
+  );
+
+  btnSelectInterval.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+    populateBodyAssessmentSelect();
+  });
+
+  btnComparar.addEventListener("click", () => {
+    modal.classList.add("hidden");
+    avaliacao1Html = document.getElementById(
+      "body-assessment-compare-item-1",
+    ).value;
+    globalValueBodyAssessment1 = Number(avaliacao1Html);
+    avaliacao2Html = document.getElementById(
+      "body-assessment-compare-item-2",
+    ).value;
+    globalValueBodyAssessment2 = Number(avaliacao2Html);
+    initBodyAssessmentCompare(
+      "bodyAssessmentCompare",
+      avaliacao1Html,
+      avaliacao2Html,
+    );
+  });
+
+  if (btnCancelar) {
+    // const novoBtn = btnCancelar.cloneNode(true);
+    // btnCancelar.parentNode.replaceChild(novoBtn, btnCancelar);
+    btnCancelar.addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+
+    // novoBtn.onclick = () => {
+    //   modal.classList.add("hidden");
+    // };
+  }
+}
+
+let globalValueBodyAssessment1, globalValueBodyAssessment2;
+
+async function populateBodyAssessmentSelect() {
+  const containerBodyAssessment = document.getElementById(
+    "body-assessment-compare-selects",
+  );
+
+  if (!containerBodyAssessment) {
+    return;
+  }
+  containerBodyAssessment.innerHTML =
+    '<span style="font-size:12px; color:var(--color-black);">Carregando avaliações...</span>';
+
+  try {
+    const todasAvaliacoes = await BodyAvaliacoesService.getAll();
+
+    const bodyAssessmentSelected1 = !globalValueBodyAssessment1
+      ? Number(localStorage.getItem("detailBodyAssessmentId"))
+      : globalValueBodyAssessment1;
+
+    /* html */
+    let html1 = `
+    <select id="body-assessment-compare-item-1" style="padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc;" class="input-select-context-recomendacoes">
+    <option value="" disabled ${!bodyAssessmentSelected1 ? "selected" : ""}>Selecione avaliação 1</option>
+    `;
+
+    todasAvaliacoes.forEach((umaAvaliacao) => {
+      const isSelected =
+        umaAvaliacao.id === bodyAssessmentSelected1 ? "selected" : "";
+
+      /* html */
+      html1 += `<option value="${umaAvaliacao.id}" ${isSelected}>
+     ${formatarValor("date", umaAvaliacao.data_registro)}
+      </option>
+      `;
+    });
+    html1 += `</select>`;
+
+    /* html */
+    let html2 = `
+    <select id="body-assessment-compare-item-2" style="padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc;" class="input-select-context-recomendacoes">
+    <option value="" disabled selected}>Selecione avaliação 2</option>
+    `;
+
+    todasAvaliacoes.forEach((umaAvaliacao) => {
+      const isSelected =
+        umaAvaliacao.id === globalValueBodyAssessment2 ? "selected" : "";
+      /* html */
+      html2 += `<option value="${umaAvaliacao.id}" ${isSelected}>
+     ${formatarValor("date", umaAvaliacao.data_registro)}
+      </option>
+      `;
+    });
+    html2 += `</select>`;
+
+    containerBodyAssessment.innerHTML = html1 + html2;
+  } catch (error) {
+    console.error("Erro ao carregar detalhes da avaliação:", error);
+    // containerItens.innerHTML =
+    //   '<p style="color:red; text-align:center;">Erro ao carregar os dados desta avaliação.</p>';
+  }
 }
 
 function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
@@ -204,9 +321,8 @@ function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
 
         //Busca valores para já calcular direita
         const chaveDir = campos[i].chave.replace("_esq", "_dir");
-        valor_antigo_dir =
-          avaliacaoAntiga.value[chaveDir] ?? "-";
-        valor_novo_dir = avaliacaoNova.value[chaveDir] ?? "-" ;
+        valor_antigo_dir = avaliacaoAntiga.value[chaveDir] ?? "-";
+        valor_novo_dir = avaliacaoNova.value[chaveDir] ?? "-";
 
         //Calcula direita
         dif_perc_dir =
@@ -274,190 +390,6 @@ function agruparCamposComparacao(campos, avaliacaoAntiga, avaliacaoNova) {
     let resultado = valor_novo - valor_antigo;
     resultado = Number(resultado.toFixed(2));
     return resultado;
-  }
-
-  resultado.sort((a, b) => {
-    const textoA = a.label_par || a.label;
-    const textoB = b.label_par || b.label;
-    return textoA.localeCompare(textoB);
-  });
-
-  resultado.sort((a, b) => {
-    const aPar = a.label_par ? 1 : 0;
-    const bPar = b.label_par ? 1 : 0;
-    return aPar - bPar; // simples primeiro, pares depois
-  });
-
-  return resultado;
-}
-
-// function objectGenerator() {
-//   // const resultado = [];
-
-//   if (!campos[i].label_par) {
-//     let valor_antigo = avaliacaoAntiga.value[campos[i].chave];
-//     let valor_novo = avaliacaoNova.value[campos[i].chave];
-//     let dif_perc = difPercentualAntigoNovo(valor_antigo, valor_novo);
-//     let dif_unit = difUnidadeAntigoNovo(valor_antigo, valor_novo);
-
-//     dif_perc = formatarValor("number", dif_perc);
-//     dif_unit = formatarValor("number", dif_unit);
-
-//     let objetoSimples = {
-//       label: campos[i].label,
-//       unidade: campos[i].unidade,
-//       tipo_html: campos[i].tipo_html,
-//       destino: campos[i].destino,
-//       valor_antigo: formatarValor(
-//         campos[i].tipo_html,
-//         avaliacaoAntiga.value[campos[i].chave],
-//       ),
-//       valor_novo: formatarValor(
-//         campos[i].tipo_html,
-//         avaliacaoNova.value[campos[i].chave],
-//       ),
-//       dif_perc: dif_perc,
-//       dif_unit: dif_unit,
-//     };
-
-//     resultado.push(objetoSimples);
-//   } else if (campos[i].label_par) {
-//     const sufixo = campos[i].chave.split("_").at(-1);
-
-//     let valor_antigo_esq, valor_novo_esq, dif_perc_esq, dif_unit_esq;
-//     let valor_antigo_dir, valor_novo_dir, dif_perc_dir, dif_unit_dir;
-
-//     if (sufixo === "esq") {
-//       // Calcula esquerda
-//       valor_antigo_esq = valor_antigo;
-//       valor_novo_esq = valor_novo;
-//       dif_perc_esq = difPercentualAntigoNovo(valor_antigo_esq, valor_novo_esq);
-//       dif_unit_esq = difUnidadeAntigoNovo(valor_antigo_esq, valor_novo_esq);
-
-//       //Busca valores para já calcular direita
-//       const chaveDir = campos[i].chave.replace("_esq", "_dir");
-//       valor_antigo_dir = avaliacaoAntiga.value[chaveDir];
-//       valor_novo_dir = avaliacaoNova.value[chaveDir];
-
-//       //Calcula direita
-//       dif_perc_dir = difPercentualAntigoNovo(valor_antigo_dir, valor_novo_dir);
-//       dif_unit_dir = difUnidadeAntigoNovo(valor_antigo_dir, valor_novo_dir);
-//     }
-//     if (sufixo === "dir") {
-//       // continue
-//     }
-
-//     valor_antigo_esq = formatarValor("number", valor_antigo_esq);
-//     valor_novo_esq = formatarValor("number", valor_novo_esq);
-//     dif_perc_esq = formatarValor("number", dif_perc_esq);
-//     dif_unit_esq = formatarValor("number", dif_unit_esq);
-//     valor_antigo_dir = formatarValor("number", valor_antigo_dir);
-//     valor_novo_dir = formatarValor("number", valor_novo_dir);
-//     dif_perc_dir = formatarValor("number", dif_perc_dir);
-//     dif_unit_dir = formatarValor("number", dif_unit_dir);
-
-//     let objetoPares = {
-//       label: campos[i].label_par,
-//       unidade: campos[i].unidade,
-//       tipo_html: campos[i].tipo_html,
-//       destino: campos[i].destino,
-//       valor_antigo: `${valor_antigo_esq}/${valor_antigo_dir}`,
-//       valor_novo: `${valor_novo_esq}/${valor_novo_dir}`,
-//       dif_perc:
-//         dif_perc_esq === dif_perc_dir
-//           ? dif_perc_esq
-//           : `${dif_perc_esq}/${dif_perc_dir}`,
-//       dif_unit:
-//         dif_unit_esq === dif_unit_dir
-//           ? dif_unit_esq
-//           : `${dif_unit_esq}/${dif_unit_dir}`,
-//       chaves: [],
-//       chave_par: campos[i].par,
-//     };
-//     resultado.push(objetoPares);
-//   }
-
-//   function difPercentualAntigoNovo(valor_antigo, valor_novo) {
-//     return ((valor_antigo - valor_novo) / valor_antigo) * 100;
-//   }
-
-//   function difUnidadeAntigoNovo(valor_antigo, valor_novo) {
-//     return valor_novo - valor_antigo;
-//   }
-// }
-
-function agruparCampos(campos, valoresAvaliacao, avaliacao) {
-  // console.log("Campos", campos);
-  // console.log("Avaliação", valoresAvaliacao);
-  const jaProcessados = {};
-  const resultado = [];
-  let valor_esq = 0;
-  let valor_dir = 0;
-
-  for (let i = 0; i < campos.length; i++) {
-    if (campos[i].par) {
-      const sufixo = campos[i].chave.split("_").at(-1);
-      if (campos[i].par in jaProcessados) {
-        jaProcessados[campos[i].par].chaves.push(campos[i].chave);
-        sufixo === "esq"
-          ? (jaProcessados[campos[i].par].valor_esq = formatarValor(
-              "number",
-              valoresAvaliacao[campos[i].chave],
-            ))
-          : (jaProcessados[campos[i].par].valor_dir = formatarValor(
-              "number",
-              valoresAvaliacao[campos[i].chave],
-            ));
-      } else {
-        if (sufixo === "esq") {
-          valor_esq = valoresAvaliacao[campos[i].chave];
-        } else {
-          valor_dir = valoresAvaliacao[campos[i].chave];
-        }
-
-        const novoGrupo = {
-          label_par: campos[i].label_par,
-          unidade: campos[i].unidade,
-          tipo_html: campos[i].tipo_html,
-          valor_esq: valor_esq,
-          valor_dir: valor_dir,
-          chaves: [],
-          destino: campos[i].destino,
-          chave_par: campos[i].par,
-        };
-        // Aqui registra o nome do par de membros para futuras consultas em iterações do for
-        jaProcessados[campos[i].par] = novoGrupo;
-
-        // Adiciona as chaves do campos já processados
-        jaProcessados[campos[i].par].chaves.push(campos[i].chave);
-        novoGrupo.valor_dir = formatarValor(
-          novoGrupo.tipo_html,
-          novoGrupo.valor_dir,
-        );
-        novoGrupo.valor_esq = formatarValor(
-          novoGrupo.tipo_html,
-          novoGrupo.valor_esq,
-        );
-
-        resultado.push(novoGrupo);
-      }
-    } else {
-      // console.log("Aqui é o que tem em Campos[i]", avaliacao);
-      // if (campos[i].destino !== "json"){
-      //   campos[i].valor = valoresAvaliacao[campos[i].chave]
-      // }
-      // campos[i].chave.valor = valoresAvaliacao[campos[i].chave];
-      if (campos[i].destino === "json") {
-        campos[i].valor = valoresAvaliacao[campos[i].chave];
-      } else if (campos[i].destino === "tabela") {
-        // de onde viria o valor aqui?
-        // campos[i][campos[i].chave] = avaliacao[campos[i].chave];
-        campos[i].valor = avaliacao[campos[i].chave];
-      }
-      campos[i].valor = formatarValor(campos[i].tipo_html, campos[i].valor);
-
-      resultado.push(campos[i]);
-    }
   }
 
   resultado.sort((a, b) => {

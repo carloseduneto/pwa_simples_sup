@@ -2,12 +2,28 @@
 import { buttonLargeIconText } from "../../components/buttons.js";
 import { buttonShortIconLabel } from "../../components/buttons.js";
 
+let compareBodyAssessmentAreaShowed = false
+
 export function gerarGrupoInputs({
   titulo,
   retratil = false,
   parametros = [],
   modoLeitura = false,
 }) {
+
+    if (!retratil) {
+      compareBodyAssessmentAreaShowed = false;
+    }
+
+  let goToCompare = `
+  <div class="flex-row-justify-end">
+  ${buttonShortIconLabel(
+    "button-details-body-assessment",
+    "compare_arrows",
+    "Comparar",
+  )}
+  </div>
+`;
   console.log("Parametros: ", parametros);
   // 1. Monta o cabeçalho do grupo (Estático vs Retrátil)
 
@@ -138,7 +154,7 @@ export function gerarGrupoInputs({
     .join("");
 
   // 3. Empacota tudo
-  return `
+  let data = `
     <div class="input-grouped-form">
       ${cabecalhoHtml}
       <div class="${retratil ? "input-grouped-form__input-hidden" : "input-grouped-form__inputs"}">
@@ -146,6 +162,15 @@ export function gerarGrupoInputs({
       </div>
     </div>
   `;
+
+  data =
+    !compareBodyAssessmentAreaShowed && !retratil ? goToCompare + data : data;
+
+  if (!retratil && compareBodyAssessmentAreaShowed == false) {
+    compareBodyAssessmentAreaShowed = true;
+  }
+
+  return data;
 }
 
 let unitPercToggleAreaShowed = false;
@@ -156,7 +181,6 @@ export function gerarGrupoComparacao({
   retratil = false,
   parametros = [],
 }) {
-
   if (!retratil) {
     unitPercToggleAreaShowed = false;
     intervalDateAreaShowed = false;
@@ -164,7 +188,7 @@ export function gerarGrupoComparacao({
   let selectIntervalDate = `
   <div class="flex-row-justify-end">
   ${buttonShortIconLabel(
-    "interval-body-assessment",
+    "button-select-interval-body-assessment-compare",
     "edit_calendar",
     "Período",
   )}

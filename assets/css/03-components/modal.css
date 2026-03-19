@@ -18,21 +18,29 @@
   text-align: center;
   max-width: 320px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 30px;
+  padding-bottom: 20px;
 }
 
 .modal-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
   margin-top: 20px;
+  align-items: center;
+  width: 100%;
 }
 
 .modal-actions button {
   padding: 10px;
   cursor: pointer;
   border: none;
-  border-radius: 4px;
-  color: white;
+  /* border-radius: 4px; */
+  /* color: white; */
 }
 .btn-success {
   background-color: #4caf50;
@@ -42,4 +50,10 @@
 }
 .btn-cancel {
   background-color: #9e9e9e;
+}
+
+.body-assessment-compare-selects{
+  gap:10px;
+  display: flex;
+  flex-direction: column;
 }
