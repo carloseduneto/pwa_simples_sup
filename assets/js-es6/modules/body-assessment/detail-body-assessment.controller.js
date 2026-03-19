@@ -5,6 +5,9 @@ import { initInputGroupedForms } from "./body-assests-ui.component.js";
 import { BodyAvaliacoesService } from "./body-avaliacoes.service.js";
 import { BodySchemaService } from "./body-schema.service.js";
 import { gerarGrupoInputs } from "./body-input-group.component.js";
+import { modalBodyAssessmentCompare } from "../../components/modal.js";
+import { populateBodyAssessmentSelect } from "./compare-body-assessment.controller.js";
+import { initBodyAssessmentCompare } from "./compare-body-assessment.controller.js";
 
 export async function initBodyAssessmentDetail(onNavigate) {
   const container = document.getElementById("detail-body-assessment-container");
@@ -97,7 +100,6 @@ export async function initBodyAssessmentDetail(onNavigate) {
           avaliacao,
         );
 
-        
         return gerarGrupoInputs({
           titulo: secaoDb.secao,
           retratil: secaoDb.retratil,
@@ -115,6 +117,53 @@ export async function initBodyAssessmentDetail(onNavigate) {
     containerItens.innerHTML =
       '<p style="color:red; text-align:center;">Erro ao carregar os dados desta avaliação.</p>';
   }
+
+  //Modal
+  const bodyAssessmentDetailsCompare = document.getElementById(
+    "body-assessment-details-compare",
+  );
+  bodyAssessmentDetailsCompare.innerHTML = modalBodyAssessmentCompare(
+    "modal-compare-detail",
+  );
+  // Captura o modal DEPOIS de injetar o HTML
+  const modal = document.getElementById("modal-compare-detail");
+  const btnDetalhesCompare = document.getElementById(
+    "details-body-assessment-compare-button--action",
+  );
+
+  btnDetalhesCompare.addEventListener("click", () => {
+    console.log("Clicou!");
+    modal.classList.remove("hidden");
+    populateBodyAssessmentSelect();
+  });
+
+  const btnComparar = document.getElementById(
+    "body-assessment-compare-button--action",
+  );
+
+  btnComparar.addEventListener("click", () => {
+    modal.classList.add("hidden");
+    const avaliacao1Html = localStorage.getItem("detailBodyAssessmentId");
+    const avaliacao2Html = document.getElementById(
+      "body-assessment-compare-item-2",
+    ).value;
+    localStorage.setItem("compareBodyAssessmentId2", avaliacao2Html);
+    onNavigate("bodyAssessmentCompare");
+  });
+
+  const btnCancelar = document.getElementById("modal-compare-detail-cancel");
+
+  if (btnCancelar) {
+    // const novoBtn = btnCancelar.cloneNode(true);
+    // btnCancelar.parentNode.replaceChild(novoBtn, btnCancelar);
+    btnCancelar.addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+
+    // novoBtn.onclick = () => {
+    //   modal.classList.add("hidden");
+    // };
+  }
 }
 
 function agruparCampos(campos, valoresAvaliacao, avaliacao) {
@@ -131,10 +180,14 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
       if (campos[i].par in jaProcessados) {
         jaProcessados[campos[i].par].chaves.push(campos[i].chave);
         sufixo === "esq"
-          ? (jaProcessados[campos[i].par].valor_esq =
-              formatarValor("number",valoresAvaliacao[campos[i].chave]))
-          : (jaProcessados[campos[i].par].valor_dir =
-              formatarValor("number",valoresAvaliacao[campos[i].chave]));
+          ? (jaProcessados[campos[i].par].valor_esq = formatarValor(
+              "number",
+              valoresAvaliacao[campos[i].chave],
+            ))
+          : (jaProcessados[campos[i].par].valor_dir = formatarValor(
+              "number",
+              valoresAvaliacao[campos[i].chave],
+            ));
       } else {
         if (sufixo === "esq") {
           valor_esq = valoresAvaliacao[campos[i].chave];
@@ -154,12 +207,18 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
         };
         // Aqui registra o nome do par de membros para futuras consultas em iterações do for
         jaProcessados[campos[i].par] = novoGrupo;
-        
+
         // Adiciona as chaves do campos já processados
         jaProcessados[campos[i].par].chaves.push(campos[i].chave);
-        novoGrupo.valor_dir = formatarValor(novoGrupo.tipo_html, novoGrupo.valor_dir);
-        novoGrupo.valor_esq = formatarValor(novoGrupo.tipo_html, novoGrupo.valor_esq);
-        
+        novoGrupo.valor_dir = formatarValor(
+          novoGrupo.tipo_html,
+          novoGrupo.valor_dir,
+        );
+        novoGrupo.valor_esq = formatarValor(
+          novoGrupo.tipo_html,
+          novoGrupo.valor_esq,
+        );
+
         resultado.push(novoGrupo);
       }
     } else {
@@ -187,7 +246,7 @@ function agruparCampos(campos, valoresAvaliacao, avaliacao) {
     const textoB = b.label_par || b.label;
     return textoA.localeCompare(textoB);
   });
-  
+
   //Ordenar simples primeiros pares depois
   resultado.sort((a, b) => {
     const aPar = a.label_par ? 1 : 0;
@@ -204,7 +263,7 @@ function formatarValor(tipo, valor) {
   if (tipo === "date") {
     // Converte YYYY-MM-DD para DD/MM/YYYY
     valor = valor.split("T")[0].split("-").reverse().join("/");
-  } else if (tipo === "number"  && valor!==null) {
+  } else if (tipo === "number" && valor !== null) {
     // Troca ponto por vírgula na exibição
     valor = valor.toString().replace(".", ",");
   }

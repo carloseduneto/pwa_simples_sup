@@ -18,7 +18,7 @@ export function gerarGrupoInputs({
   let goToCompare = `
   <div class="flex-row-justify-end">
   ${buttonShortIconLabel(
-    "button-details-body-assessment",
+    "details-body-assessment-compare-button--action",
     "compare_arrows",
     "Comparar",
   )}
