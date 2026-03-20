@@ -1,5 +1,7 @@
+// assets\js-es6\components\modal.js
+
 export function modalBodyAssessmentCompare(id = "modal-body-assessment-compare") {
-  /*html*/
+ '' /*html*/
   return `
         <div id="${id}" class="modal-overlay hidden">
       <div class="modal-content">
@@ -7,9 +9,9 @@ export function modalBodyAssessmentCompare(id = "modal-body-assessment-compare")
         <p>Selecione avaliações para comparar.</p>
         <div class="modal-actions">
 
-          <div id="body-assessment-compare-selects" class="body-assessment-compare-selects"></div>
+          <div id="${id}-selects" class="body-assessment-compare-selects"></div>
           <button
-            id="body-assessment-compare-button--action"
+            id="${id}--action"
             class="button-short-icon-label button-short-icon-label--active"
           >
             <span class="material-symbols-rounded"> compare_arrows </span>

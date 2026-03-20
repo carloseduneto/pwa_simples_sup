@@ -225,7 +225,7 @@ const rotasConfig = {
     idDiv: "screen-body-assessment-compare",
     html: "assets/js-es6/modules/body-assessment/compare-body-assessment.html",
     tipoHeader: "alternativo",
-    voltarPara: "bodyAssessmentList",
+    voltarPara: "bodyAssessmentDetail",
     bottomNav: "none",
     tema: "havelock-blue",
     // titulo: "Add/Editar Avaliação Corporal",

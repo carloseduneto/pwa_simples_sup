@@ -134,18 +134,16 @@ export async function initBodyAssessmentDetail(onNavigate) {
   btnDetalhesCompare.addEventListener("click", () => {
     console.log("Clicou!");
     modal.classList.remove("hidden");
-    populateBodyAssessmentSelect();
+    populateBodyAssessmentSelect("modal-compare-detail-selects", true, true);
   });
 
-  const btnComparar = document.getElementById(
-    "body-assessment-compare-button--action",
-  );
+  const btnComparar = document.getElementById("modal-compare-detail--action");
 
   btnComparar.addEventListener("click", () => {
     modal.classList.add("hidden");
-    const avaliacao1Html = localStorage.getItem("detailBodyAssessmentId");
+    // const avaliacao1Html = localStorage.getItem("detailBodyAssessmentId");
     const avaliacao2Html = document.getElementById(
-      "body-assessment-compare-item-2",
+      "modal-compare-detail-item-2",
     ).value;
     localStorage.setItem("compareBodyAssessmentId2", avaliacao2Html);
     onNavigate("bodyAssessmentCompare");

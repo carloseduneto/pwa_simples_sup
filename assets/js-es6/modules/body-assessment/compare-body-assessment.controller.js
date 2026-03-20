@@ -1,4 +1,4 @@
-// assets\js-es6\modules\body-assessment\detail-body-assessment.controller.js
+// assets\js-es6\modules\body-assessment\compare-body-assessment.controller.js
 
 import { GlobalLoader } from "../../ui/global-loader.js";
 import { initInputGroupedForms } from "./body-assests-ui.component.js";
@@ -12,8 +12,13 @@ export async function initBodyAssessmentCompare(
   avaliacao1Html = null,
   avaliacao2Html = null,
 ) {
-  globalValueBodyAssessment1 = avaliacao1Html
-  globalValueBodyAssessment2 = avaliacao2Html
+  if (!avaliacao1Html && !avaliacao2Html) {
+    globalValueBodyAssessment1 = null;
+    globalValueBodyAssessment2 = null;
+  } else {
+    globalValueBodyAssessment1 = avaliacao1Html ? Number(avaliacao1Html) : null;
+    globalValueBodyAssessment2 = avaliacao2Html ? Number(avaliacao2Html) : null;
+  }
 
   const container = document.getElementById(
     "compare-body-assessment-container",
@@ -28,10 +33,12 @@ export async function initBodyAssessmentCompare(
   containerItens.innerHTML = GlobalLoader.getSimple();
 
   // 1. Captura a intenção de navegação
-  const avaliacaoId1 =
-    avaliacao1Html ?? localStorage.getItem("detailBodyAssessmentId");
-  const avaliacaoId2 =
-    avaliacao2Html ?? localStorage.getItem("compareBodyAssessmentId2");
+  const avaliacaoId1 = Number(
+    avaliacao1Html ?? localStorage.getItem("detailBodyAssessmentId"),
+  );
+  const avaliacaoId2 = Number(
+    avaliacao2Html ?? localStorage.getItem("compareBodyAssessmentId2"),
+  );
   // let avaliacaoId1 = !avaliacao1Html
   //   ? localStorage.getItem("detailBodyAssessmentId")
   //   : avaliacao1Html;
@@ -91,7 +98,7 @@ export async function initBodyAssessmentCompare(
 
     // // 5. Injeta na tela e ativa as sanfonas
     containerItens.innerHTML = htmlCompleto;
-    
+
     // initInputGroupedForms();
     console.log("avaliacao antiga:", avaliacaoAntiga);
     console.log("avaliacao nova", avaliacaoNova);
@@ -139,11 +146,11 @@ export async function initBodyAssessmentCompare(
   );
 
   const btnCancelar = document.getElementById(
-    "btn-modal-body-assessment-compare-cancel",
+    "modal-body-assessment-compare-cancel",
   );
 
   const btnComparar = document.getElementById(
-    "body-assessment-compare-button--action",
+    "modal-body-assessment-compare--action",
   );
 
   btnSelectInterval.addEventListener("click", () => {
@@ -154,12 +161,12 @@ export async function initBodyAssessmentCompare(
   btnComparar.addEventListener("click", () => {
     modal.classList.add("hidden");
     avaliacao1Html = document.getElementById(
-      "body-assessment-compare-item-1",
+      "modal-body-assessment-compare-item-1",
+    ).value;
+    avaliacao2Html = document.getElementById(
+      "modal-body-assessment-compare-item-2",
     ).value;
     globalValueBodyAssessment1 = Number(avaliacao1Html);
-    avaliacao2Html = document.getElementById(
-      "body-assessment-compare-item-2",
-    ).value;
     globalValueBodyAssessment2 = Number(avaliacao2Html);
     initBodyAssessmentCompare(
       "bodyAssessmentCompare",
@@ -183,10 +190,12 @@ export async function initBodyAssessmentCompare(
 
 let globalValueBodyAssessment1, globalValueBodyAssessment2;
 
-export async function populateBodyAssessmentSelect() {
-  const containerBodyAssessment = document.getElementById(
-    "body-assessment-compare-selects",
-  );
+export async function populateBodyAssessmentSelect(
+  containerId = "modal-body-assessment-compare-selects",
+  resetarSegundo = false,
+  resetarPrimeiro = false, // 1. Novo parâmetro adicionado
+) {
+  const containerBodyAssessment = document.getElementById(containerId);
 
   if (!containerBodyAssessment) {
     return;
@@ -197,17 +206,24 @@ export async function populateBodyAssessmentSelect() {
   try {
     const todasAvaliacoes = await BodyAvaliacoesService.getAll();
 
-    const bodyAssessmentSelected1 = !globalValueBodyAssessment1
+    // 2. Lógica ajustada para priorizar o reset quando solicitado
+    const bodyAssessmentSelected1 = resetarPrimeiro
       ? Number(localStorage.getItem("detailBodyAssessmentId"))
-      : globalValueBodyAssessment1;
+      : !globalValueBodyAssessment1
+        ? Number(localStorage.getItem("detailBodyAssessmentId"))
+        : globalValueBodyAssessment1;
 
-    const bodyAssessmentSelected2 = !globalValueBodyAssessment2
-      ? Number(localStorage.getItem("compareBodyAssessmentId2"))
-      : globalValueBodyAssessment2;
+    const bodyAssessmentSelected2 = resetarSegundo
+      ? null
+      : !globalValueBodyAssessment2
+        ? Number(localStorage.getItem("compareBodyAssessmentId2"))
+        : globalValueBodyAssessment2;
+
+    const baseId = containerId.replace("-selects", "");
 
     /* html */
     let html1 = `
-    <select id="body-assessment-compare-item-1" style="padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc;" class="input-select-context-recomendacoes">
+    <select id="${baseId}-item-1" style="padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc;" class="input-select-context-recomendacoes">
     <option value="" disabled ${!bodyAssessmentSelected1 ? "selected" : ""}>Selecione avaliação 1</option>
     `;
 
@@ -225,8 +241,8 @@ export async function populateBodyAssessmentSelect() {
 
     /* html */
     let html2 = `
-    <select id="body-assessment-compare-item-2" style="padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc;" class="input-select-context-recomendacoes">
-    <option value="" disabled selected}>Selecione avaliação 2</option>
+    <select id="${baseId}-item-2" style="padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc;" class="input-select-context-recomendacoes">
+    <option value="" disabled selected>Selecione avaliação 2</option>
     `;
 
     todasAvaliacoes.forEach((umaAvaliacao) => {
