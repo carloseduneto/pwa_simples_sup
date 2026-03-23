@@ -4,6 +4,7 @@ export async function initTemplateForm(onNavigate) {
   const form = document.getElementById("form-template");
   const inputName = document.getElementById("input-name-template");
   const inputDesc = document.getElementById("input-description-template");
+  const inputDate = document.getElementById("input-date-template");
   const btnCancel = document.getElementById("btn-cancel-template");
   const headerTitle = document.getElementById("header-title-alt");
 
@@ -11,7 +12,10 @@ export async function initTemplateForm(onNavigate) {
     ? form.querySelector(".default-form-button--save")
     : null;
 
-  // 1. FAXINA E ESTADO INICIAL
+  // Formata a data de hoje no padrão exigido pelo input date (YYYY-MM-DD)
+  const agora = new Date();
+  const hoje = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
+
   const editId = localStorage.getItem("editTemplateId");
 
   if (form) form.reset();
@@ -19,13 +23,15 @@ export async function initTemplateForm(onNavigate) {
   // Ativa Skeletons
   if (inputName) inputName.classList.add("skeleton");
   if (inputDesc) inputDesc.classList.add("skeleton");
+  if (inputDate) inputDate.classList.add("skeleton");
+
   if (btnSave) {
     btnSave.classList.add("skeleton-button");
     btnSave.disabled = false;
     btnSave.innerText = editId ? "Atualizar" : "Salvar";
   }
 
-  // 2. LÓGICA DE EDIÇÃO VS CRIAÇÃO
+  // Lógica de Edição vs Criação
   if (editId) {
     if (headerTitle) headerTitle.innerText = "Editar Template";
 
@@ -33,24 +39,29 @@ export async function initTemplateForm(onNavigate) {
       const template = await TemplateService.getById(editId);
       if (inputName) inputName.value = template.nome;
       if (inputDesc) inputDesc.value = template.descricao;
+      // Puxa do banco ou faz fallback para hoje
+      if (inputDate) inputDate.value = template.data_registro || hoje;
     } catch (err) {
       console.error("Erro na edição", err);
       alert("Erro ao buscar dados do template.");
     } finally {
-      // Remove skeletons após carregar
       inputName?.classList.remove("skeleton");
       inputDesc?.classList.remove("skeleton");
+      inputDate?.classList.remove("skeleton");
       btnSave?.classList.remove("skeleton-button");
     }
   } else {
     // Modo Criação
     if (headerTitle) headerTitle.innerText = "Criar Template";
+    if (inputDate) inputDate.value = hoje;
+
     inputName?.classList.remove("skeleton");
     inputDesc?.classList.remove("skeleton");
+    inputDate?.classList.remove("skeleton");
     btnSave?.classList.remove("skeleton-button");
   }
 
-  // 3. ENVIO (SUBMIT)
+  // Envio (Submit)
   if (form) {
     form.onsubmit = async (e) => {
       e.preventDefault();
@@ -58,6 +69,7 @@ export async function initTemplateForm(onNavigate) {
       const templateData = {
         nome: inputName.value,
         descricao: inputDesc.value,
+        data_registro: inputDate.value,
       };
 
       try {
@@ -73,7 +85,6 @@ export async function initTemplateForm(onNavigate) {
         }
 
         localStorage.removeItem("editTemplateId");
-        // roteador("templates");
         if (onNavigate) onNavigate("templates");
       } catch (err) {
         console.error(err);
@@ -89,7 +100,6 @@ export async function initTemplateForm(onNavigate) {
   if (btnCancel) {
     btnCancel.onclick = () => {
       localStorage.removeItem("editTemplateId");
-      // roteador("templates");
       if (onNavigate) onNavigate("templates");
     };
   }

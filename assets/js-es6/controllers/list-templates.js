@@ -8,6 +8,7 @@ let showInactives = false;
 
 // --- FUNÇÃO DE RENDERIZAÇÃO E FILTRO ---
 // Agora aceita 'onNavigate' como segundo parâmetro para poder navegar ao clicar
+// --- FUNÇÃO DE RENDERIZAÇÃO E FILTRO ---
 function renderizarListaFiltrada(container, onNavigate) {
   container.innerHTML = "";
 
@@ -25,36 +26,118 @@ function renderizarListaFiltrada(container, onNavigate) {
     return;
   }
 
-  // 3. Renderiza Cards
-  listaExibida.forEach((item) => {
-    const article = document.createElement("article");
-    const classeInativo = item.status === "inactive" ? "template-inativo" : "";
-    article.className = `template-item ${classeInativo}`;
+  if (showInactives) {
+    // 1. Agrupa os inativos por mm/aaaa
+    const grupos = {};
+    
+    listaExibida.forEach(item => {
+      // Usa data_registro se existir, senão faz fallback pro created_at
+      const rawDate = item.data_registro || item.created_at;
+      const dataObj = new Date(rawDate);
+      
+      const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+      const ano = dataObj.getFullYear();
+      const mesAno = `${mes}/${ano}`;
 
-    // HTML Interno
-    article.innerHTML = `
-      <div class="card-info">
-        <h3 class="card-title">${item.nome}</h3>
-        <p class="card-subtitle">${item.descricao || "Sem descrição"}</p>
-      </div>
-      <button class="card-dots" data-template-id="${item.id}">&#8942;</button>
-    `;
+      if (!grupos[mesAno]) grupos[mesAno] = [];
+      grupos[mesAno].push(item);
+    });
 
-    // Evento de Clique no Card (Iniciar Treino)
-    article.onclick = (e) => {
-      // Se clicou nos 3 pontinhos, para a propagação (o options-templates.js cuida disso)
-      if (e.target.closest(".card-dots")) return;
+    // 2. Renderiza os grupos
+    Object.keys(grupos).forEach(mesAno => {
+      const headerMes = document.createElement("div");
+      headerMes.className = "group-header";
+      headerMes.innerHTML = `<h4 style="margin: 24px 0 8px 0; color: #888; font-size: 14px;">${mesAno}</h4>`;
+      container.appendChild(headerMes);
 
-      // CORREÇÃO: Usa o onNavigate injetado pelo Router
-      if (onNavigate) {
-        onNavigate("detalhes", item.id);
-      } else {
-        console.error("Navegação não disponível.");
-      }
-    };
+      grupos[mesAno].forEach(item => {
+        container.appendChild(criarElementoCard(item, onNavigate));
+      });
+    });
 
-    container.appendChild(article);
-  });
+  } else {
+    // Renderiza a lista corrida normal para os ativos
+    listaExibida.forEach((item) => {
+      container.appendChild(criarElementoCard(item, onNavigate));
+    });
+  }
+}
+
+// Extraído para evitar repetição de código
+// function criarElementoCard(item, onNavigate) {
+//   const article = document.createElement("article");
+//   const classeInativo = item.status === "inactive" ? "template-inativo" : "";
+//   article.className = `template-item ${classeInativo}`;
+
+//   article.innerHTML = `
+//     <div class="card-info">
+//       <h3 class="card-title">${item.nome}</h3>
+//       <p class="card-subtitle">${item.descricao || "Sem descrição"}</p>
+//     </div>
+//     <button class="card-dots" data-template-id="${item.id}">&#8942;</button>
+//   `;
+
+//   article.onclick = (e) => {
+//     if (e.target.closest(".card-dots")) return;
+//     if (onNavigate) {
+//       onNavigate("detalhes", item.id);
+//     } else {
+//       console.error("Navegação não disponível.");
+//     }
+//   };
+
+//   return article;
+// }
+
+// Extraído para evitar repetição de código
+function criarElementoCard(item, onNavigate) {
+  const article = document.createElement("article");
+  const classeInativo = item.status === "inactive" ? "template-inativo" : "";
+  article.className = `template-item ${classeInativo}`;
+
+  let tempoExistenteHtml = "";
+
+  // Calcula tempo apenas para os ativos
+  if (item.status !== "inactive") {
+    const rawDate = item.data_registro || item.created_at;
+    if (rawDate) {
+      // Isola YYYY-MM-DD e força o timezone local para não perder 1 dia no cálculo
+      const apenasData = rawDate.split('T')[0]; 
+      const [ano, mes, dia] = apenasData.split('-');
+      const dataObj = new Date(ano, mes - 1, dia); 
+      
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0); // Ignora a hora atual para bater dias exatos
+      
+      const diffTempo = hoje.getTime() - dataObj.getTime();
+      const diffDias = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+      const semanas = Math.max(0, Math.floor(diffDias / 7)); // Math.max evita números negativos
+      
+      const txtSemana = semanas === 1 ? "1 semana" : `${semanas} semanas`;
+      
+      tempoExistenteHtml = `<p style="font-size: 0.85rem; opacity: 0.5; margin: 12px 0 0 0; font-weight: 500;">Há ${txtSemana}</p>`;
+    }
+  }
+
+  article.innerHTML = `
+    <div class="card-info">
+      <h3 class="card-title">${item.nome}</h3>
+      <p class="card-subtitle">${item.descricao || "Sem descrição"}</p>
+      ${tempoExistenteHtml}
+    </div>
+    <button class="card-dots" data-template-id="${item.id}">&#8942;</button>
+  `;
+
+  article.onclick = (e) => {
+    if (e.target.closest(".card-dots")) return;
+    if (onNavigate) {
+      onNavigate("detalhes", item.id);
+    } else {
+      console.error("Navegação não disponível.");
+    }
+  };
+
+  return article;
 }
 
 // --- ATUALIZA O VISUAL DO BOTÃO DE FILTRO ---

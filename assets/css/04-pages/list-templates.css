@@ -288,3 +288,9 @@ body.modal-open {
 .tmp-opt-item--delete {
   color: var(--status-danger);
 }
+
+/* --- ADICIONADO: Corrige o agrupamento por data no CSS Grid --- */
+.group-header {
+  grid-column: 1 / -1; /* Ocupa de ponta a ponta no grid */
+  width: 100%;
+}
