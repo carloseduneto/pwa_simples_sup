@@ -1,10 +1,16 @@
 <form id="form-template" class="default-form template-form">
   <div class="input-group">
+    <select id="input-category-template" class="default-form-input">
+      <option value="fixo">Treino Fixo (Rotina)</option>
+      <option value="avulso">Treino Avulso (Especial)</option>
+    </select>
+  </div>
+
+  <div class="input-group">
     <input
       type="text"
       id="input-name-template" 
-      placeholder="Nome do Template"
-      required
+      placeholder="Nome do Template (Opcional para Avulsos)"
       class="default-form-input"
     />
   </div>
@@ -22,7 +28,6 @@
     <textarea
       id="input-description-template"
       placeholder="Descrição do template"
-      required
       class="default-form-input"
       rows="3"
     ></textarea>

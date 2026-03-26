@@ -5,7 +5,7 @@ export const TemplateService = {
   async getAll() {
     const { data, error } = await client
       .from("templates")
-      .select("id, nome, descricao, status, data_registro, created_at")
+      .select( "id, nome, descricao, status, data_registro, created_at, categoria")
       .order("status", { ascending: true, nullsFirst: true }) // 1. Ativos primeiro
       .order("data_registro", { ascending: false, nullsLast: true }) // 2. Mais novos no topo (descendente)
       .order("nome", { ascending: true }) // 3. Alfabético como desempate dentro do mesmo mês

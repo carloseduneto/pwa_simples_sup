@@ -1,3 +1,5 @@
+// assets\js-es6\controllers\form-templates.js
+
 import { TemplateService } from "../services/template.service.js";
 
 export async function initTemplateForm(onNavigate) {
@@ -5,6 +7,7 @@ export async function initTemplateForm(onNavigate) {
   const inputName = document.getElementById("input-name-template");
   const inputDesc = document.getElementById("input-description-template");
   const inputDate = document.getElementById("input-date-template");
+  const inputCategory = document.getElementById("input-category-template");
   const btnCancel = document.getElementById("btn-cancel-template");
   const headerTitle = document.getElementById("header-title-alt");
 
@@ -14,7 +17,11 @@ export async function initTemplateForm(onNavigate) {
 
   // Formata a data de hoje no padrão exigido pelo input date (YYYY-MM-DD)
   const agora = new Date();
-  const hoje = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
+  const dia = String(agora.getDate()).padStart(2, "0");
+  const mes = String(agora.getMonth() + 1).padStart(2, "0");
+  const ano = agora.getFullYear();
+  const hojeIso = `${ano}-${mes}-${dia}`;
+  const dataAbreviada = `${dia}/${mes}`;
 
   const editId = localStorage.getItem("editTemplateId");
 
@@ -24,6 +31,7 @@ export async function initTemplateForm(onNavigate) {
   if (inputName) inputName.classList.add("skeleton");
   if (inputDesc) inputDesc.classList.add("skeleton");
   if (inputDate) inputDate.classList.add("skeleton");
+  if (inputCategory) inputCategory.classList.add("skeleton");
 
   if (btnSave) {
     btnSave.classList.add("skeleton-button");
@@ -40,7 +48,8 @@ export async function initTemplateForm(onNavigate) {
       if (inputName) inputName.value = template.nome;
       if (inputDesc) inputDesc.value = template.descricao;
       // Puxa do banco ou faz fallback para hoje
-      if (inputDate) inputDate.value = template.data_registro || hoje;
+      if (inputDate) inputDate.value = template.data_registro || hojeIso;
+      if (inputCategory) inputCategory.value = template.categoria || "fixo";
     } catch (err) {
       console.error("Erro na edição", err);
       alert("Erro ao buscar dados do template.");
@@ -48,16 +57,18 @@ export async function initTemplateForm(onNavigate) {
       inputName?.classList.remove("skeleton");
       inputDesc?.classList.remove("skeleton");
       inputDate?.classList.remove("skeleton");
+      inputCategory?.classList.remove("skeleton");
       btnSave?.classList.remove("skeleton-button");
     }
   } else {
     // Modo Criação
     if (headerTitle) headerTitle.innerText = "Criar Template";
-    if (inputDate) inputDate.value = hoje;
+    if (inputDate) inputDate.value = hojeIso;
 
     inputName?.classList.remove("skeleton");
     inputDesc?.classList.remove("skeleton");
     inputDate?.classList.remove("skeleton");
+    inputCategory?.classList.remove("skeleton");
     btnSave?.classList.remove("skeleton-button");
   }
 
@@ -66,10 +77,25 @@ export async function initTemplateForm(onNavigate) {
     form.onsubmit = async (e) => {
       e.preventDefault();
 
+      let nomeFinal = inputName.value.trim();
+      const categoriaValue = inputCategory ? inputCategory.value : "fixo";
+
+      // Preenchimento automático para treinos avulsos sem nome
+      if (!nomeFinal) {
+        if (categoriaValue === "avulso") {
+          nomeFinal = `Treino Avulso - ${dataAbreviada}`;
+        } else {
+          alert("Por favor, defina um nome para o seu Treino Fixo.");
+          inputName.focus();
+          return;
+        }
+      }
+
       const templateData = {
-        nome: inputName.value,
+        nome: nomeFinal,
         descricao: inputDesc.value,
         data_registro: inputDate.value,
+        categoria: categoriaValue,
       };
 
       try {

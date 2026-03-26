@@ -29,13 +29,13 @@ function renderizarListaFiltrada(container, onNavigate) {
   if (showInactives) {
     // 1. Agrupa os inativos por mm/aaaa
     const grupos = {};
-    
-    listaExibida.forEach(item => {
+
+    listaExibida.forEach((item) => {
       // Usa data_registro se existir, senão faz fallback pro created_at
       const rawDate = item.data_registro || item.created_at;
       const dataObj = new Date(rawDate);
-      
-      const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+
+      const mes = String(dataObj.getMonth() + 1).padStart(2, "0");
       const ano = dataObj.getFullYear();
       const mesAno = `${mes}/${ano}`;
 
@@ -44,22 +44,52 @@ function renderizarListaFiltrada(container, onNavigate) {
     });
 
     // 2. Renderiza os grupos
-    Object.keys(grupos).forEach(mesAno => {
+    Object.keys(grupos).forEach((mesAno) => {
       const headerMes = document.createElement("div");
       headerMes.className = "group-header";
       headerMes.innerHTML = `<h4 style="margin: 24px 0 8px 0; color: #888; font-size: 14px;">${mesAno}</h4>`;
       container.appendChild(headerMes);
 
-      grupos[mesAno].forEach(item => {
+      grupos[mesAno].forEach((item) => {
         container.appendChild(criarElementoCard(item, onNavigate));
       });
     });
-
+    
   } else {
-    // Renderiza a lista corrida normal para os ativos
-    listaExibida.forEach((item) => {
-      container.appendChild(criarElementoCard(item, onNavigate));
-    });
+    // Separa os treinos ativos por categoria
+    const fixos = listaExibida.filter(
+      (t) => t.categoria === "fixo" || !t.categoria,
+    );
+    const avulsos = listaExibida.filter((t) => t.categoria === "avulso");
+
+    if (avulsos.length > 0) {
+      // Exibe cabeçalho "Rotina" apenas se houverem treinos fixos para separar
+      if (fixos.length > 0) {
+        const headerFixo = document.createElement("div");
+        headerFixo.className = "group-header";
+        headerFixo.innerHTML = `<h4 style="margin: 24px 0 8px 0; color: #888; font-size: 14px;">Rotina</h4>`;
+        container.appendChild(headerFixo);
+
+        fixos.forEach((item) =>
+          container.appendChild(criarElementoCard(item, onNavigate)),
+        );
+      }
+
+      // Exibe cabeçalho "Avulsos" e seus respectivos cards
+      const headerAvulso = document.createElement("div");
+      headerAvulso.className = "group-header";
+      headerAvulso.innerHTML = `<h4 style="margin: 24px 0 8px 0; color: #888; font-size: 14px;">Treinos Avulsos</h4>`;
+      container.appendChild(headerAvulso);
+
+      avulsos.forEach((item) =>
+        container.appendChild(criarElementoCard(item, onNavigate)),
+      );
+    } else {
+      // Se não houver nenhum treino avulso, renderiza a lista limpa, sem cabeçalhos
+      listaExibida.forEach((item) => {
+        container.appendChild(criarElementoCard(item, onNavigate));
+      });
+    }
   }
 }
 
@@ -102,19 +132,19 @@ function criarElementoCard(item, onNavigate) {
     const rawDate = item.data_registro || item.created_at;
     if (rawDate) {
       // Isola YYYY-MM-DD e força o timezone local para não perder 1 dia no cálculo
-      const apenasData = rawDate.split('T')[0]; 
-      const [ano, mes, dia] = apenasData.split('-');
-      const dataObj = new Date(ano, mes - 1, dia); 
-      
+      const apenasData = rawDate.split("T")[0];
+      const [ano, mes, dia] = apenasData.split("-");
+      const dataObj = new Date(ano, mes - 1, dia);
+
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0); // Ignora a hora atual para bater dias exatos
-      
+
       const diffTempo = hoje.getTime() - dataObj.getTime();
       const diffDias = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
       const semanas = Math.max(0, Math.floor(diffDias / 7)); // Math.max evita números negativos
-      
+
       const txtSemana = semanas === 1 ? "1 semana" : `${semanas} semanas`;
-      
+
       tempoExistenteHtml = `<p style="font-size: 0.85rem; opacity: 0.5; margin: 12px 0 0 0; font-weight: 500;">Há ${txtSemana}</p>`;
     }
   }
