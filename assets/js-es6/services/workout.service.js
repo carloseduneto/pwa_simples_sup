@@ -117,6 +117,8 @@ export const WorkoutService = {
           semana_base: payload.semana_base,
           owner_id: payload.owner_id,
           template_id: payload.template_id,
+          template_nome: payload.template_nome, // NOVO
+          observacoes: payload.observacoes, // NOVO
         },
       ])
       .select()

@@ -137,6 +137,15 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       wrapperTraining.appendChild(wrapperExercises);
     }
 
+    // --- NOVO: CAMPO DE OBSERVAÇÕES ---
+    const obsHtml = `
+      <div class="container-exercicio" style="margin-top: 20px; padding: 15px;">
+          <h4 style="margin-bottom: 10px;">Observações</h4>
+          <textarea id="obs-treino" style="width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: transparent; color: inherit; font-family: inherit;" rows="3" placeholder="Como foi o treino?"></textarea>
+      </div>
+    `;
+    wrapperTraining.insertAdjacentHTML("beforeend", obsHtml);
+
     contentDiv.appendChild(wrapperTraining);
 
     // --- RESTAURAÇÃO: BOTÃO CONCLUIR NO HEADER ---
@@ -164,6 +173,15 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
 
     // --- EVENTOS E LOGICA ---
     WorkoutDraftService.restaurarDados();
+
+    // NOVO: Restaurar e salvar cache de observações
+    const obsEl = document.getElementById("obs-treino");
+    if (obsEl) {
+      obsEl.value = localStorage.getItem("treino_cache_observacoes") || "";
+      obsEl.addEventListener("input", (e) => {
+        localStorage.setItem("treino_cache_observacoes", e.target.value);
+      });
+    }
 
     const btnReiniciar = document.getElementById("reiniciar-treino-btn");
     if (btnReiniciar) {
@@ -266,12 +284,21 @@ async function processarConclusao(templateId, onNavigate) {
 
   const userId = await AuthService.getUserId();
 
+  // ADICIONADO AQUI: A captura dos valores diretamente do DOM antes de salvar
+  const tituloElement = document.querySelector(".titulo-treino");
+  const nomeDoTreino = tituloElement
+    ? tituloElement.innerText
+    : "Treino Avulso";
+  const obsTreino = document.getElementById("obs-treino")?.value || "";
+
   dadosParaEnvio = {
     data_inicio: WorkoutDraftService.getInicio(),
     data_fim: new Date().toISOString(),
     semana_base: semanaBaseCache,
     owner_id: userId,
     template_id: templateId,
+    template_nome: nomeDoTreino, // Novo
+    observacoes: obsTreino, // Novo
     series: seriesParaSalvar,
   };
 
