@@ -1,5 +1,4 @@
 // assets\js-es6\modules\body-assessment\detail-body-assessment.controller.js
-
 import { GlobalLoader } from "../../ui/global-loader.js";
 import { initInputGroupedForms } from "./body-assests-ui.component.js";
 import { BodyAvaliacoesService } from "./body-avaliacoes.service.js";
@@ -8,6 +7,15 @@ import { gerarGrupoInputs } from "./body-input-group.component.js";
 import { modalBodyAssessmentCompare } from "../../components/modal.js";
 import { populateBodyAssessmentSelect } from "./compare-body-assessment.controller.js";
 import { initBodyAssessmentCompare } from "./compare-body-assessment.controller.js";
+
+// Utilitários
+import { calcularFaulkner } from "../../utilities/calcularPercentualGordura.js";
+import { calcularPollock7Dobras } from "../../utilities/calcularPercentualGordura.js";
+import { calcularIdade } from "../../utilities/calcularIdade.js";
+
+// User data
+import { AuthService } from "../../services/auth.service.js";
+import { UserContextService } from "../../services/user-context.service.js";
 
 export async function initBodyAssessmentDetail(onNavigate) {
   const container = document.getElementById("detail-body-assessment-container");
@@ -29,8 +37,27 @@ export async function initBodyAssessmentDetail(onNavigate) {
   }
 
   try {
+    const userId = await AuthService.getUserId();
+    if (!userId) {
+      container.innerHTML = "";
+      return;
+    }
+
+    // Busca opções e seleção atual em paralelo (mais rápido)
+    const userData = await Promise.all([
+      UserContextService.getUserData(userId),
+    ]);
+
+    console.log("Dados do usuário para contexto:", userData);
+
     // 2. Busca o conteúdo (A avaliação do paciente)
     const avaliacao = await BodyAvaliacoesService.getById(avaliacaoId);
+
+    const idadeDynamic = calcularIdade(
+      userData[0].data_nascimento,
+      avaliacao.data_registro,
+    );
+    console.log("Idade calculada:", idadeDynamic);
 
     // 3. Busca a planta (O modelo usado naquela avaliação específica)
     const esquemas = await BodySchemaService.getAll();
@@ -55,6 +82,47 @@ export async function initBodyAssessmentDetail(onNavigate) {
     //   );
     //   // console.log("campos agrupaods", camposAgrupados);
     // }
+
+    // Calcular percentuais de gordura usando as funções utilitárias
+    const dobrasFaulkner = {
+      dobra_tricipital: avaliacao.value.dobra_tricipital,
+      dobra_subescapular: avaliacao.value.dobra_subescapular,
+      dobra_suprailiaca: avaliacao.value.dobra_suprailiaca,
+      dobra_abdominal: avaliacao.value.dobra_abdominal,
+    };
+
+    const percentualFaulkner = calcularFaulkner(dobrasFaulkner);
+
+    const dobrasPollock = {
+      dobra_tricipital: avaliacao.value.dobra_tricipital,
+      dobra_subescapular: avaliacao.value.dobra_subescapular,
+      dobra_suprailiaca: avaliacao.value.dobra_suprailiaca,
+      dobra_abdominal: avaliacao.value.dobra_abdominal,
+      dobra_peitoral: avaliacao.value.dobra_peitoral,
+      dobra_axilar_media: avaliacao.value.dobra_axilar_media,
+      dobra_coxa: avaliacao.value.dobra_coxa,
+    };
+
+    const idade = 25;
+    const sexo = "masculino";
+
+    const percentualPollock7Dobras = calcularPollock7Dobras(
+      dobrasPollock,
+      idade,
+      sexo,
+    );
+
+    const percentualPollock7DobrasIdade = calcularPollock7Dobras(
+      dobrasPollock,
+      idadeDynamic,
+      sexo,
+    );
+
+    console.log("Percentual de Gordura (Faulkner):", percentualFaulkner);
+    console.log(
+      "Percentual de Gordura (Pollock 7 Dobras):",
+      percentualPollock7Dobras, "Idade dinâmica:", percentualPollock7DobrasIdade
+    );
 
     // 4. Cruzamento e Renderização
     const htmlCompleto = esquemaUsado.schema

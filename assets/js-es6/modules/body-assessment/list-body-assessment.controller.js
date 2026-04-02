@@ -1,7 +1,7 @@
 import { GlobalLoader } from "../../ui/global-loader.js";
 import { BodyAvaliacoesService } from "../body-assessment/body-avaliacoes.service.js";
 import { gerarListItem } from "../../components/list-item.js"; // <-- Importa o componente
-import { calcularFaulkner } from "../../utilities/calcularFaulkner.js";
+import { calcularFaulkner } from "../../utilities/calcularPercentualGordura.js";
 
 export async function initBodyAssessmentList(onNavigate) {
   const container = document.getElementById("body-assessment-container");
