@@ -30,42 +30,57 @@
   <section>
     <header id="main-header" class="smart-header">
       <div class="header-content">
-        <button data-route="templates" class="btn-icon-dynamic-header">
+        <button data-route="templates" class="btn-icon-dynamic-header-transparent">
           <span class="material-symbols-rounded"> arrow_back_ios_new </span>
         </button>
+
+        <div class="stopwatch-place" id="stopwatch-container">
+          <button class="btn-icon-dynamic-header-transparent" id="btn-stop-timer">
+            <span class="material-symbols-rounded icon-fill"> stop </span>
+          </button>
+          
+
+          <span class="time-stopwatch" id="stopwatch-display">00:00</span>
+
+          <button class="btn-icon-dynamic-header-transparent" id="btn-play-timer">
+            <span class="material-symbols-rounded icon-fill"> play_arrow </span>
+          </button>
+
+          <button class="btn-icon-dynamic-header-transparent hidden" id="btn-pause-timer">
+            <span class="material-symbols-rounded icon-fill"> pause </span>
+          </button>
+        </div>
       </div>
     </header>
   </section>
 </template>
 
-      <div id="modal-conclusao" class="modal-overlay hidden">
-        <div class="modal-content">
-          <h3>Treino Incompleto</h3>
-          <p>
-            Existem séries preenchidas que não foram marcadas como concluídas.
-          </p>
-          <div class="modal-actions">
-            <button
-              onclick="resolverTreino('completar')"
-              class="btn-success"
-              id="modal-conclusao"
-            >
-              Considerar tudo feito e Salvar
-            </button>
-            <button
-              onclick="resolverTreino('descartar')"
-              class="btn-warning"
-              id="btn-modal-descartar"
-            >
-              Ignorar não marcados e Salvar
-            </button>
-            <button
-              onclick="fecharModal()"
-              class="btn-cancel"
-              id="btn-modal-cancelar"
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      </div>
+<div id="modal-conclusao" class="modal-overlay hidden">
+  <div class="modal-content">
+    <h3>Treino Incompleto</h3>
+    <p>Existem séries preenchidas que não foram marcadas como concluídas.</p>
+    <div class="modal-actions">
+      <button
+        onclick="resolverTreino('completar')"
+        class="btn-success"
+        id="modal-conclusao"
+      >
+        Considerar tudo feito e Salvar
+      </button>
+      <button
+        onclick="resolverTreino('descartar')"
+        class="btn-warning"
+        id="btn-modal-descartar"
+      >
+        Ignorar não marcados e Salvar
+      </button>
+      <button
+        onclick="fecharModal()"
+        class="btn-cancel"
+        id="btn-modal-cancelar"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

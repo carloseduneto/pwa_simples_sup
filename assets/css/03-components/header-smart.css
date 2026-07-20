@@ -13,8 +13,8 @@
   /* padding: 0 20px; */
   padding-top: 40px;
   padding-bottom: 30px;
-  padding-left: 40px;
-  padding-right: 60px;
+  padding-left: 20px;
+  padding-right: 20px;
   box-sizing: border-box;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -26,9 +26,63 @@
 
 .header-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
   align-items: center;
   font-weight: bold;
 }
 
+
+.stopwatch-place{
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+}
+
+.time-stopwatch{
+  font-weight: 400;
+}
+
+.header-stopwatch-pause{
+  display: none;
+}
+
+/* Oculta o cronômetro mantendo o espaço (evita o reajuste de layout) */
+#stopwatch-container.hidden {
+  display: flex !important; /* Mantém o layout original caso flex seja usado */
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Ocultar botões play/pause internamente */
+.stopwatch-place .hidden {
+  display: none !important;
+}
+
+/* Garante que os números ocupem exatamente a mesma largura (tabular) */
+.time-stopwatch {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cores do botão de toggle no header */
+.btn-toggle-stopwatch {
+  opacity: 0.5; /* Leve transparência para indicar inatividade */
+  transition: color 0.2s ease;
+}
+
+.btn-toggle-stopwatch.active {
+  opacity: 1; /* Totalmente opaco quando ativo */
+}
+
+/* Cores do botão de toggle no header */
+.btn-toggle-stopwatch-icon {
+  color: var(--switch-inactive-bg); /* Cor inativa (cinza) */
+  transition: color 0.2s ease;
+}
+
+.btn-toggle-stopwatch-icon.active {
+  color: var(--primary-color); /* Cor ativa (laranja/primary) */
+}

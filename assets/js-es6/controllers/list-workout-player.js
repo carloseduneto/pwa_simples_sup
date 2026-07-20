@@ -7,6 +7,46 @@ import { AuthService } from "../services/auth.service.js";
 let dadosParaEnvio = null;
 let semanaBaseCache = null;
 
+// Variáveis do Cronômetro
+let timerInterval = null;
+let timerSeconds = 0;
+
+function updateTimerDisplay() {
+  const display = document.getElementById("stopwatch-display");
+  if (display) {
+    const m = String(Math.floor(timerSeconds / 60)).padStart(2, "0");
+    const s = String(timerSeconds % 60).padStart(2, "0");
+    display.textContent = `${m}:${s}`;
+  }
+}
+
+function playTimer() {
+  clearInterval(timerInterval);
+  document.getElementById("btn-play-timer")?.classList.add("hidden");
+  document.getElementById("btn-pause-timer")?.classList.remove("hidden");
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  document.getElementById("btn-pause-timer")?.classList.add("hidden");
+  document.getElementById("btn-play-timer")?.classList.remove("hidden");
+}
+
+function stopTimer() {
+  pauseTimer();
+  timerSeconds = 0;
+  updateTimerDisplay();
+}
+
+function restartAndPlayTimer() {
+  stopTimer();
+  playTimer();
+}
+
 export async function initWorkoutPlayer(onNavigate, templateId) {
   const container = document.getElementById("screen-workout-details");
   const contentDiv = container.querySelector(".itensTemplate");
@@ -54,12 +94,17 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       );
     }
 
+    /*html*/
     const headerHtml = `
       <section class="header-itens-template">
          <div class="header-session-content">
             <h1 class="titulo-treino data-week-${contexto?.series_repeticoes?.week || "1"}">${itens[0].templates.nome}</h1>
             <p class="subtitulo-treino">${itens[0].templates.descricao || ""}</p>
          </div>
+          <button id="toggle-stopwatch-btn" class="btn-icon-dynamic-header btn-toggle-stopwatch">
+            <span id="toggle-stopwatch-btn-icon" class="material-symbols-rounded btn-toggle-stopwatch-icon">timer</span>
+            <span class="btn-text-header">Cronô<br>metro</span>
+         </button>
          <button id="reiniciar-treino-btn" class="btn-icon-dynamic-header">
             <span class="material-symbols-rounded">rotate_left</span>
             <span class="btn-text-header">Reiniciar <br>treino</span>
@@ -148,13 +193,56 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
 
     contentDiv.appendChild(wrapperTraining);
 
+    // --- EVENTOS DO CRONÔMETRO ---
+    const btnPlay = document.getElementById("btn-play-timer");
+    const btnPause = document.getElementById("btn-pause-timer");
+    const btnStop = document.getElementById("btn-stop-timer");
+    const btnToggleTimer = document.getElementById("toggle-stopwatch-btn");
+    const btnToggleTimerIcon = document.getElementById("toggle-stopwatch-btn-icon");
+    const containerTimer = document.getElementById("stopwatch-container");
+
+    if (btnPlay) btnPlay.onclick = playTimer;
+    if (btnPause) btnPause.onclick = pauseTimer;
+    if (btnStop) btnStop.onclick = stopTimer;
+
+    if (btnToggleTimer && containerTimer) {
+      btnToggleTimer.classList.add("active"); // Inicia ativo
+      btnToggleTimerIcon.classList.add("active"); // Inicia ativo
+      
+      btnToggleTimer.onclick = () => {
+        const isHidden = containerTimer.classList.toggle("hidden");
+        if (isHidden) {
+          btnToggleTimer.classList.remove("active");
+          btnToggleTimerIcon.classList.remove("active"); // Inicia ativo
+          stopTimer(); // Zera o cronômetro ao ocultar
+        } else {
+          btnToggleTimer.classList.add("active");
+          btnToggleTimerIcon.classList.add("active"); // Inicia ativo
+        }
+      };
+    }
+
+    // Interceptar clique para marcação da série e reiniciar o cronômetro
+    wrapperTraining.addEventListener("click", (event) => {
+      const checkBtn = event.target.closest(".checkExercise");
+      if (checkBtn) {
+        const row = checkBtn.closest(".rowExercise");
+        // Timeout garante que sua lógica externa de marcar data-realizado="true" execute primeiro
+        setTimeout(() => {
+          if (row.dataset.realizado === "true") {
+            restartAndPlayTimer();
+          }
+        }, 50);
+      }
+    });
+
     // --- RESTAURAÇÃO: BOTÃO CONCLUIR NO HEADER ---
     const divConteudoHeader = document.querySelector(".header-content");
     const btnAntigo = document.getElementById("concluir-treino-btn");
     if (btnAntigo) btnAntigo.remove();
 
     const btnConcluirHtml = `
-      <button id="concluir-treino-btn" class="btn-icon-dynamic-header">
+      <button id="concluir-treino-btn" class="btn-icon-dynamic-header-transparent">
          <span class="material-symbols-rounded">done_all</span> 
          <span class="btn-text-header">Concluir</span>
       </button>
@@ -191,6 +279,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       novoReiniciar.onclick = () => {
         if (confirm("Limpar dados e reiniciar?")) {
           WorkoutDraftService.limparRascunho();
+          stopTimer(); // Zera o cronômetro ao ocultar
           initWorkoutPlayer(onNavigate, templateId);
         }
       };
@@ -339,6 +428,8 @@ async function enviarTreino(series, onNavigate) {
 
     alert("Treino concluído com sucesso!");
     WorkoutDraftService.limparRascunho();
+
+    stopTimer(); // <-- Adicionado aqui para zerar ao concluir
 
     if (btn) btn.remove();
 
