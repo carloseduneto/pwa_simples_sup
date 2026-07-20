@@ -183,12 +183,54 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     }
 
     // --- NOVO: CAMPO DE OBSERVAÇÕES ---
+    // const obsHtml = `
+    //   <div class="container-exercicio" style="margin-top: 20px; padding: 15px;">
+    //       <h4 style="margin-bottom: 10px;">Observações</h4>
+    //       <textarea id="obs-treino" style="width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: transparent; color: inherit; font-family: inherit;" rows="3" placeholder="Como foi o treino?"></textarea>
+    //   </div>
+    // `;
+    /* html */
     const obsHtml = `
       <div class="container-exercicio" style="margin-top: 20px; padding: 15px;">
           <h4 style="margin-bottom: 10px;">Observações</h4>
           <textarea id="obs-treino" style="width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: transparent; color: inherit; font-family: inherit;" rows="3" placeholder="Como foi o treino?"></textarea>
       </div>
+
+      <div class="container-exercicio" style="margin-top: 20px; padding: 15px;">
+        <h4 style="margin-bottom: 15px;">Estatísticas da Sessão</h4>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8;">Pausa (min : seg)</label>
+            <div style="display: flex; gap: 5px; align-items: center;">
+              <input type="number" id="est-pausa-m" value="1" min="0" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;"> :
+              <input type="number" id="est-pausa-s" value="30" min="0" max="59" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;">
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8;">Execução (min : seg)</label>
+            <div style="display: flex; gap: 5px; align-items: center;">
+              <input type="number" id="est-exec-m" value="0" min="0" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;"> :
+              <input type="number" id="est-exec-s" value="45" min="0" max="59" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;">
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; opacity: 0.9;">
+          <div>Séries restantes: <strong id="est-series">0</strong></div>
+          <div>Ex. restantes: <strong id="est-ex">0</strong></div>
+          <div>Tempo ativo: <strong id="est-tempo">00m</strong></div>
+          <div>Faltam aprox.: <strong id="est-falta">0m</strong></div>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; display: flex; justify-content: space-between;">
+          <span>Fim previsto: <strong id="est-hora-fim">--:--</strong></span>
+          <!-- <span style="color: var(--primary-color);">Volume: <strong id="est-vol">0</strong> kg</span>-->
+
+        </div>
+      </div>
     `;
+    // wrapperTraining.insertAdjacentHTML("beforeend", obsHtml);
     wrapperTraining.insertAdjacentHTML("beforeend", obsHtml);
 
     contentDiv.appendChild(wrapperTraining);
@@ -198,7 +240,9 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     const btnPause = document.getElementById("btn-pause-timer");
     const btnStop = document.getElementById("btn-stop-timer");
     const btnToggleTimer = document.getElementById("toggle-stopwatch-btn");
-    const btnToggleTimerIcon = document.getElementById("toggle-stopwatch-btn-icon");
+    const btnToggleTimerIcon = document.getElementById(
+      "toggle-stopwatch-btn-icon",
+    );
     const containerTimer = document.getElementById("stopwatch-container");
 
     if (btnPlay) btnPlay.onclick = playTimer;
@@ -208,7 +252,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     if (btnToggleTimer && containerTimer) {
       btnToggleTimer.classList.add("active"); // Inicia ativo
       btnToggleTimerIcon.classList.add("active"); // Inicia ativo
-      
+
       btnToggleTimer.onclick = () => {
         const isHidden = containerTimer.classList.toggle("hidden");
         if (isHidden) {
@@ -222,6 +266,17 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       };
     }
 
+    // --- SETUP ESTATÍSTICAS ---
+    atualizarEstatisticas(); // Chamada inicial
+
+    // Atualiza a cada 1 minuto para manter o tempo ativo e hora final sincronizados
+    setInterval(atualizarEstatisticas, 60000);
+
+    // Atualiza quando os inputs de tempo mudam
+    wrapperTraining.addEventListener("input", (e) => {
+      if (e.target.id.startsWith("est-")) atualizarEstatisticas();
+    });
+
     // Interceptar clique para marcação da série e reiniciar o cronômetro
     wrapperTraining.addEventListener("click", (event) => {
       const checkBtn = event.target.closest(".checkExercise");
@@ -232,6 +287,8 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
           if (row.dataset.realizado === "true") {
             restartAndPlayTimer();
           }
+          // Atualiza estatísticas após a marcação
+          atualizarEstatisticas();
         }, 50);
       }
     });
@@ -307,6 +364,8 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
 
     // Conecta os botões do modal fixo
     setupModalEvents(templateId, onNavigate);
+
+    // --- ESTATÍSTICAS ---
   } catch (error) {
     console.error(error);
     contentDiv.innerHTML = `<p style="color:red; text-align:center; padding:20px;">Erro ao carregar: ${error.message}</p>`;
@@ -415,14 +474,14 @@ async function enviarTreino(series, onNavigate) {
 
   dadosParaEnvio.series = seriesLimpas;
 
+  const btn = document.getElementById("concluir-treino-btn");
+  if (btn) {
+    btn.dataset.originalText = btn.innerHTML;
+    btn.innerHTML =
+    "<span class='material-symbols-rounded'>hourglass_empty</span> Salvando...";
+    btn.disabled = true;
+  }
   try {
-    const btn = document.getElementById("concluir-treino-btn");
-    if (btn) {
-      btn.dataset.originalText = btn.innerHTML;
-      btn.innerHTML =
-        "<span class='material-symbols-rounded'>hourglass_empty</span> Salvando...";
-      btn.disabled = true;
-    }
 
     await WorkoutService.saveSession(dadosParaEnvio);
 
@@ -431,9 +490,9 @@ async function enviarTreino(series, onNavigate) {
 
     stopTimer(); // <-- Adicionado aqui para zerar ao concluir
 
-    if (btn) btn.remove();
-
+    
     if (onNavigate) onNavigate("templates");
+    if (btn) btn.remove();
   } catch (err) {
     console.error(err);
     alert("Erro ao salvar: " + err.message);
@@ -483,5 +542,82 @@ function setupModalEvents(templateId, onNavigate) {
     novoBtn.onclick = () => {
       modal.classList.add("hidden");
     };
+  }
+}
+
+function atualizarEstatisticas() {
+  const rows = document.querySelectorAll(".rowExercise");
+  if (!rows.length) return;
+
+  let seriesRestantes = 0;
+  let volumeTotal = 0;
+  const exerciciosIncompletos = new Set();
+
+  rows.forEach((row) => {
+    const container = row.closest(".container-exercicio");
+    if (!container) return;
+
+    const exId = container.dataset.exercicioId;
+    const realizado = row.dataset.realizado === "true";
+
+    if (!realizado) {
+      seriesRestantes++;
+      exerciciosIncompletos.add(exId);
+    } else {
+      const kg = parseFloat(
+        row.querySelector(".kgExercise").value ||
+          row.querySelector(".kgExercise").placeholder ||
+          0,
+      );
+      const reps = parseFloat(
+        row.querySelector(".repsExercise").value ||
+          row.querySelector(".repsExercise").placeholder ||
+          0,
+      );
+      volumeTotal += kg * reps;
+    }
+  });
+
+  const pMin = parseInt(document.getElementById("est-pausa-m")?.value || 0);
+  const pSeg = parseInt(document.getElementById("est-pausa-s")?.value || 0);
+  const eMin = parseInt(document.getElementById("est-exec-m")?.value || 0);
+  const eSeg = parseInt(document.getElementById("est-exec-s")?.value || 0);
+
+  const totalSegPorSerie = pMin * 60 + pSeg + (eMin * 60 + eSeg);
+  const tempoRestanteSeg = seriesRestantes * totalSegPorSerie;
+
+  const faltamH = String(Math.floor(tempoRestanteSeg / 3600)).padStart(2, "0");
+  const faltamM = String(Math.floor((tempoRestanteSeg % 3600) / 60)).padStart(
+    2,
+    "0",
+  );
+
+  document.getElementById("est-series").textContent = seriesRestantes;
+  document.getElementById("est-ex").textContent = exerciciosIncompletos.size;
+  document.getElementById("est-falta").textContent = `${faltamH}:${faltamM}`;
+  // document.getElementById("est-vol").textContent = volumeTotal.toFixed(0);
+
+  const inicioStr = WorkoutDraftService.getInicio();
+  if (inicioStr) {
+    const inicioMs = new Date(inicioStr).getTime();
+    const agoraMs = Date.now();
+
+    const decorridoSeg = Math.floor((agoraMs - inicioMs) / 1000);
+    const ativoH = String(Math.floor(decorridoSeg / 3600)).padStart(2, "0");
+    const ativoM = String(Math.floor((decorridoSeg % 3600) / 60)).padStart(
+      2,
+      "0",
+    );
+
+    document.getElementById("est-tempo").textContent = `${ativoH}:${ativoM}`;
+
+    if (seriesRestantes > 0) {
+      const dataFim = new Date(agoraMs + tempoRestanteSeg * 1000);
+      const fimH = String(dataFim.getHours()).padStart(2, "0");
+      const fimM = String(dataFim.getMinutes()).padStart(2, "0");
+      document.getElementById("est-hora-fim").textContent = `${fimH}:${fimM}`;
+    } else {
+      document.getElementById("est-hora-fim").textContent = "--:--";
+    }
   }
 }
