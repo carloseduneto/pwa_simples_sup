@@ -9,36 +9,55 @@ let semanaBaseCache = null;
 
 // Variáveis do Cronômetro
 let timerInterval = null;
-let timerSeconds = 0;
 
 function updateTimerDisplay() {
-  const display = document.getElementById("stopwatch-display");
-  if (display) {
-    const m = String(Math.floor(timerSeconds / 60)).padStart(2, "0");
-    const s = String(timerSeconds % 60).padStart(2, "0");
-    display.textContent = `${m}:${s}`;
+  const display = document.getElementById('stopwatch-display');
+  if (!display) return;
+  
+  let elapsed = parseInt(localStorage.getItem('treino_stopwatch_elapsed') || 0, 10);
+  const startTime = parseInt(localStorage.getItem('treino_stopwatch_start') || 0, 10);
+  
+  if (startTime > 0) {
+    elapsed += Date.now() - startTime;
   }
+  
+  const totalSeconds = Math.floor(elapsed / 1000);
+  const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const s = String(totalSeconds % 60).padStart(2, '0');
+  display.textContent = `${m}:${s}`;
 }
 
 function playTimer() {
   clearInterval(timerInterval);
-  document.getElementById("btn-play-timer")?.classList.add("hidden");
-  document.getElementById("btn-pause-timer")?.classList.remove("hidden");
-  timerInterval = setInterval(() => {
-    timerSeconds++;
-    updateTimerDisplay();
-  }, 1000);
+  if (!localStorage.getItem('treino_stopwatch_start')) {
+    localStorage.setItem('treino_stopwatch_start', Date.now().toString());
+  }
+  document.getElementById('btn-play-timer')?.classList.add('hidden');
+  document.getElementById('btn-pause-timer')?.classList.remove('hidden');
+  
+  updateTimerDisplay();
+  timerInterval = setInterval(updateTimerDisplay, 1000);
 }
 
 function pauseTimer() {
   clearInterval(timerInterval);
-  document.getElementById("btn-pause-timer")?.classList.add("hidden");
-  document.getElementById("btn-play-timer")?.classList.remove("hidden");
+  const startTime = parseInt(localStorage.getItem('treino_stopwatch_start') || 0, 10);
+  if (startTime > 0) {
+    const elapsed = parseInt(localStorage.getItem('treino_stopwatch_elapsed') || 0, 10);
+    localStorage.setItem('treino_stopwatch_elapsed', (elapsed + (Date.now() - startTime)).toString());
+    localStorage.removeItem('treino_stopwatch_start');
+  }
+  document.getElementById('btn-pause-timer')?.classList.add('hidden');
+  document.getElementById('btn-play-timer')?.classList.remove('hidden');
+  updateTimerDisplay();
 }
 
 function stopTimer() {
-  pauseTimer();
-  timerSeconds = 0;
+  clearInterval(timerInterval);
+  localStorage.removeItem('treino_stopwatch_start');
+  localStorage.setItem('treino_stopwatch_elapsed', '0');
+  document.getElementById('btn-pause-timer')?.classList.add('hidden');
+  document.getElementById('btn-play-timer')?.classList.remove('hidden');
   updateTimerDisplay();
 }
 
@@ -47,6 +66,13 @@ function restartAndPlayTimer() {
   playTimer();
 }
 
+function restoreTimerState() {
+  if (localStorage.getItem('treino_stopwatch_start')) {
+    playTimer();
+  } else {
+    updateTimerDisplay();
+  }
+}
 export async function initWorkoutPlayer(onNavigate, templateId) {
   const container = document.getElementById("screen-workout-details");
   const contentDiv = container.querySelector(".itensTemplate");
@@ -120,7 +146,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       wrapperExercises.dataset.exercicioId = item.exercicios.id;
 
       const seriesPassadas = historico.filter(
-        (h) => h.exercicio_id === item.exercicios.id,
+        h => h.exercicio_id === item.exercicios.id,
       );
 
       let titleHtml = `<h4>${item.exercicios.nome}`;
@@ -190,52 +216,70 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     //   </div>
     // `;
     /* html */
-    const obsHtml = `
+    // --- FUNDO DA TELA E MODAL ---
+    const bottomHtml = `
       <div class="container-exercicio" style="margin-top: 20px; padding: 15px;">
           <h4 style="margin-bottom: 10px;">Observações</h4>
           <textarea id="obs-treino" style="width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: transparent; color: inherit; font-family: inherit;" rows="3" placeholder="Como foi o treino?"></textarea>
       </div>
 
-      <div class="container-exercicio" style="margin-top: 20px; padding: 15px;">
-        <h4 style="margin-bottom: 15px;">Estatísticas da Sessão</h4>
-        
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-          <div style="flex: 1;">
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8;">Pausa (min : seg)</label>
-            <div style="display: flex; gap: 5px; align-items: center;">
-              <input type="number" id="est-pausa-m" value="1" min="0" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;"> :
-              <input type="number" id="est-pausa-s" value="30" min="0" max="59" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;">
-            </div>
-          </div>
-          <div style="flex: 1;">
-            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8;">Execução (min : seg)</label>
-            <div style="display: flex; gap: 5px; align-items: center;">
-              <input type="number" id="est-exec-m" value="0" min="0" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;"> :
-              <input type="number" id="est-exec-s" value="45" min="0" max="59" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center;">
-            </div>
-          </div>
-        </div>
+      <div style="text-align: center; margin: 20px 15px 100px 15px;">
+          <button id="concluir-treino-btn" style="width: 100%; padding: 15px; border-radius: 8px; background: var(--primary-color); color: #fff; font-size: 1.1rem; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px;">
+             <span class="material-symbols-rounded">done_all</span> 
+             Concluir Treino
+          </button>
+      </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; opacity: 0.9;">
-          <div>Séries restantes: <strong id="est-series">0</strong></div>
-          <div>Ex. restantes: <strong id="est-ex">0</strong></div>
-          <div>Tempo ativo: <strong id="est-tempo">00m</strong></div>
-          <div>Faltam aprox.: <strong id="est-falta">0m</strong></div>
-        </div>
-        
-        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; display: flex; justify-content: space-between;">
-          <span>Fim previsto: <strong id="est-hora-fim">--:--</strong></span>
-          <!-- <span style="color: var(--primary-color);">Volume: <strong id="est-vol">0</strong> kg</span>-->
-
+<div id="modal-estatisticas" class="modal-overlay hidden" style="z-index: 1000;">
+  <div class="modal-content" style="max-width: 90%; width: 360px; padding: 24px; background: var(--bg-color, #fff); border-radius: 16px; color: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+    
+<div style="display: flex; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h3 style="margin: 0; font-size: 1.3rem; font-weight: 600; text-align: left; line-height: 1.2; flex: 1;">Estatísticas da Sessão</h3>
+      <button id="btn-close-stats" style="width: 10%; aspect-ratio: 1/1; background: none; border: none; font-size: 1.8rem; color: inherit; line-height: 0.8; padding: 0; cursor: pointer; opacity: 0.7;">&times;</button>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+      <div style="text-align: center;">
+        <label style="display: block; font-size: 0.85rem; margin-bottom: 8px; opacity: 0.8; white-space: nowrap;">Pausa (min : seg)</label>
+        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+          <input type="number" id="est-pausa-m" value="1" min="0" style="flex: 1; width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center; font-size: 1rem;">
+          <span style="opacity: 0.6; font-weight: bold;">:</span>
+          <input type="number" id="est-pausa-s" value="30" min="0" max="59" style="flex: 1; width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center; font-size: 1rem;">
         </div>
       </div>
+      <div style="text-align: center;">
+        <label style="display: block; font-size: 0.85rem; margin-bottom: 8px; opacity: 0.8; white-space: nowrap;">Execução (min : seg)</label>
+        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+          <input type="number" id="est-exec-m" value="0" min="0" style="flex: 1; width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center; font-size: 1rem;">
+          <span style="opacity: 0.6; font-weight: bold;">:</span>
+          <input type="number" id="est-exec-s" value="30" min="0" max="59" style="flex: 1; width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: inherit; text-align: center; font-size: 1rem;">
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 0.95rem; opacity: 0.9; margin-bottom: 24px;">
+      <div style="text-align: left; white-space: nowrap;">Séries rest.: <strong id="est-series">0</strong></div>
+      <div style="text-align: left; white-space: nowrap;">Ex. rest.: <strong id="est-ex">0</strong></div>
+      <div style="text-align: left; white-space: nowrap;">Tempo ativo: <strong id="est-tempo">00:00</strong></div>
+      <div style="text-align: left; white-space: nowrap;">Falta aprox.: <strong id="est-falta">00:00</strong></div>
+    </div>
+    
+    <div style="padding-top: 20px; border-top: 1px solid rgba(128, 128, 128, 0.2); text-align: center;">
+      <span style="font-size: 1.05rem; opacity: 0.9;">Fim previsto: <strong id="est-hora-fim" style="font-size: 1.15rem; margin-left: 4px;">--:--</strong></span>
+      <!-- <span style="color: var(--primary-color);">Volume: <strong id="est-vol">0</strong> kg</span>-->
+    </div>
+  </div>
+</div>
     `;
-    // wrapperTraining.insertAdjacentHTML("beforeend", obsHtml);
-    wrapperTraining.insertAdjacentHTML("beforeend", obsHtml);
+    wrapperTraining.insertAdjacentHTML("beforeend", bottomHtml);
 
     contentDiv.appendChild(wrapperTraining);
 
     // --- EVENTOS DO CRONÔMETRO ---
+
+    // --- ESTADO INICIAL DO CRONÔMETRO ---
+    restoreTimerState();
+
     const btnPlay = document.getElementById("btn-play-timer");
     const btnPause = document.getElementById("btn-pause-timer");
     const btnStop = document.getElementById("btn-stop-timer");
@@ -273,12 +317,12 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     setInterval(atualizarEstatisticas, 60000);
 
     // Atualiza quando os inputs de tempo mudam
-    wrapperTraining.addEventListener("input", (e) => {
+    wrapperTraining.addEventListener("input", e => {
       if (e.target.id.startsWith("est-")) atualizarEstatisticas();
     });
 
     // Interceptar clique para marcação da série e reiniciar o cronômetro
-    wrapperTraining.addEventListener("click", (event) => {
+    wrapperTraining.addEventListener("click", event => {
       const checkBtn = event.target.closest(".checkExercise");
       if (checkBtn) {
         const row = checkBtn.closest(".rowExercise");
@@ -294,24 +338,40 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     });
 
     // --- RESTAURAÇÃO: BOTÃO CONCLUIR NO HEADER ---
+    // const divConteudoHeader = document.querySelector(".header-content");
+    // const btnAntigo = document.getElementById("concluir-treino-btn");
+    // if (btnAntigo) btnAntigo.remove();
+
+    // const btnConcluirHtml = `
+    //   <button id="concluir-treino-btn" class="btn-icon-dynamic-header-transparent">
+    //      <span class="material-symbols-rounded">done_all</span>
+    //      <span class="btn-text-header">Concluir</span>
+    //   </button>
+    // `;
+
+    // if (divConteudoHeader) {
+    //   divConteudoHeader.insertAdjacentHTML("beforeend", btnConcluirHtml);
+    // } else {
+    //   wrapperTraining.insertAdjacentHTML(
+    //     "beforeend",
+    //     `<div style="text-align:center; margin-top:20px;">${btnConcluirHtml}</div>`,
+    //   );
+    // }
+
+    // --- NOVO BOTÃO DE ESTATÍSTICAS NO HEADER ---
     const divConteudoHeader = document.querySelector(".header-content");
-    const btnAntigo = document.getElementById("concluir-treino-btn");
+    const btnAntigo = document.getElementById("btn-open-stats");
     if (btnAntigo) btnAntigo.remove();
 
-    const btnConcluirHtml = `
-      <button id="concluir-treino-btn" class="btn-icon-dynamic-header-transparent">
-         <span class="material-symbols-rounded">done_all</span> 
-         <span class="btn-text-header">Concluir</span>
+    const btnEstatisticasHtml = `
+      <button id="btn-open-stats" class="btn-icon-dynamic-header-transparent">
+         <span class="material-symbols-rounded">more_vert</span> 
+         <!--<span class="btn-text-header">Infos</span>-->
       </button>
     `;
 
     if (divConteudoHeader) {
-      divConteudoHeader.insertAdjacentHTML("beforeend", btnConcluirHtml);
-    } else {
-      wrapperTraining.insertAdjacentHTML(
-        "beforeend",
-        `<div style="text-align:center; margin-top:20px;">${btnConcluirHtml}</div>`,
-      );
+      divConteudoHeader.insertAdjacentHTML("beforeend", btnEstatisticasHtml);
     }
 
     // --- O MODAL FOI REMOVIDO DA INJEÇÃO E AGORA USA O DO INDEX.HTML ---
@@ -323,7 +383,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     const obsEl = document.getElementById("obs-treino");
     if (obsEl) {
       obsEl.value = localStorage.getItem("treino_cache_observacoes") || "";
-      obsEl.addEventListener("input", (e) => {
+      obsEl.addEventListener("input", e => {
         localStorage.setItem("treino_cache_observacoes", e.target.value);
       });
     }
@@ -353,7 +413,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     }
 
     if (typeof window.salvarInputLocalmente === "function") {
-      wrapperTraining.addEventListener("input", (event) => {
+      wrapperTraining.addEventListener("input", event => {
         if (
           event.target.matches(".kgExercise, .repsExercise, .seriesExercise")
         ) {
@@ -366,6 +426,26 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     setupModalEvents(templateId, onNavigate);
 
     // --- ESTATÍSTICAS ---
+
+    // --- CONTROLES DO MODAL DE ESTATÍSTICAS ---
+    const btnOpenStats = document.getElementById("btn-open-stats");
+    const btnCloseStats = document.getElementById("btn-close-stats");
+    const modalStats = document.getElementById("modal-estatisticas");
+
+    if (btnOpenStats && modalStats) {
+      btnOpenStats.onclick = () => {
+        atualizarEstatisticas();
+        modalStats.classList.remove("hidden");
+      };
+    }
+    if (btnCloseStats && modalStats) {
+      btnCloseStats.onclick = () => modalStats.classList.add("hidden");
+    }
+    if (modalStats) {
+      modalStats.addEventListener("click", e => {
+        if (e.target === modalStats) modalStats.classList.add("hidden");
+      });
+    }
   } catch (error) {
     console.error(error);
     contentDiv.innerHTML = `<p style="color:red; text-align:center; padding:20px;">Erro ao carregar: ${error.message}</p>`;
