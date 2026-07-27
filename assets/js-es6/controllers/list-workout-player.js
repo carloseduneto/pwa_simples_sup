@@ -139,6 +139,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     `;
     wrapperTraining.insertAdjacentHTML("beforeend", headerHtml);
 
+
     // --- LOOP DOS EXERCÍCIOS ---
     for (const item of itens) {
       const wrapperExercises = document.createElement("div");
@@ -150,9 +151,10 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       );
 
       let titleHtml = `<h4>${item.exercicios.nome}`;
-      if (item.tecnica_intensificacao) {
-        titleHtml += ` - <em>${item.tecnica_intensificacao}</em>`;
+      if (item.tecnica_intensificacao == null ) {
+        item.tecnica_intensificacao = "";
       }
+        titleHtml += ` - <em>${item.series_alvo}&times${item.repeticoes_alvo} ${item.tecnica_intensificacao}</em>`;
       titleHtml += `</h4>`;
       wrapperExercises.insertAdjacentHTML("beforeend", titleHtml);
 

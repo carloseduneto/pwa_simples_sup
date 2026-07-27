@@ -7,58 +7,58 @@ export const WorkoutService = {
    * 2. Contexto do Usuário (Semana Leve/Pesada)
    * 3. Histórico Recente (RPC)
    */
-  async getFullWorkoutData(templateId) {
-    const cacheKey = `cache_template_full_${templateId}`;
+  // async getFullWorkoutData(templateId) {
+  //   const cacheKey = `cache_template_full_${templateId}`;
 
-    // Se quiser manter cache (opcional), descomente a lógica abaixo
-    // const cached = localStorage.getItem(cacheKey);
-    // if (cached) return JSON.parse(cached);
+  //   // Se quiser manter cache (opcional), descomente a lógica abaixo
+  //   // const cached = localStorage.getItem(cacheKey);
+  //   // if (cached) return JSON.parse(cached);
 
-    // 1. Buscas em paralelo
-    const itensPromise = client
-      .from("template_itens")
-      .select(
-        "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, tecnica_intensificacao",
-      )
-      .eq("template_id", templateId)
-      .order("ordem");
+  //   // 1. Buscas em paralelo
+  //   const itensPromise = client
+  //     .from("template_itens")
+  //     .select(
+  //       "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, repeticoes_alvo,tecnica_intensificacao",
+  //     )
+  //     .eq("template_id", templateId)
+  //     .order("ordem");
 
-    const contextoPromise = client
-      .from("user_context")
-      .select("series_repeticoes(nome, week, series, min_reps, max_reps)")
-      .single();
+  //   const contextoPromise = client
+  //     .from("user_context")
+  //     .select("series_repeticoes(nome, week, series, min_reps, max_reps)")
+  //     .single();
 
-    // Chama a função RPC do banco
-    const historicoPromise = client.rpc("get_ultimo_historico_por_template", {
-      t_id: templateId,
-    });
+  //   // Chama a função RPC do banco
+  //   const historicoPromise = client.rpc("get_ultimo_historico_por_template", {
+  //     t_id: templateId,
+  //   });
 
-    // 2. Aguarda tudo
-    const [resItens, resContexto, resHistorico] = await Promise.all([
-      itensPromise,
-      contextoPromise,
-      historicoPromise,
-    ]);
+  //   // 2. Aguarda tudo
+  //   const [resItens, resContexto, resHistorico] = await Promise.all([
+  //     itensPromise,
+  //     contextoPromise,
+  //     historicoPromise,
+  //   ]);
 
-    // 3. Validação
-    if (resItens.error)
-      throw new Error("Erro ao buscar itens: " + resItens.error.message);
+  //   // 3. Validação
+  //   if (resItens.error)
+  //     throw new Error("Erro ao buscar itens: " + resItens.error.message);
 
-    // Histórico pode falhar silenciosamente (não trava o app)
-    if (resHistorico.error)
-      console.warn("Aviso de histórico:", resHistorico.error.message);
+  //   // Histórico pode falhar silenciosamente (não trava o app)
+  //   if (resHistorico.error)
+  //     console.warn("Aviso de histórico:", resHistorico.error.message);
 
-    const resultado = {
-      itens: resItens.data,
-      contexto: resContexto.data,
-      historico: resHistorico.data || [],
-    };
+  //   const resultado = {
+  //     itens: resItens.data,
+  //     contexto: resContexto.data,
+  //     historico: resHistorico.data || [],
+  //   };
 
-    // Salva Cache
-    // localStorage.setItem(cacheKey, JSON.stringify(resultado));
+  //   // Salva Cache
+  //   // localStorage.setItem(cacheKey, JSON.stringify(resultado));
 
-    return resultado;
-  },
+  //   return resultado;
+  // },
 
   async getFullWorkoutData(templateId) {
     // ... código anterior mantido ...
@@ -66,7 +66,7 @@ export const WorkoutService = {
     const itensPromise = client
       .from("template_itens")
       .select(
-        "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, tecnica_intensificacao",
+        "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, repeticoes_alvo,tecnica_intensificacao",
       )
       .eq("template_id", templateId)
       .order("ordem");
