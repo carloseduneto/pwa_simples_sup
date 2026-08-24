@@ -3,6 +3,24 @@
   border-bottom: 1px solid #cf2020;
 }
 
+.header-exercicio{
+  /* background-color: aquamarine; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-exercicio .btn-icon-dynamic-header-transparent{
+  width: 10%;
+  padding: 1px 1px;
+}
+
+.header-exercicio .exercise-title {
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+}
+
 .screen-workout-details-style {
   padding-top: 80px;
 }

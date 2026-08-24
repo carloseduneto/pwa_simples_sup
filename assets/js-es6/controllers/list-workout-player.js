@@ -11,53 +11,68 @@ let semanaBaseCache = null;
 let timerInterval = null;
 
 function updateTimerDisplay() {
-  const display = document.getElementById('stopwatch-display');
+  const display = document.getElementById("stopwatch-display");
   if (!display) return;
-  
-  let elapsed = parseInt(localStorage.getItem('treino_stopwatch_elapsed') || 0, 10);
-  const startTime = parseInt(localStorage.getItem('treino_stopwatch_start') || 0, 10);
-  
+
+  let elapsed = parseInt(
+    localStorage.getItem("treino_stopwatch_elapsed") || 0,
+    10,
+  );
+  const startTime = parseInt(
+    localStorage.getItem("treino_stopwatch_start") || 0,
+    10,
+  );
+
   if (startTime > 0) {
     elapsed += Date.now() - startTime;
   }
-  
+
   const totalSeconds = Math.floor(elapsed / 1000);
-  const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-  const s = String(totalSeconds % 60).padStart(2, '0');
+  const m = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const s = String(totalSeconds % 60).padStart(2, "0");
   display.textContent = `${m}:${s}`;
 }
 
 function playTimer() {
   clearInterval(timerInterval);
-  if (!localStorage.getItem('treino_stopwatch_start')) {
-    localStorage.setItem('treino_stopwatch_start', Date.now().toString());
+  if (!localStorage.getItem("treino_stopwatch_start")) {
+    localStorage.setItem("treino_stopwatch_start", Date.now().toString());
   }
-  document.getElementById('btn-play-timer')?.classList.add('hidden');
-  document.getElementById('btn-pause-timer')?.classList.remove('hidden');
-  
+  document.getElementById("btn-play-timer")?.classList.add("hidden");
+  document.getElementById("btn-pause-timer")?.classList.remove("hidden");
+
   updateTimerDisplay();
   timerInterval = setInterval(updateTimerDisplay, 1000);
 }
 
 function pauseTimer() {
   clearInterval(timerInterval);
-  const startTime = parseInt(localStorage.getItem('treino_stopwatch_start') || 0, 10);
+  const startTime = parseInt(
+    localStorage.getItem("treino_stopwatch_start") || 0,
+    10,
+  );
   if (startTime > 0) {
-    const elapsed = parseInt(localStorage.getItem('treino_stopwatch_elapsed') || 0, 10);
-    localStorage.setItem('treino_stopwatch_elapsed', (elapsed + (Date.now() - startTime)).toString());
-    localStorage.removeItem('treino_stopwatch_start');
+    const elapsed = parseInt(
+      localStorage.getItem("treino_stopwatch_elapsed") || 0,
+      10,
+    );
+    localStorage.setItem(
+      "treino_stopwatch_elapsed",
+      (elapsed + (Date.now() - startTime)).toString(),
+    );
+    localStorage.removeItem("treino_stopwatch_start");
   }
-  document.getElementById('btn-pause-timer')?.classList.add('hidden');
-  document.getElementById('btn-play-timer')?.classList.remove('hidden');
+  document.getElementById("btn-pause-timer")?.classList.add("hidden");
+  document.getElementById("btn-play-timer")?.classList.remove("hidden");
   updateTimerDisplay();
 }
 
 function stopTimer() {
   clearInterval(timerInterval);
-  localStorage.removeItem('treino_stopwatch_start');
-  localStorage.setItem('treino_stopwatch_elapsed', '0');
-  document.getElementById('btn-pause-timer')?.classList.add('hidden');
-  document.getElementById('btn-play-timer')?.classList.remove('hidden');
+  localStorage.removeItem("treino_stopwatch_start");
+  localStorage.setItem("treino_stopwatch_elapsed", "0");
+  document.getElementById("btn-pause-timer")?.classList.add("hidden");
+  document.getElementById("btn-play-timer")?.classList.remove("hidden");
   updateTimerDisplay();
 }
 
@@ -67,7 +82,7 @@ function restartAndPlayTimer() {
 }
 
 function restoreTimerState() {
-  if (localStorage.getItem('treino_stopwatch_start')) {
+  if (localStorage.getItem("treino_stopwatch_start")) {
     playTimer();
   } else {
     updateTimerDisplay();
@@ -139,7 +154,6 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     `;
     wrapperTraining.insertAdjacentHTML("beforeend", headerHtml);
 
-
     // --- LOOP DOS EXERCÍCIOS ---
     for (const item of itens) {
       const wrapperExercises = document.createElement("div");
@@ -147,15 +161,18 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       wrapperExercises.dataset.exercicioId = item.exercicios.id;
 
       const seriesPassadas = historico.filter(
-        h => h.exercicio_id === item.exercicios.id,
+        (h) => h.exercicio_id === item.exercicios.id,
       );
 
-      let titleHtml = `<h4>${item.exercicios.nome}`;
-      if (item.tecnica_intensificacao == null ) {
+      let titleHtml = `<div class="header-exercicio"><h4>${item.exercicios.nome}`;
+      if (item.tecnica_intensificacao == null) {
         item.tecnica_intensificacao = "";
       }
-        titleHtml += ` - <em>${item.series_alvo}&times${item.repeticoes_alvo} ${item.tecnica_intensificacao}</em>`;
+      titleHtml += ` - <em>${item.series_alvo}&times${item.repeticoes_alvo} ${item.tecnica_intensificacao}</em>`;
       titleHtml += `</h4>`;
+      titleHtml += `<button class="btn-opcoes-exercicio btn-icon-dynamic-header-transparent">
+         <span class="material-symbols-rounded">more_vert</span> 
+      </button></div>`;
       wrapperExercises.insertAdjacentHTML("beforeend", titleHtml);
 
       if (item.treino_recomendacoes) {
@@ -273,7 +290,26 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
   </div>
 </div>
     `;
+    const menuOpcoesHtml = `
+      <div id="pop-opcoes-exercicio" style="display: none; position: absolute; z-index: 9999; background: var(--bg-color, #fff); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 16px; width: max-content; flex-direction: column; gap: 8px;">
+        <div class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
+          <span class="material-symbols-rounded" style="font-size: 1.2rem;">data_usage</span>
+          <span style="font-size: 0.95rem;">Estatísticas</span>
+        </div>
+        <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 4px 16px;">
+        <div class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
+          <span class="material-symbols-rounded" style="font-size: 1.2rem;">bar_chart</span>
+          <span style="font-size: 0.95rem;">Avaliar intes. e vol.</span>
+        </div>
+        <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 4px 16px;">
+        <div id="btn-toggle-desconsiderar" class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
+          <span class="material-symbols-rounded icon-desconsiderar" style="font-size: 1.2rem;">do_not_disturb_on</span>
+          <span class="text-desconsiderar" style="font-size: 0.95rem;">Desconsiderar ex.</span>
+        </div>
+      </div>
+    `;
     wrapperTraining.insertAdjacentHTML("beforeend", bottomHtml);
+    wrapperTraining.insertAdjacentHTML("beforeend", menuOpcoesHtml);
 
     contentDiv.appendChild(wrapperTraining);
 
@@ -319,12 +355,14 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     setInterval(atualizarEstatisticas, 60000);
 
     // Atualiza quando os inputs de tempo mudam
-    wrapperTraining.addEventListener("input", e => {
+    wrapperTraining.addEventListener("input", (e) => {
       if (e.target.id.startsWith("est-")) atualizarEstatisticas();
     });
 
-    // Interceptar clique para marcação da série e reiniciar o cronômetro
-    wrapperTraining.addEventListener("click", event => {
+    const popOpcoes = document.getElementById("pop-opcoes-exercicio");
+
+    wrapperTraining.addEventListener("click", (event) => {
+      // 1. Lógica de Marcar Check
       const checkBtn = event.target.closest(".checkExercise");
       if (checkBtn) {
         const row = checkBtn.closest(".rowExercise");
@@ -336,6 +374,101 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
           // Atualiza estatísticas após a marcação
           atualizarEstatisticas();
         }, 50);
+        return;
+      }
+
+      // 2. Lógica de Desconsiderar / Reconsiderar
+      const targetToggleDesconsiderar = event.target.closest(
+        "#btn-toggle-desconsiderar",
+      );
+      if (targetToggleDesconsiderar) {
+        const exercicioId = popOpcoes.dataset.exercicioId;
+        const container = document.querySelector(
+          `.container-exercicio[data-exercicio-id="${exercicioId}"]`,
+        );
+
+        if (container) {
+          const isDesconsiderado = container.dataset.desconsiderado === "true";
+          const h4 = container.querySelector("h4");
+
+          let desconsideradosCache = JSON.parse(
+            localStorage.getItem("treino_cache_desconsiderados") || "[]",
+          );
+
+          if (isDesconsiderado) {
+            container.dataset.desconsiderado = "false";
+            container.style.opacity = "1";
+            const iconElement = h4.querySelector(".icon-h4-desconsiderado");
+            if (iconElement) iconElement.remove();
+
+            desconsideradosCache = desconsideradosCache.filter(
+              (id) => id !== exercicioId,
+            );
+          } else {
+            container.dataset.desconsiderado = "true";
+            container.style.opacity = "0.5";
+            if (!h4.querySelector(".icon-h4-desconsiderado")) {
+              h4.insertAdjacentHTML(
+                "afterbegin",
+                `<span class="material-symbols-rounded icon-h4-desconsiderado" style="font-size: 1.2rem; margin-right: 4px; vertical-align: top;">do_not_disturb_on</span>`,
+              );
+            }
+
+            if (!desconsideradosCache.includes(exercicioId)) {
+              desconsideradosCache.push(exercicioId);
+            }
+          }
+
+          localStorage.setItem(
+            "treino_cache_desconsiderados",
+            JSON.stringify(desconsideradosCache),
+          );
+          atualizarEstatisticas();
+          popOpcoes.style.display = "none";
+        }
+        event.stopPropagation();
+        return;
+      }
+
+      // 3. Lógica de Abertura/Fechamento do Pop-up (Três Pontos)
+      const btnOpcoes = event.target.closest(".btn-opcoes-exercicio");
+      if (btnOpcoes) {
+        const container = btnOpcoes.closest(".container-exercicio");
+        const exercicioIdAtual = container.dataset.exercicioId;
+
+        if (
+          popOpcoes.style.display === "flex" &&
+          popOpcoes.dataset.exercicioId === exercicioIdAtual
+        ) {
+          popOpcoes.style.display = "none";
+        } else {
+          const isDesconsiderado = container.dataset.desconsiderado === "true";
+          const btnToggle = document.getElementById("btn-toggle-desconsiderar");
+          const iconDesc = btnToggle.querySelector(".icon-desconsiderar");
+          const textDesc = btnToggle.querySelector(".text-desconsiderar");
+
+          if (isDesconsiderado) {
+            iconDesc.textContent = "check";
+            textDesc.textContent = "Reconsiderar exerc.";
+          } else {
+            iconDesc.textContent = "do_not_disturb_on";
+            textDesc.textContent = "Desconsiderar ex.";
+          }
+
+          popOpcoes.style.display = "flex";
+
+          const rect = btnOpcoes.getBoundingClientRect();
+          const top = rect.bottom + window.scrollY;
+          let left =
+            rect.left + window.scrollX - (popOpcoes.offsetWidth - rect.width);
+
+          if (left < 10) left = 10;
+
+          popOpcoes.style.top = `${top}px`;
+          popOpcoes.style.left = `${left}px`;
+          popOpcoes.dataset.exercicioId = exercicioIdAtual;
+        }
+        event.stopPropagation();
       }
     });
 
@@ -385,10 +518,31 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     const obsEl = document.getElementById("obs-treino");
     if (obsEl) {
       obsEl.value = localStorage.getItem("treino_cache_observacoes") || "";
-      obsEl.addEventListener("input", e => {
+      obsEl.addEventListener("input", (e) => {
         localStorage.setItem("treino_cache_observacoes", e.target.value);
       });
     }
+
+    // NOVO: Restaurar estado de exercícios desconsiderados
+    const desconsideradosCache = JSON.parse(
+      localStorage.getItem("treino_cache_desconsiderados") || "[]",
+    );
+    desconsideradosCache.forEach((id) => {
+      const container = wrapperTraining.querySelector(
+        `.container-exercicio[data-exercicio-id="${id}"]`,
+      );
+      if (container) {
+        container.dataset.desconsiderado = "true";
+        container.style.opacity = "0.5";
+        const h4 = container.querySelector("h4");
+        if (h4 && !h4.querySelector(".icon-h4-desconsiderado")) {
+          h4.insertAdjacentHTML(
+            "afterbegin",
+            `<span class="material-symbols-rounded icon-h4-desconsiderado" style="font-size: 1.2rem; margin-right: 4px; vertical-align: middle;">do_not_disturb_on</span>`,
+          );
+        }
+      }
+    });
 
     const btnReiniciar = document.getElementById("reiniciar-treino-btn");
     if (btnReiniciar) {
@@ -398,6 +552,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       novoReiniciar.onclick = () => {
         if (confirm("Limpar dados e reiniciar?")) {
           WorkoutDraftService.limparRascunho();
+          localStorage.removeItem("treino_cache_desconsiderados"); // Limpa cache de desconsiderados
           stopTimer(); // Zera o cronômetro ao ocultar
           initWorkoutPlayer(onNavigate, templateId);
         }
@@ -415,7 +570,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     }
 
     if (typeof window.salvarInputLocalmente === "function") {
-      wrapperTraining.addEventListener("input", event => {
+      wrapperTraining.addEventListener("input", (event) => {
         if (
           event.target.matches(".kgExercise, .repsExercise, .seriesExercise")
         ) {
@@ -444,7 +599,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
       btnCloseStats.onclick = () => modalStats.classList.add("hidden");
     }
     if (modalStats) {
-      modalStats.addEventListener("click", e => {
+      modalStats.addEventListener("click", (e) => {
         if (e.target === modalStats) modalStats.classList.add("hidden");
       });
     }
@@ -560,19 +715,18 @@ async function enviarTreino(series, onNavigate) {
   if (btn) {
     btn.dataset.originalText = btn.innerHTML;
     btn.innerHTML =
-    "<span class='material-symbols-rounded'>hourglass_empty</span> Salvando...";
+      "<span class='material-symbols-rounded'>hourglass_empty</span> Salvando...";
     btn.disabled = true;
   }
   try {
-
     await WorkoutService.saveSession(dadosParaEnvio);
 
     alert("Treino concluído com sucesso!");
     WorkoutDraftService.limparRascunho();
+    localStorage.removeItem("treino_cache_desconsiderados");
 
     stopTimer(); // <-- Adicionado aqui para zerar ao concluir
 
-    
     if (onNavigate) onNavigate("templates");
     if (btn) btn.remove();
   } catch (err) {
@@ -638,6 +792,9 @@ function atualizarEstatisticas() {
   rows.forEach((row) => {
     const container = row.closest(".container-exercicio");
     if (!container) return;
+
+    // Ignora exercícios desconsiderados
+    if (container.dataset.desconsiderado === "true") return;
 
     const exId = container.dataset.exercicioId;
     const realizado = row.dataset.realizado === "true";
