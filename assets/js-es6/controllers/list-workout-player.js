@@ -292,24 +292,41 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     `;
     const menuOpcoesHtml = `
       <div id="pop-opcoes-exercicio" style="display: none; position: absolute; z-index: 9999; background: var(--bg-color, #fff); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 16px; width: max-content; flex-direction: column; gap: 8px;">
-        <div class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
+        <div id="btn-open-estatisticas-ex" class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
           <span class="material-symbols-rounded" style="font-size: 1.2rem;">data_usage</span>
-          <span style="font-size: 0.95rem;">Estatísticas</span>
+          <span style="font-size: 1rem;">Estatísticas</span>
         </div>
         <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 4px 16px;">
         <div class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
           <span class="material-symbols-rounded" style="font-size: 1.2rem;">bar_chart</span>
-          <span style="font-size: 0.95rem;">Avaliar intes. e vol.</span>
+          <span style="font-size: 1rem;">Avaliar intes. e vol.</span>
         </div>
         <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 4px 16px;">
         <div id="btn-toggle-desconsiderar" class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
           <span class="material-symbols-rounded icon-desconsiderar" style="font-size: 1.2rem;">do_not_disturb_on</span>
-          <span class="text-desconsiderar" style="font-size: 0.95rem;">Desconsiderar ex.</span>
+          <span class="text-desconsiderar" style="font-size: 1rem;">Desconsiderar ex.</span>
+        </div>
+      </div>
+
+      <div id="pop-estatisticas-exercicio" style="display: none; position: absolute; z-index: 9999; background: var(--bg-color, #fff); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 16px; width: max-content; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; gap: 24px;">
+          <span style="opacity: 0.8;">Volume anterior</span>
+          <strong id="pop-est-vol-ant">0kg</strong>
+        </div>
+        <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 0;">
+        <div style="display: flex; justify-content: space-between; gap: 24px;">
+          <span style="opacity: 0.8;">Volume atual</span>
+          <strong id="pop-est-vol-atual">0kg</strong>
+        </div>
+        <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 0;">
+        <div style="display: flex; justify-content: space-between; gap: 24px;">
+          <span style="opacity: 0.8;">% variação</span>
+          <strong id="pop-est-vol-var">0%</strong>
         </div>
       </div>
     `;
-    wrapperTraining.insertAdjacentHTML("beforeend", bottomHtml);
     wrapperTraining.insertAdjacentHTML("beforeend", menuOpcoesHtml);
+    wrapperTraining.insertAdjacentHTML("beforeend", bottomHtml);
 
     contentDiv.appendChild(wrapperTraining);
 
@@ -360,18 +377,19 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
     });
 
     const popOpcoes = document.getElementById("pop-opcoes-exercicio");
+    const popEstatisticas = document.getElementById(
+      "pop-estatisticas-exercicio",
+    );
 
     wrapperTraining.addEventListener("click", (event) => {
       // 1. Lógica de Marcar Check
       const checkBtn = event.target.closest(".checkExercise");
       if (checkBtn) {
         const row = checkBtn.closest(".rowExercise");
-        // Timeout garante que sua lógica externa de marcar data-realizado="true" execute primeiro
         setTimeout(() => {
           if (row.dataset.realizado === "true") {
             restartAndPlayTimer();
           }
-          // Atualiza estatísticas após a marcação
           atualizarEstatisticas();
         }, 50);
         return;
@@ -410,7 +428,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
             if (!h4.querySelector(".icon-h4-desconsiderado")) {
               h4.insertAdjacentHTML(
                 "afterbegin",
-                `<span class="material-symbols-rounded icon-h4-desconsiderado" style="font-size: 1.2rem; margin-right: 4px; vertical-align: top;">do_not_disturb_on</span>`,
+                `<span class="material-symbols-rounded icon-h4-desconsiderado" style="font-size: 1.2rem; margin-right: 4px; vertical-align: middle;">do_not_disturb_on</span>`,
               );
             }
 
@@ -430,18 +448,101 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
         return;
       }
 
-      // 3. Lógica de Abertura/Fechamento do Pop-up (Três Pontos)
+      // 3. Lógica de Abertura das Estatísticas e Cálculos
+      const targetOpenEstatisticas = event.target.closest(
+        "#btn-open-estatisticas-ex",
+      );
+      if (targetOpenEstatisticas) {
+        const exercicioId = popOpcoes.dataset.exercicioId;
+        const container = document.querySelector(
+          `.container-exercicio[data-exercicio-id="${exercicioId}"]`,
+        );
+
+        if (container) {
+          let volAnterior = 0;
+          let volAtual = 0;
+
+          const rows = container.querySelectorAll(".rowExercise");
+          rows.forEach((row) => {
+            // Volume Anterior
+            const btnAnt = row.querySelector(".anteriorExercise");
+            if (btnAnt && btnAnt.textContent.includes("x")) {
+              const partes = btnAnt.textContent.split("x");
+              const rAnt = parseFloat(partes[0]) || 0;
+              const kAnt = parseFloat(partes[1]) || 0;
+              volAnterior += rAnt * kAnt;
+            }
+
+            // Volume Atual (Usa value ou placeholder)
+            const inputKg = row.querySelector(".kgExercise");
+            const inputReps = row.querySelector(".repsExercise");
+            const kAtual = parseFloat(
+              inputKg.value || inputKg.placeholder || 0,
+            );
+            const rAtual = parseFloat(
+              inputReps.value || inputReps.placeholder || 0,
+            );
+            volAtual += kAtual * rAtual;
+          });
+
+          // Variação
+          let variacao = 0;
+          let sinal = "";
+          if (volAnterior > 0) {
+            variacao = ((volAtual - volAnterior) / volAnterior) * 100;
+            if (variacao > 0) sinal = "+";
+          }
+          let variacaoComma = variacao.toFixed(2).replace('.', ',');
+
+          document.getElementById("pop-est-vol-ant").textContent =
+            `${volAnterior.toFixed(0)}kg`;
+          document.getElementById("pop-est-vol-atual").textContent =
+            `${volAtual.toFixed(0)}kg`;
+          document.getElementById("pop-est-vol-var").textContent =
+            volAnterior > 0 ? `${sinal}${variacaoComma}%` : "--";
+
+          // Alterna as telas
+          popOpcoes.style.display = "none";
+
+          const btnOpcoesRef = container.querySelector(".btn-opcoes-exercicio");
+          const rect = btnOpcoesRef.getBoundingClientRect();
+          popEstatisticas.style.display = "flex";
+
+          const top = rect.bottom + window.scrollY;
+          let left =
+            rect.left +
+            window.scrollX -
+            (popEstatisticas.offsetWidth - rect.width);
+          if (left < 10) left = 10;
+
+          popEstatisticas.style.top = `${top}px`;
+          popEstatisticas.style.left = `${left}px`;
+          popEstatisticas.dataset.exercicioId = exercicioId;
+        }
+        event.stopPropagation();
+        return;
+      }
+
+      // 4. Lógica de Abertura/Fechamento do Pop-up Principal (Três Pontos)
       const btnOpcoes = event.target.closest(".btn-opcoes-exercicio");
       if (btnOpcoes) {
         const container = btnOpcoes.closest(".container-exercicio");
         const exercicioIdAtual = container.dataset.exercicioId;
 
-        if (
+        const isOpcoesAberto =
           popOpcoes.style.display === "flex" &&
-          popOpcoes.dataset.exercicioId === exercicioIdAtual
-        ) {
+          popOpcoes.dataset.exercicioId === exercicioIdAtual;
+        const isEstatAberto =
+          popEstatisticas.style.display === "flex" &&
+          popEstatisticas.dataset.exercicioId === exercicioIdAtual;
+
+        // Fecha se um dos dois já estiver aberto no mesmo exercício
+        if (isOpcoesAberto || isEstatAberto) {
           popOpcoes.style.display = "none";
+          popEstatisticas.style.display = "none";
         } else {
+          popEstatisticas.style.display = "none"; // Garante que a de estatística não sobreponha
+
           const isDesconsiderado = container.dataset.desconsiderado === "true";
           const btnToggle = document.getElementById("btn-toggle-desconsiderar");
           const iconDesc = btnToggle.querySelector(".icon-desconsiderar");
@@ -469,6 +570,19 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
           popOpcoes.dataset.exercicioId = exercicioIdAtual;
         }
         event.stopPropagation();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (popOpcoes && popOpcoes.style.display === "flex") {
+        if (!popOpcoes.contains(e.target)) {
+          popOpcoes.style.display = "none";
+        }
+      }
+      if (popEstatisticas && popEstatisticas.style.display === "flex") {
+        if (!popEstatisticas.contains(e.target)) {
+          popEstatisticas.style.display = "none";
+        }
       }
     });
 
