@@ -290,6 +290,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
   </div>
 </div>
     `;
+    /*html*/
     const menuOpcoesHtml = `
       <div id="pop-opcoes-exercicio" style="display: none; position: absolute; z-index: 9999; background: var(--bg-color, #fff); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 16px; width: max-content; flex-direction: column; gap: 8px;">
         <div id="btn-open-estatisticas-ex" class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
@@ -297,9 +298,9 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
           <span style="font-size: 1rem;">Estatísticas</span>
         </div>
         <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 4px 16px;">
-        <div class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
+        <div id="btn-open-avaliar-intensidade" class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
           <span class="material-symbols-rounded" style="font-size: 1.2rem;">bar_chart</span>
-          <span style="font-size: 1rem;">Avaliar intes. e vol.</span>
+          <span style="font-size: 0.95rem;">Avaliar intes. e vol.</span>
         </div>
         <hr style="border: 0; border-top: 1px solid rgba(128, 128, 128, 0.2); margin: 4px 16px;">
         <div id="btn-toggle-desconsiderar" class="menu-item-opcao" style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: inherit;">
@@ -492,7 +493,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
             variacao = ((volAtual - volAnterior) / volAnterior) * 100;
             if (variacao > 0) sinal = "+";
           }
-          let variacaoComma = variacao.toFixed(2).replace('.', ',');
+          let variacaoComma = variacao.toFixed(2).replace(".", ",");
 
           document.getElementById("pop-est-vol-ant").textContent =
             `${volAnterior.toFixed(0)}kg`;
@@ -519,6 +520,55 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
           popEstatisticas.style.left = `${left}px`;
           popEstatisticas.dataset.exercicioId = exercicioId;
         }
+        event.stopPropagation();
+        return;
+      }
+
+      // 3.5 Lógica de Navegação para Avaliar Intensidade e Volume
+      const targetOpenAvaliar = event.target.closest(
+        "#btn-open-avaliar-intensidade",
+      );
+      if (targetOpenAvaliar) {
+        const exercicioId = popOpcoes.dataset.exercicioId;
+        const container = document.querySelector(
+          `.container-exercicio[data-exercicio-id="${exercicioId}"]`,
+        );
+
+        // Extrai os dados digitados agora
+        const seriesHoje = [];
+        if (container) {
+          container.querySelectorAll(".rowExercise").forEach((row, index) => {
+            const kg = parseFloat(
+              row.querySelector(".kgExercise").value ||
+                row.querySelector(".kgExercise").placeholder ||
+                0,
+            );
+            const reps = parseFloat(
+              row.querySelector(".repsExercise").value ||
+                row.querySelector(".repsExercise").placeholder ||
+                0,
+            );
+            seriesHoje.push({ ordem: index + 1, carga: kg, repeticoes: reps });
+          });
+
+          const nomeExercicio = container.querySelector("h4").textContent;
+          // Salva na sessão temporária
+          sessionStorage.setItem(
+            "treino_atual_avaliacao",
+            JSON.stringify({
+              exercicioId,
+              nome: nomeExercicio,
+              series: seriesHoje,
+            }),
+          );
+        }
+
+        popOpcoes.style.display = "none";
+
+        if (typeof onNavigate === "function") {
+          onNavigate("exercisesIntensityVolume", exercicioId);
+        }
+
         event.stopPropagation();
         return;
       }

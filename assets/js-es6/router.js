@@ -13,6 +13,9 @@ import { initBodyAssessmentList } from "./modules/body-assessment/list-body-asse
 import { initBodyAssessmentForm } from "./modules/body-assessment/form-body-assessment.controller.js";
 import { initBodyAssessmentDetail } from "./modules/body-assessment/detail-body-assessment.controller.js";
 import { initBodyAssessmentCompare } from "./modules/body-assessment/compare-body-assessment.controller.js";
+
+//Exercícios 
+import { initExerciseIntensityVolume } from "./modules/exercises/exercise-intensity-volume.controller.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -162,6 +165,19 @@ const rotasConfig = {
       // }
     },
   },
+  // detalhes: {
+  //   idDiv: "screen-workout-details",
+  //   html: "assets/screens/list-workout-player.html",
+  //   tipoHeader: "nenhum",
+  //   bottomNav: "none",
+  //   titulo: "Treino em Andamento",
+  //   onLoad: (id) => {
+  //     // AQUI É A MUDANÇA:
+  //     initWorkoutPlayer((rota, param) => {
+  //       roteador(rota, param);
+  //     }, id);
+  //   },
+  // },
   detalhes: {
     idDiv: "screen-workout-details",
     html: "assets/screens/list-workout-player.html",
@@ -169,10 +185,29 @@ const rotasConfig = {
     bottomNav: "none",
     titulo: "Treino em Andamento",
     onLoad: (id) => {
-      // AQUI É A MUDANÇA:
+      // 1. Salva o ID no cache sempre que entrar na tela com um ID válido
+      if (id) localStorage.setItem("treino_atual_template_id", id);
+
+      // 2. Se voltar do pop-up sem ID, puxa o que estava salvo
+      const idSeguro = id || localStorage.getItem("treino_atual_template_id");
+
       initWorkoutPlayer((rota, param) => {
         roteador(rota, param);
-      }, id);
+      }, idSeguro);
+    },
+  },
+  exercisesIntensityVolume: {
+    idDiv: "screen-exercise-intensity-volume",
+    html: "assets/js-es6/modules/exercises/exercise-intensity-volume.html",
+    tipoHeader: "alternativo", // <--- AQUI A MÁGICA: Usa o novo header!
+    bottomNav: "none",
+    titulo: "Avaliar intens. e vol.",
+    // SE voltar daqui, vai para o inicio (ou templates)
+    voltarPara: "detalhes",
+    onLoad: (id) => {
+      initExerciseIntensityVolume((rotaDestino, paramId) => {
+        roteador(rotaDestino, paramId);
+      });
     },
   },
   bodyAssessmentList: {

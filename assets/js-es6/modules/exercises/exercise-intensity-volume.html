@@ -1,0 +1,204 @@
+<div
+  id="exercise-intensity-volume-container"
+  style="padding: 16px; padding-bottom: 80px"
+>
+  <h2 id="eiv-title" style="font-size: 1.2rem; margin-bottom: 12px">
+    Carregando...
+  </h2>
+
+  <!-- NOVO: Select de limite de histórico -->
+  <div style="margin-bottom: 16px">
+    <select
+      id="eiv-select-limit"
+      style="
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background: transparent;
+        color: inherit;
+        font-size: 0.9rem;
+      "
+    >
+      <option value="4">4 últimos</option>
+      <option value="8">8 últimos</option>
+      <option value="12">12 últimos</option>
+      <option value="999">Todos</option>
+    </select>
+  </div>
+
+  <!-- Controles Principais -->
+  <div style="display: flex; gap: 12px; margin-bottom: 12px">
+    <button
+      id="eiv-btn-carga"
+      style="
+        flex: 1;
+        padding: 8px;
+        border-radius: 8px;
+        border: 2px solid var(--primary-color, #ff6b00);
+        background: var(--primary-color, #ff6b00);
+        color: white;
+        font-weight: bold;
+      "
+    >
+      Carga (kg)
+    </button>
+    <button
+      id="eiv-btn-tonelagem"
+      style="
+        flex: 1;
+        padding: 8px;
+        border-radius: 8px;
+        border: 2px solid var(--primary-color, #ff6b00);
+        background: transparent;
+        color: var(--primary-color, #ff6b00);
+        font-weight: bold;
+      "
+    >
+      Tonelagem
+    </button>
+  </div>
+
+  <!-- NOVO: Subcontroles (Visível apenas na aba Carga) -->
+  <div
+    id="eiv-subcontrols-carga"
+    style="display: flex; gap: 8px; margin-bottom: 24px"
+  >
+    <button
+      class="eiv-sub-btn"
+      data-mode="both"
+      style="
+        padding: 4px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--primary-color, #ff6b00);
+        background: var(--primary-color, #ff6b00);
+        color: white;
+        font-size: 0.8rem;
+      "
+    >
+      Série &times; Carga
+    </button>
+    <button
+      class="eiv-sub-btn"
+      data-mode="reps"
+      style="
+        padding: 4px 12px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        background: transparent;
+        color: inherit;
+        font-size: 0.8rem;
+      "
+    >
+      Séries
+    </button>
+    <button
+      class="eiv-sub-btn"
+      data-mode="carga"
+      style="
+        padding: 4px 12px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        background: transparent;
+        color: inherit;
+        font-size: 0.8rem;
+      "
+    >
+      Carga
+    </button>
+  </div>
+
+  <!-- Tabela com scroll horizontal no meio -->
+  <div
+    style="
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    "
+  >
+    <table
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        font-size: 0.9rem;
+        min-width: max-content;
+      "
+    >
+      <thead id="eiv-thead" style="background: rgba(128, 128, 128, 0.1)">
+        <!-- Gerado via JS -->
+      </thead>
+      <tbody id="eiv-tbody">
+        <!-- Gerado via JS -->
+      </tbody>
+      <tfoot
+        id="eiv-tfoot"
+        style="font-weight: bold; background: rgba(128, 128, 128, 0.05)"
+      >
+        <!-- Gerado via JS (Para somas) -->
+      </tfoot>
+    </table>
+  </div>
+  <p
+    style="
+      font-size: 0.75rem;
+      opacity: 0.6;
+      margin-top: 8px;
+      text-align: center;
+    "
+  >
+    * Preenchido automaticamente por não corresponder transposição
+  </p>
+</div>
+
+<style>
+  /* 1. Troca o 'collapse' por 'separate' para consertar o vazamento (bug da linha verde) */
+  #exercise-intensity-volume-container table {
+    border-collapse: separate !important;
+    border-spacing: 0;
+  }
+
+  /* Estética base das células */
+  #exercise-intensity-volume-container table th,
+  #exercise-intensity-volume-container table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+    background-clip: padding-box; /* Evita que o scroll vaze por trás da borda */
+  }
+
+  /* Remove borda sobrando na última coluna */
+  #exercise-intensity-volume-container table th:last-child,
+  #exercise-intensity-volume-container table td:last-child {
+    border-right: none;
+  }
+
+  /* 2. Coluna da Esquerda (Fixa + Sombra Direita) */
+  #exercise-intensity-volume-container table th:first-child,
+  #exercise-intensity-volume-container table td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--bg-color, #fff);
+    z-index: 2;
+    /* Efeito de profundidade para separar as informações (linha vermelha) */
+    box-shadow: 4px 0 8px -4px rgba(0, 0, 0, 0.12);
+  }
+
+  /* 3. Coluna da Direita (Fixa + Sombra Esquerda) */
+  #exercise-intensity-volume-container table th:last-child,
+  #exercise-intensity-volume-container table td:last-child {
+    position: sticky;
+    right: 0;
+    background: var(--bg-color, #fff);
+    z-index: 2;
+    box-shadow: -4px 0 8px -4px rgba(0, 0, 0, 0.20);
+  }
+
+  /* Garante que o header (thead) mantenha o fundo opaco nas colunas fixas */
+  #exercise-intensity-volume-container table thead th:first-child,
+  #exercise-intensity-volume-container table thead th:last-child {
+    background: #f7f7f7; /* Simula o fundo cinza claro para as colunas fixas do topo */
+    z-index: 3;
+  }
+</style>
