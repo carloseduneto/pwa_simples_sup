@@ -12,6 +12,8 @@ const State = {
   compareIndex: -1,
 };
 
+let chartInstance = null;
+
 export async function initExerciseIntensityVolume(onNavigate) {
   const container = document.getElementById(
     "exercise-intensity-volume-container",
@@ -116,7 +118,7 @@ function renderizarTabela() {
       index === State.compareIndex ? "background: rgba(255, 107, 0, 0.1);" : "";
     trHead += `<th style="${bg} cursor: pointer;" onclick="selecionarComparacao(${index})">${sessao.data}</th>`;
   });
-//   trHead += `<th>Hoje <span class="material-symbols-rounded" style="font-size: 1rem; vertical-align: middle;">anchor</span></th></tr>`;
+  //   trHead += `<th>Hoje <span class="material-symbols-rounded" style="font-size: 1rem; vertical-align: middle;">anchor</span></th></tr>`;
   trHead += `<th>Hoje </th></tr>`;
   thead.innerHTML = trHead;
 
@@ -260,6 +262,8 @@ function renderizarTabela() {
   } else {
     tfoot.innerHTML = "";
   }
+
+  renderizarGrafico(sessoesAlinhadas);
 }
 
 // --- EVENTOS DOS FILTROS ---
@@ -315,5 +319,118 @@ function setupFilters() {
       State.cargaDisplayMode = target.dataset.mode;
       renderizarTabela();
     };
+  });
+}
+
+function renderizarGrafico(sessoesAlinhadas) {
+  const ctx = document.getElementById("eiv-chart");
+  if (!ctx) return;
+
+  // Destrói a instância anterior para evitar sobreposição ao atualizar os filtros
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  // Eixo X: Datas históricas + "Hoje"
+  const labels = sessoesAlinhadas.map((s) => s.data);
+  labels.push("Hoje");
+
+  const numSeries = State.seriesHoje.length;
+  const datasets = [];
+
+  // Paleta de cores nítida para diferenciar cada série
+  const cores = [
+    "#ff6b00", // Laranja (Primária)
+    "#0088cc", // Azul
+    "#00b862", // Verde
+    "#8833ff", // Roxo
+    "#e63946", // Vermelho
+    "#f4a261", // Amarelo
+    "#2a9d8f", // Turquesa
+    "#264653", // Azul Escuro
+  ];
+
+  const extrairValor = (serie) => {
+    if (!serie) return null;
+    if (State.viewTarget === "tonelagem") return serie.repeticoes * serie.carga;
+    return State.cargaDisplayMode === "reps" ? serie.repeticoes : serie.carga;
+  };
+
+  for (let i = 0; i < numSeries; i++) {
+    const dataPoints = [];
+
+    // Busca os dados passados para a série atual
+    sessoesAlinhadas.forEach((sessao) => {
+      dataPoints.push(extrairValor(sessao.series[i]));
+    });
+
+    // Adiciona o dado de Hoje
+    dataPoints.push(extrairValor(State.seriesHoje[i]));
+
+    const corAtual = cores[i % cores.length];
+
+    datasets.push({
+      label: `Série ${i + 1}`,
+      data: dataPoints,
+      borderColor: corAtual,
+      backgroundColor: corAtual + "1A", // Transparência de ~10% para o preenchimento
+      pointBackgroundColor: corAtual, // <-- Adicionado: Deixa o ponto e a legenda sólidos
+      pointBorderColor: corAtual, // <-- Adicionado: Garante que a borda do ponto também seja sólida
+      stepped: "middle", // Formato em escada
+      fill: false,
+      borderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    });
+  }
+
+  const tituloGrafico =
+    State.viewTarget === "tonelagem"
+      ? "Evolução de Tonelagem"
+      : State.cargaDisplayMode === "reps"
+        ? "Evolução de Repetições"
+        : "Evolução de Carga (kg)";
+
+  chartInstance = new window.Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 600,
+        easing: "easeOutQuart",
+      },
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: tituloGrafico,
+          font: { size: 14 },
+        },
+        legend: {
+          position: "bottom",
+          labels: {
+            usePointStyle: true,
+            padding: 16,
+          },
+        },
+        tooltip: {
+          position: "nearest",
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          grid: { color: "rgba(128,128,128,0.1)" },
+        },
+        x: {
+          grid: { display: false },
+        },
+      },
+    },
   });
 }
