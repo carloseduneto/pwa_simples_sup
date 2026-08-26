@@ -14,6 +14,7 @@ const State = {
 
 let chartInstance = null;
 let chartInstanceBar = null;
+let chartInstanceTranspose = null;
 
 export async function initExerciseIntensityVolume(onNavigate) {
   const container = document.getElementById(
@@ -463,5 +464,70 @@ function renderizarGrafico(sessoesAlinhadas) {
       },
     });
   }
+
+  // --- INÍCIO: TERCEIRO GRÁFICO (BARRAS TRANSPOSTAS) ---
+  const ctxTranspose = document.getElementById("eiv-chart-transpose");
+  if (ctxTranspose) {
+    if (chartInstanceTranspose) chartInstanceTranspose.destroy();
+
+    // 1. Inversão do Eixo X: Agora as labels são as séries (ex: "Série 1", "Série 2")
+    const labelsTranspostas = State.seriesHoje.map((_, i) => `Série ${i + 1}`);
+    const datasetsTranspostos = [];
+
+    // Limita o histórico para evitar estourar a paleta de cores (máximo 7 datas antigas + Hoje)
+    const sessoesLimitadas = sessoesAlinhadas.slice(-7);
+
+    // 2. Inversão dos Datasets: Agora cada dataset representa uma Data do histórico
+    sessoesLimitadas.forEach((sessao, idxData) => {
+      const dataPoints = [];
+      for (let i = 0; i < State.seriesHoje.length; i++) {
+        dataPoints.push(extrairValor(sessao.series[i]));
+      }
+
+      datasetsTranspostos.push({
+        label: sessao.data,
+        data: dataPoints,
+        // Reaproveita o seu array de cores já existente no escopo da função
+        backgroundColor: cores[idxData % cores.length],
+      });
+    });
+
+    // 3. Adiciona a data de "Hoje" como o último conjunto no gráfico
+    const dataPointsHoje = [];
+    for (let i = 0; i < State.seriesHoje.length; i++) {
+      dataPointsHoje.push(extrairValor(State.seriesHoje[i]));
+    }
+
+    datasetsTranspostos.push({
+      label: "Hoje",
+      data: dataPointsHoje,
+      backgroundColor: cores[sessoesLimitadas.length % cores.length],
+    });
+
+    // 4. Instancia utilizando o padrão DRY com baseOptions
+    chartInstanceTranspose = new window.Chart(ctxTranspose, {
+      type: "bar",
+      data: {
+        labels: labelsTranspostas,
+        datasets: datasetsTranspostos,
+      },
+      options: {
+        ...baseOptions,
+        plugins: {
+          ...baseOptions.plugins,
+          title: {
+            display: true,
+            text: tituloGrafico + " (Por Série)",
+            font: { size: 14 },
+          },
+        },
+        scales: {
+          ...baseOptions.scales,
+          y: { ...baseOptions.scales.y, beginAtZero: true },
+        },
+      },
+    });
+  }
+  // --- FIM: TERCEIRO GRÁFICO ---
 }
 
