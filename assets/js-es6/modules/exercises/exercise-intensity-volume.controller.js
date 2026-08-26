@@ -13,6 +13,7 @@ const State = {
 };
 
 let chartInstance = null;
+let chartInstanceBar = null;
 
 export async function initExerciseIntensityVolume(onNavigate) {
   const container = document.getElementById(
@@ -373,10 +374,13 @@ function renderizarGrafico(sessoesAlinhadas) {
       label: `Série ${i + 1}`,
       data: dataPoints,
       borderColor: corAtual,
-      backgroundColor: corAtual + "1A", // Transparência de ~10% para o preenchimento
+      // backgroundColor: corAtual + "1A", // Transparência de ~10% para o preenchimento
+      backgroundColor: corAtual, // Transparência de ~10% para o preenchimento
       pointBackgroundColor: corAtual, // <-- Adicionado: Deixa o ponto e a legenda sólidos
       pointBorderColor: corAtual, // <-- Adicionado: Garante que a borda do ponto também seja sólida
-      stepped: "middle", // Formato em escada
+      // stepped: "middle", // Formato em escada
+      tension: 0.4, // Curvatura da linha
+      cubicInterpolationMode: "monotone",
       fill: false,
       borderWidth: 2,
       pointRadius: 4,
@@ -391,46 +395,73 @@ function renderizarGrafico(sessoesAlinhadas) {
         ? "Evolução de Repetições"
         : "Evolução de Carga (kg)";
 
-  chartInstance = new window.Chart(ctx, {
-    type: "line",
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 600,
-        easing: "easeOutQuart",
+  const baseOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 600, easing: "easeOutQuart" },
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: { usePointStyle: true, padding: 16 },
       },
-      interaction: {
-        mode: "index",
-        intersect: false,
-      },
-      plugins: {
-        title: {
-          display: true,
-          text: tituloGrafico,
-          font: { size: 14 },
+      tooltip: { position: "nearest" },
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: "rgba(128,128,128,0.1)" } },
+    },
+  };
+
+  // Instanciação Gráfico 1 (Linha)
+  const ctxLine = document.getElementById("eiv-chart");
+  if (ctxLine) {
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new window.Chart(ctxLine, {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        ...baseOptions,
+        plugins: {
+          ...baseOptions.plugins,
+          title: { display: true, text: tituloGrafico, font: { size: 14 } },
         },
-        legend: {
-          position: "bottom",
-          labels: {
-            usePointStyle: true,
-            padding: 16,
+        scales: {
+          ...baseOptions.scales,
+          y: { ...baseOptions.scales.y, beginAtZero: false },
+        },
+      },
+    });
+  }
+
+  // Instanciação Gráfico 2 (Barras)
+  const ctxBar = document.getElementById("eiv-chart-bar");
+  if (ctxBar) {
+    if (chartInstanceBar) chartInstanceBar.destroy();
+    const datasetsBar = JSON.parse(JSON.stringify(datasets));
+
+    // Gráfico de barras precisa que a propriedade 'stepped' seja removida dos datasets clonados
+    datasetsBar.forEach((ds) => delete ds.stepped);
+
+    chartInstanceBar = new window.Chart(ctxBar, {
+      type: "bar",
+      data: { labels, datasets: datasetsBar },
+      options: {
+        ...baseOptions,
+        plugins: {
+          ...baseOptions.plugins,
+          title: {
+            display: true,
+            text: tituloGrafico + " (Barras)",
+            font: { size: 14 },
           },
         },
-        tooltip: {
-          position: "nearest",
+        scales: {
+          ...baseOptions.scales,
+          y: { ...baseOptions.scales.y, beginAtZero: true },
         },
       },
-      scales: {
-        y: {
-          beginAtZero: false,
-          grid: { color: "rgba(128,128,128,0.1)" },
-        },
-        x: {
-          grid: { display: false },
-        },
-      },
-    },
-  });
+    });
+  }
 }
+
