@@ -718,6 +718,15 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
           WorkoutDraftService.limparRascunho();
           localStorage.removeItem("treino_cache_desconsiderados"); // Limpa cache de desconsiderados
           stopTimer(); // Zera o cronômetro ao ocultar
+          // Varre o cache de histórico e avaliações temporárias
+          Object.keys(sessionStorage).forEach((key) => {
+            if (
+              key.startsWith("eiv_cache_hist_") ||
+              key.startsWith("eiv_cache_all_")
+            ) {
+              sessionStorage.removeItem(key);
+            }
+          });
           initWorkoutPlayer(onNavigate, templateId);
         }
       };
@@ -888,6 +897,16 @@ async function enviarTreino(series, onNavigate) {
     alert("Treino concluído com sucesso!");
     WorkoutDraftService.limparRascunho();
     localStorage.removeItem("treino_cache_desconsiderados");
+
+    // Varre o cache de histórico e avaliações temporárias
+    Object.keys(sessionStorage).forEach((key) => {
+      if (
+        key.startsWith("eiv_cache_hist_") ||
+        key.startsWith("eiv_cache_all_")
+      ) {
+        sessionStorage.removeItem(key);
+      }
+    });
 
     stopTimer(); // <-- Adicionado aqui para zerar ao concluir
 

@@ -1,15 +1,17 @@
-import { client } from "../../config/config.js";
+import { ExerciseHistoryService } from "../../services/exercise-history.service.js";
 
 // --- ESTADO DA APLICAÇÃO ---
 const State = {
   exercicioId: null,
   nomeExercicio: "",
   seriesHoje: [],
-  historico: [],
+  historicoCompleto: [], // NOVO: Guarda o cache do banco em memória
+  historico: [], // O que realmente vai para a tela
   viewTarget: "carga", // 'carga' ou 'tonelagem'
   cargaDisplayMode: "both", // 'both' (Série x Carga), 'reps' (Séries) ou 'carga' (Carga)
   historyLimit: 4, // Qtd de treinos para buscar
   compareIndex: -1,
+  tudoCarregado: false, // NOVO: Evita buscar "Todos" mais de uma vez
 };
 
 let chartInstance = null;
@@ -24,10 +26,16 @@ export async function initExerciseIntensityVolume(onNavigate) {
 
   const cached = sessionStorage.getItem("treino_atual_avaliacao");
   if (!cached) {
-    container.innerHTML = "<p>Erro: Dados do treino atual não encontrados.</p>";
+    container.innerHTML =
+      "<p style='text-align:center; opacity:0.6; margin-top:20px;'>Dados do treino não encontrados. Redirecionando...</p>";
+
+    if (onNavigate) {
+      setTimeout(() => onNavigate("detalhes"), 1500);
+    }
+    // if (onNavigate) onNavigate("detalhes");
+
     return;
   }
-
   const dadosHoje = JSON.parse(cached);
   State.exercicioId = dadosHoje.exercicioId;
   State.nomeExercicio = dadosHoje.nome;
@@ -38,30 +46,63 @@ export async function initExerciseIntensityVolume(onNavigate) {
   setupToggles();
   setupFilters();
 
-  await fetchHistorico();
+  // Verifica se já temos o histórico salvo na sessão para este exercício
+  const cacheHistorico = sessionStorage.getItem(
+    `eiv_cache_hist_${State.exercicioId}`,
+  );
+
+  if (cacheHistorico) {
+    State.historicoCompleto = JSON.parse(cacheHistorico);
+    // Recupera também a flag se "Todos" já foram carregados antes
+    State.tudoCarregado =
+      sessionStorage.getItem(`eiv_cache_all_${State.exercicioId}`) === "true";
+    aplicarFiltroDeHistorico();
+  } else {
+    // Por padrão, busca 12 registros para preencher o cache inicial
+    await fetchHistorico(12);
+  }
 }
 
 // --- INTEGRAÇÃO COM O BANCO ---
-async function fetchHistorico() {
+async function fetchHistorico(limiteBusca) {
   try {
-    const { data, error } = await client.rpc(
-      "get_historico_sessoes_exercicio",
-      {
-        e_id: State.exercicioId,
-        limit_sessoes: parseInt(State.historyLimit),
-      },
+    // A chamada ao banco foi abstraída para o Service
+    const data = await ExerciseHistoryService.getSessionHistory(
+      State.exercicioId,
+      limiteBusca,
     );
 
-    if (error) throw error;
+    // O Controller mantém apenas a lógica de formatação e cache local
+    State.historicoCompleto = processarDadosBanco(data);
 
-    State.historico = processarDadosBanco(data);
-    State.compareIndex =
-      State.historico.length > 0 ? State.historico.length - 1 : -1;
+    // Salva no Cache do navegador
+    sessionStorage.setItem(
+      `eiv_cache_hist_${State.exercicioId}`,
+      JSON.stringify(State.historicoCompleto),
+    );
 
-    renderizarTabela();
+    if (limiteBusca === 999) {
+      State.tudoCarregado = true;
+      sessionStorage.setItem(`eiv_cache_all_${State.exercicioId}`, "true");
+    }
+
+    aplicarFiltroDeHistorico();
   } catch (err) {
     console.error("Erro ao buscar histórico:", err);
   }
+}
+
+// --- NOVO: FILTRO EM MEMÓRIA ---
+function aplicarFiltroDeHistorico() {
+  const limite = parseInt(State.historyLimit);
+
+  // Fatiamento do array: Pega de trás pra frente (os X mais recentes)
+  State.historico = State.historicoCompleto.slice(-limite);
+
+  State.compareIndex =
+    State.historico.length > 0 ? State.historico.length - 1 : -1;
+
+  renderizarTabela();
 }
 
 function processarDadosBanco(dataFlat) {
@@ -299,8 +340,15 @@ function setupToggles() {
 function setupFilters() {
   // Limite de Histórico (4, 8, 12, Todos)
   document.getElementById("eiv-select-limit").onchange = async (e) => {
-    State.historyLimit = e.target.value;
-    await fetchHistorico(); // Refaz a busca
+    State.historyLimit = parseInt(e.target.value);
+
+    // Se o usuário pediu "Todos" (999) e ainda não carregamos, vai no banco
+    if (State.historyLimit === 999 && !State.tudoCarregado) {
+      await fetchHistorico(999);
+    } else {
+      // Caso contrário, apenas fatia o que já está na memória (Zero latência)
+      aplicarFiltroDeHistorico();
+    }
   };
 
   // Subfiltros da Carga (Série x Carga, Séries, Carga)
@@ -328,11 +376,28 @@ function renderizarGrafico(sessoesAlinhadas) {
   const ctx = document.getElementById("eiv-chart");
   if (!ctx) return;
 
-  // Destrói a instância anterior para evitar sobreposição ao atualizar os filtros
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
+  if (chartInstance) chartInstance.destroy();
+  if (chartInstanceBar) chartInstanceBar.destroy();
+  if (chartInstanceTranspose) chartInstanceTranspose.destroy();
 
+  // 1. Detecção Híbrida: Sistema + Horário (Fallback para navegadores restritos)
+  const isSystemDark =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const horaAtual = new Date().getHours();
+  const isNoite = horaAtual >= 18 || horaAtual < 6;
+
+  // Assume dark mode se o sistema reportar OU se for período noturno
+  const isDarkMode = isSystemDark || isNoite;
+
+  // 2. Cores com contraste reforçado
+  const corTexto = isDarkMode ? "#d4d4d4" : "#666666";
+  const corGrid = isDarkMode
+    ? "rgba(255,255,255,0.15)"
+    : "rgba(128,128,128,0.1)";
+
+  // Aplica a cor do texto globalmente no Chart.js (resolve Títulos e Legendas)
+  window.Chart.defaults.color = corTexto;
   // Eixo X: Datas históricas + "Hoje"
   const labels = sessoesAlinhadas.map((s) => s.data);
   labels.push("Hoje");
@@ -340,16 +405,15 @@ function renderizarGrafico(sessoesAlinhadas) {
   const numSeries = State.seriesHoje.length;
   const datasets = [];
 
-  // Paleta de cores nítida para diferenciar cada série
   const cores = [
-    "#ff6b00", // Laranja (Primária)
+    "#ff6b00", // Laranja
     "#0088cc", // Azul
     "#00b862", // Verde
-    "#8833ff", // Roxo
-    "#e63946", // Vermelho
-    "#f4a261", // Amarelo
+    isDarkMode ? "#b87aff" : "#8833ff", // Roxo: mais claro no escuro
+    isDarkMode ? "#ff5c6a" : "#e63946", // Vermelho: mais vivo no escuro
+    "#fcdc29", // Amarelo
     "#2a9d8f", // Turquesa
-    "#264653", // Azul Escuro
+    isDarkMode ? "#4cc9f0" : "#264653", // Azul Escuro para Ciano
   ];
 
   const extrairValor = (serie) => {
@@ -406,11 +470,28 @@ function renderizarGrafico(sessoesAlinhadas) {
         position: "bottom",
         labels: { usePointStyle: true, padding: 16 },
       },
-      tooltip: { position: "nearest" },
+      tooltip: {
+        position: "nearest",
+        callbacks: {
+          labelColor: function (context) {
+            return {
+              borderColor: "#ffffff", // Força a borda branca
+              backgroundColor: context.dataset.backgroundColor,
+              borderWidth: 0.5, // Ajuste a espessura se necessário
+            };
+          },
+        },
+      },
     },
     scales: {
-      x: { grid: { display: false } },
-      y: { grid: { color: "rgba(128,128,128,0.1)" } },
+      x: {
+        grid: { display: false },
+        ticks: { color: corTexto }, // Contraste do eixo X
+      },
+      y: {
+        grid: { color: corGrid }, // Contraste da grade
+        ticks: { color: corTexto }, // Contraste do eixo Y
+      },
     },
   };
 
@@ -530,4 +611,3 @@ function renderizarGrafico(sessoesAlinhadas) {
   }
   // --- FIM: TERCEIRO GRÁFICO ---
 }
-
