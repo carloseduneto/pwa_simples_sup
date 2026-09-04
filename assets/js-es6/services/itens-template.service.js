@@ -8,7 +8,13 @@ export const TemplateItensService = {
       .select(
         `
         id, ordem, series_alvo, repeticoes_alvo, tecnica_intensificacao,
-        exercicios ( id, nome, grupo_muscular ( id, nome ) ),
+        exercicios ( 
+          id, nome, grupo_muscular ( id, nome ),
+          musculo_exercicio (
+            tipo,
+            musculos_granulares ( nome )
+          )
+        ),
         treino_recomendacoes ( id, name, detalhes, description )
       `,
       )

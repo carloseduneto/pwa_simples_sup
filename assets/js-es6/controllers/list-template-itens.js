@@ -5,6 +5,7 @@ import { TemplateItensService } from "../services/itens-template.service.js";
 let meuSortable = null;
 let ESTA_REORDENANDO = false; // Nosso "interruptor"
 let onNavigateGlobal = null; // Guarda a função de navegação para usar no botão cancelar
+let meuGrafico = null; // Controle da instância do Chart.js
 
 // --- EVENTOS GLOBAIS DE PROTEÇÃO DE ROTA ---
 // Bloqueia F5 ou fechamento da aba
@@ -143,6 +144,10 @@ export async function renderizarListItensTemplate(onNavigate) {
 
       container.appendChild(clone);
     });
+
+    // Injeta os dados no gráfico após montar a lista
+    const dadosGrafico = processarDadosGrafico(exercicios);
+    renderizarGraficoRadar(dadosGrafico);
   } catch (error) {
     console.error(error);
     container.innerHTML =
@@ -307,5 +312,296 @@ function initSortable(elementoLista) {
   meuSortable = new Sortable(elementoLista, {
     animation: 150,
     handle: ".drag-handle",
+  });
+}
+
+// --- FUNÇÃO 7: PROCESSAR DADOS PARA O GRÁFICO ---
+function processarDadosGrafico(itensTemplate) {
+  const distribuicao = {};
+
+  if (!Array.isArray(itensTemplate)) return { labels: [], data: [] };
+
+  itensTemplate.forEach((item) => {
+    const series = Number(item.series_alvo) || 0;
+    const exercicio = item.exercicios;
+
+    if (!exercicio || !exercicio.musculo_exercicio) return;
+
+    // Supabase pode retornar um objeto único em vez de array dependendo da inferência da FK.
+    // Forçamos a transformação em array para garantir o funcionamento do forEach.
+    const relacoes = Array.isArray(exercicio.musculo_exercicio)
+      ? exercicio.musculo_exercicio
+      : [exercicio.musculo_exercicio];
+
+    relacoes.forEach((relacao) => {
+      // O mesmo tratamento de segurança para o nível de músculos granulares
+      const granular = Array.isArray(relacao.musculos_granulares)
+        ? relacao.musculos_granulares[0]
+        : relacao.musculos_granulares;
+
+      const nomeMusculo = granular?.nome;
+      if (!nomeMusculo) return;
+
+      let multiplicador = 0;
+      if (relacao.tipo === "principal") multiplicador = 1.0;
+      if (relacao.tipo === "secundario") multiplicador = 0.5;
+
+      if (multiplicador > 0) {
+        if (!distribuicao[nomeMusculo]) distribuicao[nomeMusculo] = 0;
+        distribuicao[nomeMusculo] += series * multiplicador;
+      }
+    });
+  });
+
+  return {
+    labels: Object.keys(distribuicao).map((nome) =>
+      nome.includes(" ") ? nome.split(" ") : nome,
+    ),
+    data: Object.values(distribuicao),
+  };
+}
+
+// // --- FUNÇÃO 8: RENDERIZAR O GRÁFICO RADAR ---
+// function renderizarGraficoRadar(dados) {
+//   const ctx = document.getElementById("radar-chart-musculos");
+//   if (!ctx) return;
+
+//   if (meuGrafico) {
+//     meuGrafico.destroy();
+//   }
+
+//   if (typeof Chart === "undefined") return;
+
+//   // Plugin para pintar os fundos dos intervalos com cores alternadas
+//   const pluginFundoAlternado = {
+//     id: "fundoAlternado",
+//     beforeDraw: (chart) => {
+//       const {
+//         ctx,
+//         scales: { r },
+//       } = chart;
+//       if (!r || !r.ticks) return;
+
+//       const ticks = r.ticks;
+//       const totalPontas = chart.data.labels.length;
+
+//       // Desenha de fora para dentro para que as formas menores sobreponham as maiores
+//       for (let i = ticks.length - 1; i >= 0; i--) {
+//         ctx.beginPath();
+//         for (let j = 0; j < totalPontas; j++) {
+//           // Captura a exata coordenada (x, y) da intersecção do radar
+//           const { x, y } = r.getPointPositionForValue(j, ticks[i].value);
+//           if (j === 0) ctx.moveTo(x, y);
+//           else ctx.lineTo(x, y);
+//         }
+//         ctx.closePath();
+
+//         // Alterna a cor com base no índice (par ou ímpar)
+//         // Ajuste os valores rgba() se desejar escurecer ou mudar os tons
+//         ctx.fillStyle =
+//           i % 2 === 0 ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0)";
+//         ctx.fill();
+//       }
+//     },
+//   };
+
+//   meuGrafico = new Chart(ctx, {
+//     type: "radar",
+//     data: {
+//       labels: dados.labels,
+//       datasets: [
+//         {
+//           data: dados.data,
+//           backgroundColor: "#ff62141e", // Preenchimento semi-transparente
+//           borderColor: "#ff6314", // Cor da linha
+//           borderWidth: 2,
+//           pointBackgroundColor: "#ff6314",
+//           pointBorderColor: "#fff",
+//           pointHoverBackgroundColor: "#fff",
+//           pointHoverBorderColor: "#ff6314",
+//         },
+//       ],
+//     },
+//     plugins: [pluginFundoAlternado], // <-- Registro do plugin no gráfico
+//     options: {
+//       responsive: true,
+//       maintainAspectRatio: false, // Lembre-se do contêiner com position: relative e height fixo no HTML
+//       scales: {
+//         r: {
+//           beginAtZero: true,
+//           ticks: {
+//             display: true,
+//           },
+//         },
+//       },
+//       plugins: {
+//         legend: {
+//           display: false,
+//         },
+//       },
+//     },
+//   });
+// }
+
+// // --- FUNÇÃO 8: RENDERIZAR O GRÁFICO RADAR ---
+// function renderizarGraficoRadar(dados) {
+//   const ctx = document.getElementById("radar-chart-musculos");
+//   if (!ctx) return;
+
+//   if (meuGrafico) {
+//     meuGrafico.destroy();
+//   }
+
+//   // Verifica se há a biblioteca carregada no window
+//   if (typeof Chart === "undefined") return;
+
+//   meuGrafico = new Chart(ctx, {
+//     type: "radar",
+//     data: {
+//       labels: dados.labels,
+//       datasets: [
+//         {
+//           data: dados.data,
+//           backgroundColor: "#ff62141e", // Preenchimento semi-transparente
+//           borderColor: "#ff6314", // Cor da linha
+//           borderWidth: 2,
+//           pointBackgroundColor: "#ff6314",
+//           pointBorderColor: "#fff",
+//           pointHoverBackgroundColor: "#fff",
+//           pointHoverBorderColor: "#ff6314",
+//         },
+//       ],
+//     },
+//     options: {
+//       responsive: true,
+//       maintainAspectRatio: true,
+//       scales: {
+//         r: {
+//           beginAtZero: true,
+//           ticks: {
+//             display: true,
+//           },
+//           pointLabels: {
+//             font: {
+//               size: 11,
+//             },
+//             padding: 8,
+//           },
+//         },
+//       },
+//       plugins: {
+//         legend: {
+//           display: false, // Remove a legenda
+//         },
+//       },
+//     },
+//   });
+// }
+
+// --- FUNÇÃO 8: RENDERIZAR O GRÁFICO RADAR ---
+function renderizarGraficoRadar(dados) {
+  const ctx = document.getElementById("radar-chart-musculos");
+  if (!ctx) return;
+
+  if (meuGrafico) {
+    meuGrafico.destroy();
+  }
+
+  if (typeof Chart === "undefined") return;
+
+  // 1. Detecção Híbrida: Sistema + Horário
+  const isSystemDark =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const horaAtual = new Date().getHours();
+  const isNoite = horaAtual >= 18 || horaAtual < 6;
+
+  const isDarkMode = isSystemDark || isNoite;
+
+  // 2. Cores dinâmicas com contraste reforçado
+  const corTexto = isDarkMode ? "#d4d4d4" : "#666666";
+  const corGrid = isDarkMode
+    ? "rgba(255, 255, 255, 0.15)"
+    : "rgba(128, 128, 128, 0.1)";
+  const corFundoZebra = isDarkMode
+    ? "rgba(255, 255, 255, 0.05)"
+    : "rgba(0, 0, 0, 0.04)";
+
+  // // Plugin para pintar os fundos dos intervalos com cores alternadas
+  // const pluginFundoAlternado = {
+  //   id: 'fundoAlternado',
+  //   beforeDraw: (chart) => {
+  //     const { ctx, scales: { r } } = chart;
+  //     if (!r || !r.ticks) return;
+
+  //     const ticks = r.ticks;
+  //     const totalPontas = chart.data.labels.length;
+
+  //     for (let i = ticks.length - 1; i >= 0; i--) {
+  //       ctx.beginPath();
+  //       for (let j = 0; j < totalPontas; j++) {
+  //         const { x, y } = r.getPointPositionForValue(j, ticks[i].value);
+  //         if (j === 0) ctx.moveTo(x, y);
+  //         else ctx.lineTo(x, y);
+  //       }
+  //       ctx.closePath();
+
+  //       // Aplica o fundo zebra dinâmico
+  //       ctx.fillStyle = i % 2 === 0 ? corFundoZebra : 'rgba(255, 255, 255, 0)';
+  //       ctx.fill();
+  //     }
+  //   }
+  // };
+
+  meuGrafico = new Chart(ctx, {
+    type: "radar",
+    data: {
+      labels: dados.labels,
+      datasets: [
+        {
+          data: dados.data,
+          backgroundColor: "#ff62141e", // Preenchimento semi-transparente
+          borderColor: "#ff6314", // Cor da linha
+          borderWidth: 2,
+          pointBackgroundColor: "#ff6314",
+          pointBorderColor: "#fff",
+          pointHoverBackgroundColor: "#fff",
+          pointHoverBorderColor: "#ff6314",
+        },
+      ],
+    },
+    // plugins: [pluginFundoAlternado],
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          grid: {
+            color: corGrid, // Cor das linhas circulares
+          },
+          angleLines: {
+            color: corGrid, // Cor das linhas retas do centro para as pontas
+          },
+          pointLabels: {
+            color: corTexto, // Cor do texto dos músculos
+            font: {
+              size: 11,
+            },
+            padding: 8,
+          },
+          ticks: {
+            display: true,
+            color: corTexto, // Cor dos números
+            backdropColor: "transparent", // Remove o bloco de fundo sólido dos números
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
   });
 }
