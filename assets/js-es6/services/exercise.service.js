@@ -29,10 +29,20 @@ export const ExerciseService = {
   async getById(id) {
     const { data, error } = await client
       .from("exercicios")
-      .select("*")
+      .select("*, musculo_exercicio(musculo_granular_id, tipo)")
       .eq("id", id)
       .single();
 
+    if (error) throw error;
+    return data;
+  },
+
+  // NOVO MÉTODO: Buscar músculos granulares
+  async getGranularMuscles() {
+    const { data, error } = await client
+      .from("musculos_granulares")
+      .select("*")
+      .order("nome", { ascending: true });
     if (error) throw error;
     return data;
   },
@@ -47,26 +57,55 @@ export const ExerciseService = {
     return data;
   },
 
-  // CRIAR (CREATE)
-  async create(exerciseData) {
-    // exerciseData deve ser { nome: "...", grupo_muscular: ID }
+  // CRIAR (CREATE) - Ajustado para inserir relações
+  async create(exerciseData, musculosRelations) {
     const { data, error } = await client
       .from("exercicios")
       .insert([exerciseData])
       .select();
 
     if (error) throw error;
+
+    const exerciseId = data[0].id;
+
+    if (musculosRelations && musculosRelations.length > 0) {
+      const relations = musculosRelations.map((m) => ({
+        ...m,
+        exercicio_id: exerciseId,
+      }));
+      const { error: relError } = await client
+        .from("musculo_exercicio")
+        .insert(relations);
+      if (relError) throw relError;
+    }
+
     return data;
   },
 
-  // ATUALIZAR (UPDATE)
-  async update(id, exerciseData) {
+  // ATUALIZAR (UPDATE) - Ajustado para recriar relações
+  async update(id, exerciseData, musculosRelations) {
     const { data, error } = await client
       .from("exercicios")
       .update(exerciseData)
-      .eq("id", id);
+      .eq("id", id)
+      .select();
 
     if (error) throw error;
+
+    // Limpa antigas e insere novas
+    await client.from("musculo_exercicio").delete().eq("exercicio_id", id);
+
+    if (musculosRelations && musculosRelations.length > 0) {
+      const relations = musculosRelations.map((m) => ({
+        ...m,
+        exercicio_id: id,
+      }));
+      const { error: relError } = await client
+        .from("musculo_exercicio")
+        .insert(relations);
+      if (relError) throw relError;
+    }
+
     return data;
   },
 

@@ -16,6 +16,38 @@ export async function initExerciseForm(onNavigate) {
   // Variável de edição
   const editId = localStorage.getItem("editExerciseId");
 
+  const selectMainMuscle = document.getElementById("input-main-muscle");
+  const selectSecondaryMuscles = document.getElementById(
+    "input-secondary-muscles",
+  );
+
+  if (selectMainMuscle) selectMainMuscle.classList.add("skeleton");
+  if (selectSecondaryMuscles) selectSecondaryMuscles.classList.add("skeleton");
+
+  // Regra de negócio: Ocultar/Desabilitar músculo principal nos secundários
+  const updateSecondaryOptions = () => {
+    if (!selectMainMuscle || !selectSecondaryMuscles) return;
+    const mainVal = selectMainMuscle.value;
+
+    const checkboxes = selectSecondaryMuscles.querySelectorAll(
+      'input[type="checkbox"]',
+    );
+    checkboxes.forEach((cb) => {
+      if (cb.value === mainVal && mainVal !== "") {
+        cb.disabled = true;
+        cb.checked = false;
+        cb.parentElement.style.opacity = "0.4";
+      } else {
+        cb.disabled = false;
+        cb.parentElement.style.opacity = "1";
+      }
+    });
+  };
+
+  if (selectMainMuscle) {
+    selectMainMuscle.addEventListener("change", updateSecondaryOptions);
+  }
+
   // ============================================================
   // 1. FAXINA GERAL E RESSUSCITAÇÃO (Estado Inicial)
   // ============================================================
@@ -42,30 +74,57 @@ export async function initExerciseForm(onNavigate) {
   // 2. CARREGAR GRUPOS MUSCULARES
   // ============================================================
   try {
-    const grupos = await MuscleGroupService.getAll();
+    const [grupos, musculosGranulares] = await Promise.all([
+      MuscleGroupService.getAll(),
+      ExerciseService.getGranularMuscles(),
+    ]);
 
     if (selectGroup) {
       selectGroup.innerHTML =
         '<option value="" disabled selected>Grupo Muscular</option>';
-
       grupos.forEach((grupo) => {
         const option = document.createElement("option");
         option.value = grupo.id;
         option.textContent = grupo.nome;
         selectGroup.appendChild(option);
       });
+      setTimeout(() => selectGroup.classList.remove("skeleton"), 300);
+    }
 
-      // Remove skeleton do select após carregar
+    if (selectMainMuscle && selectSecondaryMuscles) {
+      selectMainMuscle.innerHTML =
+        '<option value="" disabled selected>Músculo principal</option>';
+      selectSecondaryMuscles.innerHTML = "";
+
+      musculosGranulares.forEach((musculo) => {
+        const optMain = document.createElement("option");
+        optMain.value = musculo.id;
+        optMain.textContent = musculo.nome;
+        selectMainMuscle.appendChild(optMain);
+
+        const label = document.createElement("label");
+        label.style.display = "flex";
+        label.style.alignItems = "center";
+        label.style.gap = "8px";
+        label.style.fontSize = "1rem";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = musculo.id;
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(musculo.nome));
+        selectSecondaryMuscles.appendChild(label);
+      });
+
       setTimeout(() => {
-        selectGroup.classList.remove("skeleton");
+        selectMainMuscle.classList.remove("skeleton");
+        selectSecondaryMuscles.classList.remove("skeleton");
       }, 300);
     }
   } catch (err) {
-    console.error("Erro ao carregar grupos", err);
-    if (selectGroup) {
-      selectGroup.classList.remove("skeleton");
-      selectGroup.innerHTML = "<option disabled>Erro ao carregar</option>";
-    }
+    console.error("Erro ao carregar dados", err);
+    if (selectGroup) selectGroup.classList.remove("skeleton");
   }
 
   // ============================================================
@@ -92,6 +151,31 @@ export async function initExerciseForm(onNavigate) {
 
       if (exercicio.grupo_muscular && selectGroup) {
         selectGroup.value = exercicio.grupo_muscular;
+
+        if (exercicio.musculo_exercicio) {
+          const principal = exercicio.musculo_exercicio.find(
+            (m) => m.tipo === "principal",
+          );
+          const secundarios = exercicio.musculo_exercicio
+            .filter((m) => m.tipo === "secundario")
+            .map((m) => m.musculo_granular_id.toString());
+
+          if (principal && selectMainMuscle) {
+            selectMainMuscle.value = principal.musculo_granular_id;
+            updateSecondaryOptions();
+          }
+
+          if (selectSecondaryMuscles) {
+            const checkboxes = selectSecondaryMuscles.querySelectorAll(
+              'input[type="checkbox"]',
+            );
+            checkboxes.forEach((cb) => {
+              if (secundarios.includes(cb.value)) {
+                cb.checked = true;
+              }
+            });
+          }
+        }
       }
     } catch (err) {
       console.error("Erro na edição", err);
@@ -126,23 +210,43 @@ export async function initExerciseForm(onNavigate) {
         return;
       }
 
+      if (!selectMainMuscle.value) {
+        alert("A seleção de um músculo principal é obrigatória");
+        return;
+      }
+
       const formData = {
         nome: inputName.value,
         grupo_muscular: selectGroup.value === "" ? null : selectGroup.value,
       };
 
+      const musculosRelations = [];
+      musculosRelations.push({
+        musculo_granular_id: parseInt(selectMainMuscle.value),
+        tipo: "principal",
+      });
+
+      const checkedSecundarios = selectSecondaryMuscles.querySelectorAll(
+        'input[type="checkbox"]:checked',
+      );
+      checkedSecundarios.forEach((cb) => {
+        musculosRelations.push({
+          musculo_granular_id: parseInt(cb.value),
+          tipo: "secundario",
+        });
+      });
+
       try {
-        // Bloqueia o botão para evitar clique duplo
         if (btnSave) {
           btnSave.innerText = "Salvando...";
           btnSave.disabled = true;
         }
 
         if (editId) {
-          await ExerciseService.update(editId, formData);
+          await ExerciseService.update(editId, formData, musculosRelations);
           alert("Exercício atualizado com sucesso!");
         } else {
-          await ExerciseService.create(formData);
+          await ExerciseService.create(formData, musculosRelations);
           alert("Exercício criado com sucesso!");
         }
 

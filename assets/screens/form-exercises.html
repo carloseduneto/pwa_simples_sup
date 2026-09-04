@@ -20,6 +20,22 @@
     </select>
   </div>
 
+  <!-- INÍCIO DOS NOVOS CAMPOS -->
+  <div class="input-group">
+    <label for="input-main-muscle"></label>
+    <select id="input-main-muscle" class="default-form-select" required>
+      <option value="" disabled selected>Músculo principal</option>
+    </select>
+  </div>
+
+  <div class="input-group">
+    <label style="font-size: 0.8rem; color: #666; margin-bottom: 5px; display: block;">Músculos secundários</label>
+    <div id="input-secondary-muscles" class="default-form-input" style="height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px; background: #fff;">
+      <!-- Checkboxes gerados via JS -->
+    </div>
+  </div>
+  <!-- FIM DOS NOVOS CAMPOS -->
+
   <button type="submit" class="default-form-button default-form-button--save">
     Salvar Exercício
   </button>
