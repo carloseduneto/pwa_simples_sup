@@ -205,7 +205,7 @@ button.anteriorExercise {
 
 .rowExercise.concluido input,
 .rowExercise.concluido button.anteriorExercise {
-  pointer-events: none;
+  /* pointer-events: none; */
   background-color: var(--unselected-background-color);
   border: none;
   /* Desativa interações */

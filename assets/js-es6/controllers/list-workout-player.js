@@ -2,6 +2,7 @@ import { GlobalLoader } from "../ui/global-loader.js";
 import { WorkoutService } from "../services/workout.service.js";
 import { WorkoutDraftService } from "../services/workout-draft.service.js";
 import { AuthService } from "../services/auth.service.js";
+import { UserContextService } from "../services/user-context.service.js";
 
 // Variáveis locais de estado
 let dadosParaEnvio = null;
@@ -88,6 +89,25 @@ function restoreTimerState() {
     updateTimerDisplay();
   }
 }
+
+// --- FUNÇÃO AUXILIAR DE CÁLCULO ---
+function calcularSemanaAutomatica(rawDate) {
+  if (!rawDate) return 1;
+  const apenasData = rawDate.split("T")[0];
+  const [ano, mes, dia] = apenasData.split("-");
+  const dataObj = new Date(ano, mes - 1, dia);
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const diffTempo = hoje.getTime() - dataObj.getTime();
+  const diffDias = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+  const semanas = Math.max(0, Math.floor(diffDias / 7));
+
+  // Há 0 semanas = 1. Há 1 semana = 2.
+  return semanas + 1;
+}
+
 export async function initWorkoutPlayer(onNavigate, templateId) {
   const container = document.getElementById("screen-workout-details");
   const contentDiv = container.querySelector(".itensTemplate");
@@ -98,11 +118,25 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
   contentDiv.innerHTML = GlobalLoader.getSimple();
 
   try {
-    // 2. Busca Dados
-    const { itens, contexto, historico } =
-      await WorkoutService.getFullWorkoutData(templateId);
+    const userId = await AuthService.getUserId();
 
-    semanaBaseCache = contexto?.series_repeticoes?.week || null;
+    // 2. Busca Dados do Treino e Preferências em paralelo
+    const [workoutData, userPrefs] = await Promise.all([
+      WorkoutService.getFullWorkoutData(templateId),
+      UserContextService.getUserDataByIdPreferences(userId),
+    ]);
+
+    const { itens, contexto, historico } = workoutData;
+    const modoRegistro = userPrefs?.preferences?.["week-register"] || "manual";
+
+    // Regra de negócio aplicada
+    if (modoRegistro === "automatic" && itens && itens.length > 0) {
+      const templateDate =
+        itens[0].templates.data_registro || itens[0].templates.created_at;
+      semanaBaseCache = calcularSemanaAutomatica(templateDate);
+    } else {
+      semanaBaseCache = contexto?.series_repeticoes?.week || null;
+    }
 
     // 3. Limpeza
     contentDiv.innerHTML = "";
@@ -278,7 +312,7 @@ export async function initWorkoutPlayer(onNavigate, templateId) {
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 0.95rem; opacity: 0.9; margin-bottom: 24px;">
       <div style="text-align: left; white-space: nowrap;">Séries rest.: <strong id="est-series">0</strong></div>
-      <div style="text-align: left; white-space: nowrap;">Ex. rest.: <strong id="est-ex">0</strong></div>
+      <div style="text-align: left; white-space: nowrap;">Exer. rest.: <strong id="est-ex">0</strong></div>
       <div style="text-align: left; white-space: nowrap;">Tempo ativo: <strong id="est-tempo">00:00</strong></div>
       <div style="text-align: left; white-space: nowrap;">Falta aprox.: <strong id="est-falta">00:00</strong></div>
     </div>

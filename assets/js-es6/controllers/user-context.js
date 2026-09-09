@@ -1,14 +1,18 @@
 import { TreinoRecomendacoesService } from "../services/treino-recomendacoes.service.js";
 import { AuthService } from "../services/auth.service.js";
+import { UserContextService } from "../services/user-context.service.js";
 
 export async function initUserContextController() {
   const container = document.getElementById("container-recomendacoes");
+  const templateHeaderActions = document.querySelector(
+    ".template-header--actions",
+  );
 
   // Se não existir o container na tela atual (ex: tela de login), sai sem erro.
   if (!container) return;
 
-  container.innerHTML =
-    '<span style="font-size:12px; color:#666;">Carregando semanas...</span>';
+  // container.innerHTML =    '<span style="font-size:12px; color:#666;">Carregando semanas...</span>';
+  // container.innerHTML =    '';
 
   try {
     const userId = await AuthService.getUserId();
@@ -17,11 +21,34 @@ export async function initUserContextController() {
       return;
     }
 
-    // Busca opções e seleção atual em paralelo (mais rápido)
-    const [opcoes, contexto] = await Promise.all([
+    // Busca as opções, contexto e preferências simultaneamente
+    const [opcoes, contexto, userData] = await Promise.all([
       TreinoRecomendacoesService.getSemanasOptions(),
       TreinoRecomendacoesService.getUserContext(userId),
+      UserContextService.getUserDataByIdPreferences(userId),
     ]);
+
+    const modoRegistro = userData?.preferences?.["week-register"] || "manual";
+
+    // Regra de ocultação
+    if (templateHeaderActions) {
+      if (modoRegistro === "automatic") {
+        container.style.display = "none";
+
+        templateHeaderActions.classList.remove("template-header--actions");
+        templateHeaderActions.classList.add("template-header--actions--lonely");
+      } else if (modoRegistro === "manual") {
+        // Restaura a exibição do container (use "block", "flex" ou "" conforme seu layout)
+        container.style.display = "block";
+        templateHeaderActions.classList.remove(
+          "template-header--actions--lonely",
+        );
+        templateHeaderActions.classList.add("template-header--actions");
+      }
+    }
+
+    // Se for manual, garante que esteja visível
+    // container.style.display = "block";
 
     const idSelecionado = contexto ? contexto.current_modifier_id_series : null;
 
@@ -31,7 +58,7 @@ export async function initUserContextController() {
         <option value="" disabled ${!idSelecionado ? "selected" : ""}>Selecione a fase do treino...</option>
     `;
 
-    opcoes.forEach(opcao => {
+    opcoes.forEach((opcao) => {
       const isSelected = opcao.id === idSelecionado ? "selected" : "";
       html += `
         <option value="${opcao.id}" ${isSelected}>
@@ -46,7 +73,7 @@ export async function initUserContextController() {
     // Adiciona o Evento de Mudança (Change)
     const selectEl = document.getElementById("select-semana");
 
-    selectEl.addEventListener("change", async e => {
+    selectEl.addEventListener("change", async (e) => {
       const novoId = e.target.value;
       try {
         // Feedback visual (desabilita enquanto salva)

@@ -14,8 +14,12 @@ import { initBodyAssessmentForm } from "./modules/body-assessment/form-body-asse
 import { initBodyAssessmentDetail } from "./modules/body-assessment/detail-body-assessment.controller.js";
 import { initBodyAssessmentCompare } from "./modules/body-assessment/compare-body-assessment.controller.js";
 
+
 //Exercícios 
 import { initExerciseIntensityVolume } from "./modules/exercises/exercise-intensity-volume.controller.js";
+
+//Configurações
+import { initConfigController } from "./controllers/config.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -59,7 +63,7 @@ const rotasConfig = {
     tipoHeader: "padrao",
     bottomNav: "none",
     titulo: "Configurações",
-    onLoad: null,
+    onLoad: initConfigController,
   },
 
   // --- TELAS NOVAS ---

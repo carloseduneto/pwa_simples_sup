@@ -122,17 +122,40 @@ function processarDadosBanco(dataFlat) {
   return Array.from(sessoesMap.values());
 }
 
+// function aplicarRegraDeTransposicao(seriesAntigas, qtdHoje) {
+//   const qtdAntiga = seriesAntigas.length;
+//   if (qtdAntiga === 0) return Array(qtdHoje).fill(null);
+
+//   let resultado = [];
+//   for (let i = 0; i < qtdHoje; i++) {
+//     if (i < qtdAntiga - 1) {
+//       resultado.push({ ...seriesAntigas[i], autoFilled: false });
+//     } else if (i === qtdHoje - 1) {
+//       resultado.push({ ...seriesAntigas[qtdAntiga - 1], autoFilled: false });
+//     } else {
+//       const penultimoAntigo = seriesAntigas[qtdAntiga - 2] || seriesAntigas[0];
+//       resultado.push({ ...penultimoAntigo, autoFilled: true });
+//     }
+//   }
+//   return resultado;
+// }
+
 function aplicarRegraDeTransposicao(seriesAntigas, qtdHoje) {
   const qtdAntiga = seriesAntigas.length;
   if (qtdAntiga === 0) return Array(qtdHoje).fill(null);
 
   let resultado = [];
   for (let i = 0; i < qtdHoje; i++) {
-    if (i < qtdAntiga - 1) {
-      resultado.push({ ...seriesAntigas[i], autoFilled: false });
-    } else if (i === qtdHoje - 1) {
+    // 1. PRIORIDADE MÁXIMA: Se for a última série de hoje, vincula com a última série do histórico (mesmo que o antigo tivesse 10 séries e hoje tenha 3).
+    if (i === qtdHoje - 1) {
       resultado.push({ ...seriesAntigas[qtdAntiga - 1], autoFilled: false });
-    } else {
+    }
+    // 2. Transposição 1 para 1 das séries intermediárias
+    else if (i < qtdAntiga - 1) {
+      resultado.push({ ...seriesAntigas[i], autoFilled: false });
+    }
+    // 3. Preenchimento (AutoFill) se o treino de hoje tiver MAIS séries que o antigo
+    else {
       const penultimoAntigo = seriesAntigas[qtdAntiga - 2] || seriesAntigas[0];
       resultado.push({ ...penultimoAntigo, autoFilled: true });
     }
