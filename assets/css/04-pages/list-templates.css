@@ -9,6 +9,13 @@
   margin-bottom: 20px;
 }
 
+.template-header--actions--lonely{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-end;
+}
+
 
 
 .btn-template-inactive-active {
