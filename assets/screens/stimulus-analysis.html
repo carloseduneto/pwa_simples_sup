@@ -1,0 +1,60 @@
+<main class="page-stimulus">
+  <header class="header-standard">
+    <button class="btn-back" id="btnBack">
+      <i class="icon-arrow-left"></i>
+    </button>
+    <h1>Análise de estímulo</h1>
+  </header>
+
+  <!-- Navegação de Período -->
+  <section class="period-navigation">
+    <div class="tabs-container" id="periodTabs">
+      <button class="tab-btn active" data-period="day">Dia</button>
+      <button class="tab-btn" data-period="week">Sem.</button>
+      <button class="tab-btn" data-period="month">Mês</button>
+      <button class="tab-btn" data-period="year">Ano</button>
+    </div>
+
+    <div class="date-selector">
+      <button class="btn-nav-date" id="btnPrevDate"><i class="icon-chevron-left"></i></button>
+      <span id="currentDateDisplay">segunda-feira, 17 de agosto</span>
+      <button class="btn-nav-date" id="btnNextDate"><i class="icon-chevron-right"></i></button>
+    </div>
+  </section>
+
+  <!-- Resumo -->
+  <section class="summary-info" id="summaryContainer">
+    <!-- Renderizado via JS -->
+  </section>
+
+  <!-- Gráfico Radar (Requer biblioteca como Chart.js) -->
+  <section class="chart-container">
+    <canvas id="stimulusRadarChart"></canvas>
+  </section>
+
+  <!-- Tabela de Volume -->
+  <section class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Músculo</th>
+          <th>Séries</th>
+        </tr>
+      </thead>
+      <tbody id="muscleTableBody">
+        <!-- Renderizado via JS -->
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Lista de Exercícios Detalhada -->
+  <section class="exercise-breakdown">
+    <div class="breakdown-header">
+      <h2>Exercícios</h2>
+      <button class="btn-icon"><i class="icon-arrows-out"></i></button>
+    </div>
+    <div id="exerciseListContainer" class="exercise-list">
+      <!-- Renderizado via JS -->
+    </div>
+  </section>
+</main>

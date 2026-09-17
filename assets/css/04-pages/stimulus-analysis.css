@@ -1,0 +1,95 @@
+.page-stimulus {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+}
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+  border-bottom: 3px solid var(--text-primary);
+}
+
+/* Navegação de Data */
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-weight: 600;
+}
+
+/* Resumo */
+.summary-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Tabela */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--gray-200);
+}
+
+.data-table th, .data-table td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--gray-200);
+}
+
+.data-table th:first-child, .data-table td:first-child {
+  text-align: left;
+}
+
+/* Lista de Exercícios */
+.exercise-breakdown {
+  margin-top: 16px;
+}
+
+.exercise-card {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.exercise-header {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.exercise-header span {
+  color: var(--text-secondary);
+}
+
+.muscle-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background-color: var(--gray-100);
+  color: var(--text-primary);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
