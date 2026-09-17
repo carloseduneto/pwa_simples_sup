@@ -13,7 +13,7 @@ import { initBodyAssessmentList } from "./modules/body-assessment/list-body-asse
 import { initBodyAssessmentForm } from "./modules/body-assessment/form-body-assessment.controller.js";
 import { initBodyAssessmentDetail } from "./modules/body-assessment/detail-body-assessment.controller.js";
 import { initBodyAssessmentCompare } from "./modules/body-assessment/compare-body-assessment.controller.js";
-
+import { initStimulusAnalysis } from "./controllers/stimulus-analysis.controller.js";
 
 //Exercícios 
 import { initExerciseIntensityVolume } from "./modules/exercises/exercise-intensity-volume.controller.js";
@@ -76,6 +76,20 @@ const rotasConfig = {
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
       initWorkoutHistory((rota, param) => {
+        roteador(rota, param);
+      });
+    },
+  },
+  // --- TELAS NOVAS ---
+  stimulusAnalysis: {
+    idDiv: "screen-stimulus-analysis",
+    html: "assets/screens/stimulus-analysis.html",
+    tipoHeader: "alternativo",
+    bottomNav: "none",
+    titulo: "Análise de Estímulo",
+    onLoad: (id) => {
+      // AQUI É A MUDANÇA:
+      initStimulusAnalysis((rota, param) => {
         roteador(rota, param);
       });
     },
