@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 16px;
+  /* padding: 8px; */
 }
 
 /* Tabs */
@@ -92,4 +92,105 @@
   border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
+}
+
+.btn-nav-date{
+  width: 50px;
+  aspect-ratio: 1 / 1;
+  background-color: transparent;
+  border: none;
+}
+
+#currentDateDisplay{
+  width: 70%;
+  text-align: center;
+  font-size: 14px;
+}
+
+.breakdown-group {
+  margin-bottom: 24px;
+}
+
+.group-title-main {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.sub-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sub-group-label {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  min-width: 90px;
+}
+
+.exercise-title-inline {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.exercise-title-inline span {
+  color: var(--text-secondary, #999);
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-pill {
+  background-color: var(--gray-100, #f3f4f6);
+  color: var(--text-primary, #111);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.chart-container {
+  /* background-color: yellowgreen; */
+  position: relative;
+  min-height: 320px; /* Trava a altura mínima para evitar colapso no primeiro load */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.skeleton-chart {
+  display: none;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 1 / 1;
+  border-radius: 10%;
+  background: linear-gradient(90deg, var(--gray-100, #f3f4f6) 25%, var(--gray-200, #e5e7eb) 50%, var(--gray-100, #f3f4f6) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s infinite linear;
+}
+
+/* Classes controladas pelo JavaScript */
+.chart-container.is-loading .skeleton-chart {
+  display: block;
+}
+
+.chart-container.is-loading canvas {
+  display: none !important;
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
