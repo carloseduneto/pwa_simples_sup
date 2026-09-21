@@ -229,3 +229,68 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+.mini-calendar-wrapper {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+  font-size: 14px;
+  justify-items: center;
+}
+
+.calendar-header {
+  color: var(--text-secondary, #666);
+  font-weight: 500;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.calendar-day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  color: var(--text-primary, #111);
+  transition: all 0.2s ease;
+}
+
+.calendar-day.out-of-month {
+  color: var(--gray-300, #d1d5db);
+}
+
+/* Dias com treino recebem destaque laranja e viram botões interativos */
+.calendar-day.has-session {
+  background-color: #fba87f; /* Laranja da paleta */
+  color: #111;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calendar-day.has-session:hover {
+  transform: scale(1.1);
+  filter: brightness(0.95);
+}
+
+.calendar-day-today {
+  border: 2px solid var(--btn-primary, #111);
+  font-weight: 600;
+  /* color: var(--btn-primary, #111); */
+}
+
+/* O card de histórico agora é clicável */
+.session-log-item.clickable {
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.session-log-item.clickable:active {
+  transform: scale(0.98);
+}

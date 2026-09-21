@@ -1,9 +1,94 @@
 import { StimulusService } from "../services/stimulus.service.js";
 import { AuthService } from "../services/auth.service.js";
 
+// --- MÓDULO DE CALENDÁRIO (Fábrica Modular) ---
+const CalendarFactory = {
+  // Extrai uma lista de strings 'YYYY-MM-DD' em horário local a partir dos dados brutos
+  extractActiveDates(historyArray) {
+    if (!historyArray) return new Set();
+    const dates = historyArray.map((session) => {
+      const d = new Date(session.data);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    });
+    return new Set(dates);
+  },
+
+  buildWeek(currentDate, activeDatesSet, getRangeFn) {
+    const { start } = getRangeFn("week", currentDate);
+    const startDate = new Date(start);
+    const days = ["seg.", "ter.", "qua.", "qui.", "sex.", "sáb.", "dom."];
+
+    let html = `<div class="calendar-grid">`;
+    // Cabeçalho
+    days.forEach((d) => (html += `<div class="calendar-header">${d}</div>`));
+
+    // Dias da semana (começando sempre na segunda-feira)
+    for (let i = 0; i < 7; i++) {
+      const currentDay = new Date(startDate);
+      currentDay.setDate(startDate.getDate() + i);
+
+      const dateStr = `${currentDay.getFullYear()}-${String(currentDay.getMonth() + 1).padStart(2, "0")}-${String(currentDay.getDate()).padStart(2, "0")}`;
+      const isSession = activeDatesSet.has(dateStr);
+      const classes = `calendar-day ${isSession ? "has-session" : ""}`;
+
+      html += `<div class="${classes}" ${isSession ? `data-date="${dateStr}"` : ""}>${currentDay.getDate()}</div>`;
+    }
+    html += `</div>`;
+    return html;
+  },
+
+  buildMonth(currentDate, activeDatesSet) {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+
+    // Para a visão mensal, o padrão começa no Domingo
+    const headers = ["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."];
+    let html = `<div class="calendar-grid">`;
+    headers.forEach((d) => (html += `<div class="calendar-header">${d}</div>`));
+
+    const startPadding = firstDayOfMonth.getDay(); // 0 (Dom) a 6 (Sáb)
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+    // Dias do mês anterior (esmaecidos)
+    for (let i = startPadding - 1; i >= 0; i--) {
+      html += `<div class="calendar-day out-of-month">${prevMonthLastDay - i}</div>`;
+    }
+
+    // Dias do mês atual
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+      const isSession = activeDatesSet.has(dateStr);
+      let classes = `calendar-day ${isSession ? "has-session" : ""}`;
+      const localDateStr = dateStr.replace(/-/g, "/");
+      const isToday =
+        new Date().toDateString() === new Date(localDateStr).toDateString();
+      if (isToday) {
+        classes += " calendar-day-today";
+      }
+
+      html += `<div class="${classes}" ${isSession ? `data-date="${dateStr}"` : ""}>${i}</div>`;
+    }
+
+    // Dias do próximo mês (esmaecidos) para completar o grid
+    const totalCellsRendered = startPadding + daysInMonth;
+    const remainingCells =
+      totalCellsRendered % 7 === 0 ? 0 : 7 - (totalCellsRendered % 7);
+    for (let i = 1; i <= remainingCells; i++) {
+      html += `<div class="calendar-day out-of-month">${i}</div>`;
+    }
+
+    html += `</div>`;
+    return html;
+  },
+};
+
+// --- CONTROLLER PRINCIPAL ---
 const StimulusAnalysisController = {
   state: {
-    period: "day", // day, week, month, year
+    period: "day",
     currentDate: new Date(),
     data: {
       history: [],
@@ -13,7 +98,7 @@ const StimulusAnalysisController = {
     breakdownMode: "muscle",
     chartInstance: null,
     navigateCallback: null,
-    currentRenderId: null, // Token de bloqueio para requisições obsoletas
+    currentRenderId: null,
   },
 
   async init(navigateCallback) {
@@ -34,6 +119,9 @@ const StimulusAnalysisController = {
     this.chartCanvas = document.getElementById("stimulusRadarChart");
     this.chartContainer = document.querySelector(".chart-container");
     this.tableHead = document.querySelector(".data-table thead tr");
+    this.miniCalendarContainer = document.getElementById(
+      "miniCalendarContainer",
+    );
 
     this.btnPrevDate = document.getElementById("btnPrevDate");
     this.btnNextDate = document.getElementById("btnNextDate");
@@ -96,12 +184,26 @@ const StimulusAnalysisController = {
     await this.updateDataAndRender();
   },
 
+  // FUNÇÃO DE NAVEGAÇÃO DE ATALHO (Drill-down)
+  goToDayView(dateString) {
+    // Atualiza o estado
+    this.state.period = "day";
+    // Força o fuso horário local quebrando a string YYYY-MM-DD
+    const [y, m, d] = dateString.split("-").map(Number);
+    this.state.currentDate = new Date(y, m - 1, d);
+
+    // Atualiza a UI das abas
+    this.tabs.forEach((t) => {
+      t.classList.toggle("active", t.dataset.period === "day");
+    });
+
+    this.updateDataAndRender();
+  },
+
   async updateDataAndRender() {
-    // 1. Cria um token único para esta renderização
     const renderToken = Symbol();
     this.state.currentRenderId = renderToken;
 
-    // 2. Destruição imediata e ativação do Skeleton
     if (this.state.chartInstance) {
       this.state.chartInstance.destroy();
       this.state.chartInstance = null;
@@ -121,7 +223,6 @@ const StimulusAnalysisController = {
       const ownerId = await AuthService.getUserId();
       if (!ownerId) return;
 
-      // 3. Bloqueia avanço de calendário caso não haja dados no futuro (Geral para todas as abas)
       await this.checkNextButtonState(ownerId, end);
 
       const cacheKey = `${this.state.period}_${start}_${end}`;
@@ -151,28 +252,35 @@ const StimulusAnalysisController = {
         };
       }
 
-      // 4. Se o usuário clicou em outra aba enquanto a rede carregava, descarta esta execução
       if (this.state.currentRenderId !== renderToken) return;
 
       this.state.data.history = finalHistory;
       this.state.data.volume = finalVolume;
 
+      this.renderMiniCalendar();
       this.renderHistoryLog();
-      this.renderDynamicTableAndChart();
       this.renderExerciseList();
+
+      if (this.chartContainer) {
+        this.chartContainer.classList.remove("is-loading");
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (this.state.currentRenderId === renderToken) {
+              this.renderDynamicTableAndChart();
+            }
+          });
+        });
+      } else {
+        this.renderDynamicTableAndChart();
+      }
     } catch (error) {
       console.error("Erro ao carregar dados de estímulo", error);
-    } finally {
-      // Remove o skeleton apenas se a renderização não foi substituída
-      if (this.state.currentRenderId === renderToken && this.chartContainer) {
+      if (this.chartContainer)
         this.chartContainer.classList.remove("is-loading");
-      }
     }
   },
 
   async checkNextButtonState(ownerId, currentPeriodEnd) {
-    // Consulta o banco para TODAS as abas. Se o limite final (currentPeriodEnd)
-    // for maior que o último registro do banco, o botão desativa.
     const nextDate = await StimulusService.getAdjacentSessionDate(
       ownerId,
       currentPeriodEnd,
@@ -180,6 +288,45 @@ const StimulusAnalysisController = {
     );
     this.btnNextDate.disabled = !nextDate;
     this.btnNextDate.style.opacity = nextDate ? "1" : "0.3";
+  },
+
+  renderMiniCalendar() {
+    if (!this.miniCalendarContainer) return;
+
+    // Só exibe o mini-calendário nas visões de semana e mês
+    if (this.state.period !== "week" && this.state.period !== "month") {
+      this.miniCalendarContainer.innerHTML = "";
+      this.miniCalendarContainer.style.display = "none";
+      return;
+    }
+
+    this.miniCalendarContainer.style.display = "block";
+    const activeDatesSet = CalendarFactory.extractActiveDates(
+      this.state.data.history,
+    );
+
+    if (this.state.period === "week") {
+      this.miniCalendarContainer.innerHTML = CalendarFactory.buildWeek(
+        this.state.currentDate,
+        activeDatesSet,
+        this.getDateRange.bind(this),
+      );
+    } else if (this.state.period === "month") {
+      this.miniCalendarContainer.innerHTML = CalendarFactory.buildMonth(
+        this.state.currentDate,
+        activeDatesSet,
+      );
+    }
+
+    // Atrela os eventos de clique aos dias que possuem sessão
+    const interactiveDays = this.miniCalendarContainer.querySelectorAll(
+      ".calendar-day.has-session",
+    );
+    interactiveDays.forEach((el) => {
+      el.addEventListener("click", () => {
+        this.goToDayView(el.dataset.date);
+      });
+    });
   },
 
   renderHistoryLog() {
@@ -194,7 +341,6 @@ const StimulusAnalysisController = {
       totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0;
     const formattedAvg = this.formatDuration(avgMinutes);
 
-    // 5. Ajuste de Estrutura CSS Flexbox
     let html = `
       <div class="history-summary-container" style="padding-left: 16px; padding-right: 16px; width: 100%; display: flex; flex-direction: column; gap: 16px;">
         <div class="history-summary" style="display: flex; justify-content: space-between; width: 100%; font-size: 14px; color: var(--text-secondary, #666);">
@@ -206,20 +352,58 @@ const StimulusAnalysisController = {
     if (this.state.period === "day" || this.state.period === "week") {
       html += `<div class="history-logs-container" style="display: flex; flex-direction: column; gap: 8px;">`;
       html += this.state.data.history
-        .map(
-          (session) => `
-        <div class="session-log-item" style="display: flex; justify-content: space-between; background: var(--gray-100, #f3f4f6); padding: 12px; border-radius: 8px; font-size: 14px; color: var(--text-primary, #111);">
-          <strong>${session.nome}</strong>
-          <span>${this.formatDuration(session.duracao_minutos)}</span>
-        </div>
-      `,
-        )
+        .map((session) => {
+          const d = new Date(session.data);
+          const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+          let timeInfoHtml = `<span>${this.formatDuration(session.duracao_minutos)}</span>`;
+
+          // Injeta a hora de início e fim exclusivamente na visão "Dia"
+          if (this.state.period === "day") {
+            const endDate = new Date(
+              d.getTime() + (session.duracao_minutos || 0) * 60000,
+            );
+            const startTimeStr = d.toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            const endTimeStr = endDate.toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            timeInfoHtml = `
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                <span>${this.formatDuration(session.duracao_minutos)}</span>
+                <span style="font-size: 12px; color: var(--text-secondary, #666);">${startTimeStr} - ${endTimeStr}</span>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="session-log-item clickable" data-date="${dateStr}" style="display: flex; justify-content: space-between; align-items: center; background: var(--gray-100, #f3f4f6); padding: 12px; border-radius: 8px; font-size: 14px; color: var(--text-primary, #111);">
+              <strong>${session.nome}</strong>
+              ${timeInfoHtml}
+            </div>
+          `;
+        })
         .join("");
       html += `</div>`;
     }
 
     html += `</div>`;
     this.summaryContainer.innerHTML = html;
+
+    const sessionCards = this.summaryContainer.querySelectorAll(
+      ".session-log-item.clickable",
+    );
+    sessionCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        if (this.state.period !== "day") {
+          this.goToDayView(card.dataset.date);
+        }
+      });
+    });
   },
 
   renderDynamicTableAndChart() {
@@ -285,44 +469,33 @@ const StimulusAnalysisController = {
         ? "rgba(255, 255, 255, 0.15)"
         : "rgba(128, 128, 128, 0.1)";
 
-      // 1. Remove o skeleton imediatamente
-      if (this.chartContainer) {
-        this.chartContainer.classList.remove("is-loading");
-      }
-
-      // 2. Purga a instância antiga do Chart.js
       if (this.state.chartInstance) {
         this.state.chartInstance.destroy();
+        this.state.chartInstance = null;
       }
 
-      // 3. RECRIAR O DOM: Remove o canvas contaminado e injeta um virgem
       const parent = this.chartCanvas.parentNode;
       this.chartCanvas.remove();
       const newCanvas = document.createElement("canvas");
       newCanvas.id = "stimulusRadarChart";
       parent.appendChild(newCanvas);
-      this.chartCanvas = newCanvas; // Atualiza a referência no state do Controller
+      this.chartCanvas = newCanvas;
 
-      // 4. Instancia o gráfico no canvas limpo (animação nativa será disparada)
       this.state.chartInstance = new Chart(this.chartCanvas, {
         type: "radar",
         data: { labels, datasets },
         options: {
           responsive: true,
-          maintainAspectRatio: false, // O CSS agora controla o tamanho, evitando eventos de resize
+          maintainAspectRatio: false,
           animation: {
             duration: 800,
-            easing: "easeOutQuart", // Deixa a animação de entrada mais fluida
+            easing: "easeOutQuart",
           },
           scales: {
             r: {
               beginAtZero: true,
-              grid: {
-                color: corGrid,
-              },
-              angleLines: {
-                color: corGrid,
-              },
+              grid: { color: corGrid },
+              angleLines: { color: corGrid },
               pointLabels: {
                 color: corTexto,
                 font: { size: 11 },
@@ -343,10 +516,9 @@ const StimulusAnalysisController = {
 
   formatChartLabel(nome) {
     if (nome.includes(" ")) {
-      return nome.split(" "); // Ex: "Costas Superiores" -> ["Costas", "Superiores"]
+      return nome.split(" ");
     }
     if (nome.length > 10) {
-      // Ex: "Isquiossurais" (13) -> ["Isquios-", "surais"]
       const half = Math.ceil(nome.length / 2);
       return [nome.slice(0, half) + "-", nome.slice(half)];
     }
