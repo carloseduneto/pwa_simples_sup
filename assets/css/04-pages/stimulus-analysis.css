@@ -68,11 +68,14 @@
 }
 
 /* Tabela */
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid var(--gray-200);
+  white-space: nowrap; /* Evita quebra de texto espremendo as colunas de data */
 }
+
 
 .data-table th, .data-table td {
   padding: 12px;
@@ -88,6 +91,56 @@
 .data-table th:first-child, .data-table td:first-child {
   text-align: left;
 }
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  /* Garante rolagem suave e nativa no mobile */
+  -webkit-overflow-scrolling: touch; 
+  padding-left: 0px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap; /* Evita quebra de texto espremendo as colunas de data */
+}
+
+/* Trava a coluna de Músculo */
+.data-table th:first-child,
+.data-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  /* IMPORTANTE: Coloque a cor de fundo real do seu app para esconder as células passando por baixo */
+  /* background-color: var(--gray-200, #ffffff);  */
+  border-left: 1px solid var(--gray-200, #e5e7eb);
+  /* border-left: 1px solid red; */
+}
+/* Trava a coluna de Músculo */
+.data-table th:first-child {
+  background-color: var(--gray-100, #ffffff); 
+}
+
+.data-table td:first-child {
+  background-color: var(--text-white, #ffffff); 
+}
+
+/* Opcional: Adiciona uma sombra sutil indicando que existe rolagem */
+.data-table th:first-child::after,
+.data-table td:first-child::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 4px;
+  transform: translateX(100%);
+  box-shadow: inset 4px 0 4px -4px rgba(0,0,0,0.1);
+  pointer-events: none;
+}
+
+
 
 /* Lista de Exercícios */
 .exercise-breakdown {

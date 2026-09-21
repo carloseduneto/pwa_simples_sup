@@ -99,6 +99,7 @@ const StimulusAnalysisController = {
     chartInstance: null,
     navigateCallback: null,
     currentRenderId: null,
+    tableSort: { key: "musculo", asc: true },
   },
 
   async init(navigateCallback) {
@@ -266,12 +267,14 @@ const StimulusAnalysisController = {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (this.state.currentRenderId === renderToken) {
-              this.renderDynamicTableAndChart();
+              this.renderTable(); // Nova função modular
+              this.renderChart(); // Nova função modular
             }
           });
         });
       } else {
-        this.renderDynamicTableAndChart();
+        this.renderTable();
+        this.renderChart();
       }
     } catch (error) {
       console.error("Erro ao carregar dados de estímulo", error);
@@ -406,7 +409,84 @@ const StimulusAnalysisController = {
     });
   },
 
-  renderDynamicTableAndChart() {
+  renderTable() {
+    const dadosPlano = this.state.data.volume.grafico_tabela;
+    const periodosUnicos = [
+      ...new Set(dadosPlano.map((d) => d.periodo)),
+    ].sort();
+
+    // 1. Agrupar dados por músculo transformando em um array de objetos para ordenação
+    const musculosMap = {};
+    dadosPlano.forEach((row) => {
+      if (!musculosMap[row.musculo])
+        musculosMap[row.musculo] = { musculo: row.musculo };
+      musculosMap[row.musculo][row.periodo] = row.series;
+    });
+
+    const tableData = Object.values(musculosMap);
+    const { key: sortKey, asc: sortAsc } = this.state.tableSort;
+
+    // 2. Lógica de Ordenação
+    tableData.sort((a, b) => {
+      let valA = a[sortKey] || 0;
+      let valB = b[sortKey] || 0;
+
+      if (sortKey === "musculo") {
+        valA = a.musculo.toLowerCase();
+        valB = b.musculo.toLowerCase();
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+      } else {
+        return sortAsc ? valA - valB : valB - valA;
+      }
+    });
+
+    // 3. Renderização do HTML
+    if (this.tableHead && this.tableBody) {
+      const getSortIcon = (key) => {
+        if (sortKey !== key) return "";
+        return sortAsc ? " ↑" : " ↓";
+      };
+
+      let thHtml = `<th data-sort="musculo" style="cursor: pointer; user-select: none;">Músculo${getSortIcon("musculo")}</th>`;
+      periodosUnicos.forEach((p) => {
+        thHtml += `<th data-sort="${p}" style="cursor: pointer; user-select: none;">${this.formatShortDate(p)}${getSortIcon(p)}</th>`;
+      });
+      this.tableHead.innerHTML = thHtml;
+
+      let trHtml = "";
+      tableData.forEach((row) => {
+        trHtml += `<tr><td>${row.musculo}</td>`;
+        periodosUnicos.forEach((p) => {
+          const series = row[p] || 0;
+          trHtml += `<td>${series}</td>`;
+        });
+        trHtml += `</tr>`;
+      });
+      this.tableBody.innerHTML = trHtml;
+
+      // 4. Delegação de Eventos para os Headers
+      this.tableHead.querySelectorAll("th").forEach((th) => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.sort;
+          if (this.state.tableSort.key === key) {
+            this.state.tableSort.asc = !this.state.tableSort.asc;
+          } else {
+            this.state.tableSort.key = key;
+            // Se for coluna de texto (músculo), padrão asc. Se for data (números), padrão desc.
+            this.state.tableSort.asc = key === "musculo";
+          }
+          // Apenas recria a tabela sem tocar no motor do Chart.js
+          this.renderTable();
+        });
+      });
+    }
+  },
+
+  renderChart() {
+    if (!this.chartCanvas) return;
+
     const dadosPlano = this.state.data.volume.grafico_tabela;
     const periodosUnicos = [
       ...new Set(dadosPlano.map((d) => d.periodo)),
@@ -418,100 +498,77 @@ const StimulusAnalysisController = {
       musculosMap[row.musculo][row.periodo] = row.series;
     });
 
-    if (this.tableHead && this.tableBody) {
-      let thHtml = `<th>Músculo</th>`;
-      periodosUnicos.forEach((p) => {
-        thHtml += `<th>${this.formatShortDate(p)}</th>`;
-      });
-      this.tableHead.innerHTML = thHtml;
+    const labelsRaw = Object.keys(musculosMap).sort();
+    const labels = labelsRaw.map((nome) => this.formatChartLabel(nome));
+    const periodosExibicao = periodosUnicos.slice(-4);
 
-      let trHtml = "";
-      Object.keys(musculosMap)
-        .sort()
-        .forEach((musculo) => {
-          trHtml += `<tr><td>${musculo}</td>`;
-          periodosUnicos.forEach((p) => {
-            const series = musculosMap[musculo][p] || 0;
-            trHtml += `<td>${series}</td>`;
-          });
-          trHtml += `</tr>`;
-        });
-      this.tableBody.innerHTML = trHtml;
+    const datasets = periodosExibicao.map((periodo, index) => {
+      const colors = ["#f59e0b", "#3b82f6", "#ef4444", "#10b981"];
+      const cor = colors[index % colors.length];
+
+      return {
+        label: this.formatShortDate(periodo),
+        data: labelsRaw.map((m) => musculosMap[m][periodo] || 0),
+        borderColor: cor,
+        backgroundColor: "transparent",
+        pointBackgroundColor: cor,
+      };
+    });
+
+    const isSystemDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const horaAtual = new Date().getHours();
+    const isNoite = horaAtual >= 18 || horaAtual < 6;
+    const isDarkMode = isSystemDark || isNoite;
+
+    const corTexto = isDarkMode ? "#d4d4d4" : "#666666";
+    const corGrid = isDarkMode
+      ? "rgba(255, 255, 255, 0.15)"
+      : "rgba(128, 128, 128, 0.1)";
+
+    if (this.state.chartInstance) {
+      this.state.chartInstance.destroy();
+      this.state.chartInstance = null;
     }
 
-    if (this.chartCanvas) {
-      const labelsRaw = Object.keys(musculosMap).sort();
-      const labels = labelsRaw.map((nome) => this.formatChartLabel(nome));
-      const periodosExibicao = periodosUnicos.slice(-4);
+    const parent = this.chartCanvas.parentNode;
+    this.chartCanvas.remove();
+    const newCanvas = document.createElement("canvas");
+    newCanvas.id = "stimulusRadarChart";
+    parent.appendChild(newCanvas);
+    this.chartCanvas = newCanvas;
 
-      const datasets = periodosExibicao.map((periodo, index) => {
-        const colors = ["#f59e0b", "#3b82f6", "#ef4444", "#10b981"];
-        const cor = colors[index % colors.length];
-
-        return {
-          label: this.formatShortDate(periodo),
-          data: labelsRaw.map((m) => musculosMap[m][periodo] || 0),
-          borderColor: cor,
-          backgroundColor: "transparent",
-          pointBackgroundColor: cor,
-        };
-      });
-
-      const isSystemDark =
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const horaAtual = new Date().getHours();
-      const isNoite = horaAtual >= 18 || horaAtual < 6;
-      const isDarkMode = isSystemDark || isNoite;
-
-      const corTexto = isDarkMode ? "#d4d4d4" : "#666666";
-      const corGrid = isDarkMode
-        ? "rgba(255, 255, 255, 0.15)"
-        : "rgba(128, 128, 128, 0.1)";
-
-      if (this.state.chartInstance) {
-        this.state.chartInstance.destroy();
-        this.state.chartInstance = null;
-      }
-
-      const parent = this.chartCanvas.parentNode;
-      this.chartCanvas.remove();
-      const newCanvas = document.createElement("canvas");
-      newCanvas.id = "stimulusRadarChart";
-      parent.appendChild(newCanvas);
-      this.chartCanvas = newCanvas;
-
-      this.state.chartInstance = new Chart(this.chartCanvas, {
-        type: "radar",
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: {
-            duration: 800,
-            easing: "easeOutQuart",
-          },
-          scales: {
-            r: {
-              beginAtZero: true,
-              grid: { color: corGrid },
-              angleLines: { color: corGrid },
-              pointLabels: {
-                color: corTexto,
-                font: { size: 11 },
-                padding: 8,
-              },
-              ticks: {
-                display: true,
-                color: corTexto,
-                backdropColor: "transparent",
-              },
+    this.state.chartInstance = new Chart(this.chartCanvas, {
+      type: "radar",
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 800,
+          easing: "easeOutQuart",
+        },
+        scales: {
+          r: {
+            beginAtZero: true,
+            grid: { color: corGrid },
+            angleLines: { color: corGrid },
+            pointLabels: {
+              color: corTexto,
+              font: { size: 11 },
+              padding: 8,
+            },
+            ticks: {
+              display: true,
+              color: corTexto,
+              backdropColor: "transparent",
             },
           },
-          plugins: { legend: { display: periodosExibicao.length > 1 } },
         },
-      });
-    }
+        plugins: { legend: { display: periodosExibicao.length > 1 } },
+      },
+    });
   },
 
   formatChartLabel(nome) {
