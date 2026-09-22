@@ -246,11 +246,14 @@
 .chart-container {
   /* background-color: yellowgreen; */
   position: relative;
-  min-height: 320px; /* Trava a altura mínima para evitar colapso no primeiro load */
+  min-height: 400px; /* Trava a altura mínima para evitar colapso no primeiro load */
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
+  flex-direction: column;
+  /* height: 480px; */
+  /* aspect-ratio: 1 / 1.4; */
 }
 
 .skeleton-chart {
@@ -274,9 +277,16 @@
 }
 
 .chart-container canvas {
+  /* flex: 1;
+  min-height: 0;
   width: 100% !important;
-  height: 100% !important;
+  height: 100% !important; */
+  width: 100% !important;
+  max-height: 400px !important;
+  margin: 0 auto;
 }
+
+/* Aqui para Ctrl + Z */
 
 @keyframes skeleton-pulse {
   0% { background-position: 200% 0; }

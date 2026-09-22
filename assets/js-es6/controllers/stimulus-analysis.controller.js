@@ -96,6 +96,8 @@ const StimulusAnalysisController = {
     },
     cache: {},
     breakdownMode: "muscle",
+    monthChartMode: "overlap", // NOVO: Controle de sobreposição vs soma
+    chartZoomLevel: 100, // NOVO: Controle do nível de zoom (100% = exibe todos)
     chartInstance: null,
     navigateCallback: null,
     currentRenderId: null,
@@ -151,6 +153,7 @@ const StimulusAnalysisController = {
     e.target.classList.add("active");
 
     this.state.period = e.target.dataset.period;
+    this.state.chartZoomLevel = 100;
     await this.updateDataAndRender();
   },
 
@@ -332,6 +335,19 @@ const StimulusAnalysisController = {
     });
   },
 
+  // Nova função de navegação para semanas
+  goToWeekView(dateString) {
+    this.state.period = "week";
+    const [y, m, d] = dateString.split("-").map(Number);
+    this.state.currentDate = new Date(y, m - 1, d);
+
+    this.tabs.forEach((t) => {
+      t.classList.toggle("active", t.dataset.period === "week");
+    });
+
+    this.updateDataAndRender();
+  },
+
   renderHistoryLog() {
     if (!this.summaryContainer) return;
 
@@ -361,7 +377,6 @@ const StimulusAnalysisController = {
 
           let timeInfoHtml = `<span>${this.formatDuration(session.duracao_minutos)}</span>`;
 
-          // Injeta a hora de início e fim exclusivamente na visão "Dia"
           if (this.state.period === "day") {
             const endDate = new Date(
               d.getTime() + (session.duracao_minutos || 0) * 60000,
@@ -392,11 +407,65 @@ const StimulusAnalysisController = {
         })
         .join("");
       html += `</div>`;
+    } else if (this.state.period === "month") {
+      const weeksMap = new Map();
+
+      this.state.data.history.forEach((session) => {
+        const d = new Date(session.data);
+        const { start, end } = this.getDateRange("week", d);
+        const key = `${start}|${end}`;
+        if (!weeksMap.has(key)) {
+          weeksMap.set(key, { sessions: 0, totalMinutes: 0, start, end });
+        }
+        const week = weeksMap.get(key);
+        week.sessions++;
+        week.totalMinutes += session.duracao_minutos || 0;
+      });
+
+      if (weeksMap.size > 0) {
+        html += `<div class="month-weeks-deck" style="margin-top: 8px; display: flex; flex-direction: column;">
+                   <h3 style="font-size: 16px; margin-bottom: 12px; font-weight: 600;">Semanas</h3>`;
+
+        const sortedKeys = Array.from(weeksMap.keys()).sort();
+
+        sortedKeys.forEach((key) => {
+          const week = weeksMap.get(key);
+          const avgTime =
+            week.sessions > 0
+              ? Math.round(week.totalMinutes / week.sessions)
+              : 0;
+          const s = new Date(week.start);
+          const e = new Date(week.end);
+          const sMonth = s.toLocaleDateString("pt-BR", { month: "long" });
+          const eMonth = e.toLocaleDateString("pt-BR", { month: "long" });
+
+          let dateRangeStr =
+            sMonth === eMonth
+              ? `${s.getDate()} - ${e.getDate()} de ${sMonth}`
+              : `${s.getDate()} de ${sMonth.substring(0, 3)}. - ${e.getDate()} de ${eMonth.substring(0, 3)}.`;
+
+          // Cria a string de data YYYY-MM-DD baseada no início da semana para guiar o drill-down
+          const weekDateStr = `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, "0")}-${String(s.getDate()).padStart(2, "0")}`;
+
+          // Adiciona a classe 'week-clickable' e o 'data-date' no elemento
+          html += `
+            <div class="week-clickable" data-date="${weekDateStr}" style="cursor: pointer; border-bottom: 1px solid var(--gray-200, #ddd); padding: 12px 0; display: flex; justify-content: space-between; align-items: flex-start; transition: opacity 0.2s;" onmousedown="this.style.opacity=0.7" onmouseup="this.style.opacity=1" onmouseleave="this.style.opacity=1">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <strong style="font-size: 14px; color: var(--text-primary, #111);">${dateRangeStr}</strong>
+                <span style="font-size: 12px; color: var(--text-secondary, #666);">${week.sessions} sessões</span>
+              </div>
+              <div style="font-size: 14px; color: var(--text-primary, #111);">${this.formatDuration(avgTime)}</div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
     }
 
     html += `</div>`;
     this.summaryContainer.innerHTML = html;
 
+    // Atribui eventos aos cards de dias
     const sessionCards = this.summaryContainer.querySelectorAll(
       ".session-log-item.clickable",
     );
@@ -405,6 +474,14 @@ const StimulusAnalysisController = {
         if (this.state.period !== "day") {
           this.goToDayView(card.dataset.date);
         }
+      });
+    });
+
+    // Atribui eventos aos cards de semanas
+    const weekCards = this.summaryContainer.querySelectorAll(".week-clickable");
+    weekCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        this.goToWeekView(card.dataset.date);
       });
     });
   },
@@ -484,7 +561,7 @@ const StimulusAnalysisController = {
     }
   },
 
-  renderChart() {
+  renderChart(isZoomUpdate = false) {
     if (!this.chartCanvas) return;
 
     const dadosPlano = this.state.data.volume.grafico_tabela;
@@ -499,44 +576,151 @@ const StimulusAnalysisController = {
     });
 
     const labelsRaw = Object.keys(musculosMap).sort();
-    const labels = labelsRaw.map((nome) => this.formatChartLabel(nome));
-    const periodosExibicao = periodosUnicos.slice(-4);
 
-    const datasets = periodosExibicao.map((periodo, index) => {
-      const colors = ["#f59e0b", "#3b82f6", "#ef4444", "#10b981"];
-      const cor = colors[index % colors.length];
+    // 1. Definição do Período (Todos para Ano, últimos 4 para os demais)
+    const periodosExibicao =
+      this.state.period === "year" ? periodosUnicos : periodosUnicos.slice(-4);
 
-      return {
-        label: this.formatShortDate(periodo),
-        data: labelsRaw.map((m) => musculosMap[m][periodo] || 0),
-        borderColor: cor,
-        backgroundColor: "transparent",
-        pointBackgroundColor: cor,
-      };
+    // 2. Lógica do Slider de Zoom: Calcular limite de volume
+    let globalMax = 0;
+    const maxVolumePerMuscle = {};
+
+    labelsRaw.forEach((m) => {
+      const max = Math.max(
+        ...periodosExibicao.map((p) => musculosMap[m][p] || 0),
+      );
+      maxVolumePerMuscle[m] = max;
+      if (max > globalMax) globalMax = max;
     });
 
+    const threshold = globalMax * (this.state.chartZoomLevel / 100);
+
+    // Filtra os músculos baseados no slider
+    const filteredLabelsRaw = labelsRaw.filter(
+      (m) =>
+        this.state.chartZoomLevel === 100 || maxVolumePerMuscle[m] <= threshold,
+    );
+    const labels = filteredLabelsRaw.map((nome) => this.formatChartLabel(nome));
+
+    // 3. Geração dos Datasets
+    let datasets = [];
+    if (
+      (this.state.period === "month" || this.state.period === "year") &&
+      this.state.monthChartMode === "sum"
+    ) {
+      datasets = [
+        {
+          label: "Total Acumulado",
+          data: filteredLabelsRaw.map((m) => {
+            return periodosExibicao.reduce(
+              (acc, p) => acc + (musculosMap[m][p] || 0),
+              0,
+            );
+          }),
+          borderColor: "#f59e0b",
+          backgroundColor: "transparent",
+          pointBackgroundColor: "#f59e0b",
+        },
+      ];
+    } else {
+      datasets = periodosExibicao.map((periodo, index) => {
+        // Paleta base cíclica
+        const colors = ["#f59e0b", "#3b82f6", "#ef4444", "#10b981"];
+        const cor = colors[index % colors.length];
+
+        // Na visão anual, oculta por padrão os meses anteriores aos 4 mais recentes
+        const isHidden =
+          this.state.period === "year" && index < periodosExibicao.length - 4;
+
+        return {
+          label: this.formatShortDate(periodo),
+          data: filteredLabelsRaw.map((m) => musculosMap[m][periodo] || 0),
+          borderColor: cor,
+          backgroundColor: "transparent",
+          pointBackgroundColor: cor,
+          hidden: isHidden, // Otimização para o Chart.js gerenciar a legenda
+        };
+      });
+    }
+
+    // 4. Se for apenas um ajuste do Slider (Zoom), injeta os dados sem destruir o DOM
+    if (isZoomUpdate && this.state.chartInstance) {
+      this.state.chartInstance.data.labels = labels;
+      this.state.chartInstance.data.datasets = datasets;
+      this.state.chartInstance.update();
+      return;
+    }
+
+    // 5. Configurações de Tema
     const isSystemDark =
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
     const horaAtual = new Date().getHours();
-    const isNoite = horaAtual >= 18 || horaAtual < 6;
-    const isDarkMode = isSystemDark || isNoite;
-
+    const isDarkMode = isSystemDark || horaAtual >= 18 || horaAtual < 6;
     const corTexto = isDarkMode ? "#d4d4d4" : "#666666";
     const corGrid = isDarkMode
       ? "rgba(255, 255, 255, 0.15)"
       : "rgba(128, 128, 128, 0.1)";
 
+    const parent = this.chartCanvas.parentNode;
+
+// 6. Injeção Dinâmica: Botão de Swap
+    let chartHeader = parent.querySelector(".chart-header-toggle");
+    if (!chartHeader) {
+      chartHeader = document.createElement("div");
+      chartHeader.className = "chart-header-toggle";
+      // ADICIONADO: flex-shrink: 0 para blindar a altura
+      chartHeader.style.cssText = "width: 100%; display: flex; justify-content: flex-end; margin-bottom: 8px; padding-right: 8px; z-index: 5; position: relative; flex-shrink: 0;";
+      chartHeader.innerHTML = `<button class="btn-icon" style="background:none; border:none; cursor:pointer;"><span class="material-symbols-rounded">swap_horiz</span></button>`;
+      parent.insertBefore(chartHeader, this.chartCanvas);
+
+      chartHeader.querySelector("button").addEventListener("click", () => {
+        this.state.monthChartMode = this.state.monthChartMode === "overlap" ? "sum" : "overlap";
+        this.renderChart();
+      });
+    }
+    chartHeader.style.display =
+      this.state.period === "month" || this.state.period === "year"
+        ? "flex"
+        : "none";
+
+// 7. Injeção Dinâmica: Slider de Zoom
+    let sliderContainer = parent.querySelector(".chart-zoom-slider");
+    if (!sliderContainer) {
+      sliderContainer = document.createElement("div");
+      sliderContainer.className = "chart-zoom-slider";
+      // ADICIONADO: flex-shrink: 0 para impedir o esmagamento
+      sliderContainer.style.cssText = "width: 100%; display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 0 8px; flex-shrink: 0;";
+      sliderContainer.innerHTML = `
+        <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary, #666); white-space: nowrap;">Foco: Menores</span>
+        <input type="range" min="5" max="100" value="100" style="flex: 1; cursor: pointer; accent-color: var(--primary-color, #ff6b00);">
+        <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary, #666);">Todos</span>
+      `;
+      parent.appendChild(sliderContainer);
+
+      sliderContainer.querySelector("input").addEventListener("input", (e) => {
+        this.state.chartZoomLevel = Number(e.target.value);
+        this.renderChart(true);
+      });
+    }
+    // Garante que o input visual espelhe o estado ao trocar de abas
+    sliderContainer.querySelector("input").value = this.state.chartZoomLevel;
+    sliderContainer.style.display =
+      this.state.period === "month" || this.state.period === "year"
+        ? "flex"
+        : "none";
+
+    // 8. Reconstrução Física do Gráfico (Apenas First Load da Aba)
     if (this.state.chartInstance) {
       this.state.chartInstance.destroy();
       this.state.chartInstance = null;
     }
 
-    const parent = this.chartCanvas.parentNode;
     this.chartCanvas.remove();
     const newCanvas = document.createElement("canvas");
     newCanvas.id = "stimulusRadarChart";
-    parent.appendChild(newCanvas);
+    // Insere o canvas ANTES do slider para manter a ordem estrutural
+    parent.insertBefore(newCanvas, sliderContainer);
     this.chartCanvas = newCanvas;
 
     this.state.chartInstance = new Chart(this.chartCanvas, {
@@ -566,7 +750,16 @@ const StimulusAnalysisController = {
             },
           },
         },
-        plugins: { legend: { display: periodosExibicao.length > 1 } },
+        plugins: {
+          // legend: {
+          //   // Permite exibição forçada mesmo com muitos meses, o Chart.js quebra a linha automaticamente
+          //   display: true,
+          // },
+          legend: {
+            display:
+              this.state.period === "month" || this.state.period === "year",
+          },
+        },
       },
     });
   },
