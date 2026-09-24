@@ -85,6 +85,120 @@ const CalendarFactory = {
   },
 };
 
+// --- MÓDULO DE ANÁLISE ANUAL (Fábrica Modular) ---
+const AnnualAnalysisFactory = {
+  mesesNome: [
+    "jan",
+    "fev",
+    "mar",
+    "abr",
+    "mai",
+    "jun",
+    "jul",
+    "ago",
+    "set",
+    "out",
+    "nov",
+    "dez",
+  ],
+
+  calculateVariance(values) {
+    if (values.length === 0) return 0;
+    const sum = values.reduce((a, b) => a + b, 0);
+    const mean = sum / values.length;
+    if (mean === 0) return 0;
+    const variance =
+      values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+    return Math.sqrt(variance) / mean;
+  },
+
+  getStats(arrayData) {
+    let max = -Infinity;
+    let min = Infinity;
+    let maxIdx = 0;
+    let minIdx = 0;
+    let sum = 0;
+
+    arrayData.forEach((val, idx) => {
+      sum += val;
+
+      // Registra o Pico normalmente
+      if (val > max) {
+        max = val;
+        maxIdx = idx;
+      }
+
+      // REGRA CORRIGIDA: Só assume como 'mínima' se o valor for maior que ZERO
+      if (val < min && val > 0) {
+        min = val;
+        minIdx = idx;
+      }
+    });
+
+    // Fallback de segurança: se o array for 100% zerado, impede que retorne 'Infinity'
+    if (min === Infinity) {
+      min = 0;
+      minIdx = 0;
+    }
+
+    return {
+      total: sum,
+      pico: max,
+      mesPico: this.mesesNome[maxIdx],
+      minima: min,
+      mesMinima: this.mesesNome[minIdx],
+      variancia: this.calculateVariance(arrayData),
+    };
+  },
+
+  // Recebe o globalMax para padronizar a escala (Eixo Y partindo do zero)
+  generateSparkline(dataArray, colorHex, id, globalMax) {
+    const width = 130;
+    const height = 60;
+    const max = globalMax > 0 ? globalMax : 1;
+    const stepX = width / Math.max(dataArray.length - 1, 1);
+
+    const points = dataArray.map((val, i) => {
+      // Inverte o eixo Y pois no SVG o 0 é no topo
+      return { x: i * stepX, y: height - (val / max) * (height - 5) };
+    });
+
+    const bezierCommand = (point, i, a) => {
+      if (i === 0) return `M ${point.x},${point.y}`;
+      const prev = a[i - 1];
+      const tension = 0.4;
+
+      // Simulação matemática de Interpolação Monotônica:
+      // Pontos de controle na exata altura do eixo Y, travando extrapolações.
+      const cp1x = prev.x + (point.x - prev.x) * tension;
+      const cp1y = prev.y;
+      const cp2x = point.x - (point.x - prev.x) * tension;
+      const cp2y = point.y;
+
+      return `C ${cp1x},${cp1y} ${cp2x},${cp2y} ${point.x},${point.y}`;
+    };
+
+    const pathString = points.reduce(
+      (acc, point, i, a) => acc + bezierCommand(point, i, a),
+      "",
+    );
+    const fillPath = `${pathString} L ${width},${height} L 0,${height} Z`;
+
+    return `
+      <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+        <defs>
+          <linearGradient id="grad-${id}" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="${colorHex}" stop-opacity="0.4" />
+            <stop offset="100%" stop-color="${colorHex}" stop-opacity="0.0" />
+          </linearGradient>
+        </defs>
+        <path d="${fillPath}" fill="url(#grad-${id})" />
+        <path d="${pathString}" fill="none" stroke="${colorHex}" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+    `;
+  },
+};
+
 // --- CONTROLLER PRINCIPAL ---
 const StimulusAnalysisController = {
   state: {
@@ -188,6 +302,202 @@ const StimulusAnalysisController = {
     await this.updateDataAndRender();
   },
 
+  renderAnnualView() {
+    const dadosPlano = this.state.data.volume.grafico_tabela;
+
+    if (this.miniCalendarContainer)
+      this.miniCalendarContainer.style.display = "none";
+    if (this.exerciseList)
+      this.exerciseList.closest(".exercise-breakdown").style.display = "none";
+    if (document.querySelector(".table-container"))
+      document.querySelector(".table-container").style.display = "none";
+
+    // 1. Definição do LImite Temporal (Ocultar meses do futuro)
+    const yearView = this.state.currentDate.getFullYear();
+    const currentYear = new Date().getFullYear();
+    const limitMonth = yearView === currentYear ? new Date().getMonth() : 11; // 0 a 11
+
+    const macroMap = {};
+    const microMap = {};
+
+    dadosPlano.forEach((row) => {
+      const macro = row.grupo_muscular || "Geral";
+      const micro = row.musculo;
+      const mesString = row.periodo.split("-")[1];
+      const monthIdx = parseInt(mesString, 10) - 1;
+
+      if (!macroMap[macro]) macroMap[macro] = Array(12).fill(0);
+      if (!microMap[micro]) microMap[micro] = Array(12).fill(0);
+
+      macroMap[macro][monthIdx] += row.series;
+      microMap[micro][monthIdx] += row.series;
+    });
+
+    if (this.chartContainer) this.chartContainer.classList.remove("is-loading");
+
+    const mesesExibicao = AnnualAnalysisFactory.mesesNome
+      .slice(0, limitMonth + 1)
+      .map((m) => `${m}./${String(yearView).slice(-2)}`);
+    const macroLabels = Object.keys(macroMap).sort();
+
+    // 2. Montagem dos Datasets (Gráfico Principal)
+    const datasets = macroLabels.map((macro, index) => {
+      const colors = [
+        "#4285F4",
+        "#EA4335",
+        "#FBBC04",
+        "#34A853",
+        "#FF6D00",
+        "#46BDC6",
+      ];
+      const cor = colors[index % colors.length];
+      return {
+        label: macro,
+        data: macroMap[macro].slice(0, limitMonth + 1), // Corta dados do futuro
+        borderColor: cor,
+        backgroundColor: cor, // Preenche a bolinha da legenda
+        tension: 0.4,
+        // cubicInterpolationMode: "monotone", // Suavização nativa do Chart.js
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHitRadius: 10,
+        pointStyle: "circle", // Bolinhas em vez de quadrados na legenda
+      };
+    });
+
+    const parent = this.chartCanvas.parentNode;
+    if (this.state.chartInstance) {
+      this.state.chartInstance.destroy();
+    }
+
+    const chartHeader = parent.querySelector(".chart-header-toggle");
+    if (chartHeader) chartHeader.style.display = "none";
+    const sliderContainer = parent.querySelector(".chart-zoom-slider");
+    if (sliderContainer) sliderContainer.style.display = "none";
+
+    this.chartCanvas.remove();
+    const newCanvas = document.createElement("canvas");
+    newCanvas.id = "stimulusRadarChart";
+    parent.appendChild(newCanvas);
+    this.chartCanvas = newCanvas;
+
+    this.state.chartInstance = new Chart(this.chartCanvas, {
+      type: "line",
+      data: {
+        labels: mesesExibicao,
+        datasets: datasets,
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.2,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: "rgba(128,128,128,0.1)" } },
+        },
+        plugins: {
+          legend: {
+            position: "top",
+            labels: {
+              usePointStyle: true,
+              boxWidth: 8,
+              padding: 16, // Amplia o espaçamento para forçar a quebra da legenda no mobile
+            },
+          },
+        },
+      },
+    });
+
+    // 3. Preparação das Análises Granulares (Decks e Sparklines)
+    let globalMaxVolume = 0;
+
+    const statsList = Object.keys(microMap).map((musculo) => {
+      // Fatiamento obrigatório: Cortar array no limite do mês para gerar SVG sem extrapolamento
+      const dataArray = microMap[musculo].slice(0, limitMonth + 1);
+      const stats = AnnualAnalysisFactory.getStats(dataArray);
+
+      // Descobre o teto global do Y para a normalização de escala dos SVGs
+      if (stats.pico > globalMaxVolume) globalMaxVolume = stats.pico;
+
+      return { musculo, dataArray, ...stats };
+    });
+
+    const topMais = [...statsList]
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+    const topMenos = [...statsList]
+      .filter((m) => m.total > 0)
+      .sort((a, b) => a.total - b.total)
+      .slice(0, 5);
+    const topVar = [...statsList]
+      .filter((m) => m.total > 0)
+      .sort((a, b) => b.variancia - a.variancia)
+      .slice(0, 5);
+
+    // ValKey mapeia a chave do objeto que será impressa na div de maior destaque
+    const buildDeckHtml = (
+      title,
+      icon,
+      list,
+      colorHex,
+      valKey,
+      subKeyPrefix,
+    ) => {
+      let html = `
+        <div class="analysis-deck-header">
+          <span class="material-symbols-rounded" style="font-size: 18px;">${icon}</span>
+          ${title}
+        </div>
+        <div class="analysis-deck">
+      `;
+
+      list.forEach((item, i) => {
+        // Agora reflete o Pico ou a Mínima como você solicitou na documentação
+        const displayVal =
+          valKey === "variancia" ? Math.round(item.pico) : item[valKey];
+
+        let displaySub = "";
+        if (valKey === "variancia") {
+          displaySub = `var. ${(item.variancia * 100).toFixed(0)}%`;
+        } else if (valKey === "pico") {
+          displaySub = `${subKeyPrefix} ${item.mesPico}`;
+        } else {
+          displaySub = `${subKeyPrefix} ${item.mesMinima}`;
+        }
+
+        // Envia o Teto Global para que todos usem a mesma balança Y
+        const sparklineSvg = AnnualAnalysisFactory.generateSparkline(
+          item.dataArray,
+          colorHex,
+          `${valKey}-${i}`,
+          globalMaxVolume,
+        );
+
+        html += `
+          <div class="analysis-card">
+            <div class="analysis-card-content">
+              <div class="analysis-card-title">${item.musculo}</div>
+              <div class="analysis-card-value">${displayVal}</div>
+              <div class="analysis-card-subtext">${displaySub}</div>
+            </div>
+            <div class="analysis-card-sparkline">
+              ${sparklineSvg}
+            </div>
+          </div>
+        `;
+      });
+      return html + `</div>`;
+    };
+
+    this.summaryContainer.innerHTML = `
+      <div class="analysis-sections-container">
+        ${buildDeckHtml("Músculos mais ativos (top 5)", "arrow_upward", topMais, "#fba87f", "pico", "pico em")}
+        ${buildDeckHtml("Músculos menos ativos (top 5)", "arrow_downward", topMenos, "#fba87f", "minima", "mínima em")}
+        ${buildDeckHtml("Músculos maior variância (top 5)", "bar_chart", topVar, "#fba87f", "variancia", "pico em")}
+      </div>
+    `;
+  },
   // FUNÇÃO DE NAVEGAÇÃO DE ATALHO (Drill-down)
   goToDayView(dateString) {
     // Atualiza o estado
@@ -261,23 +571,28 @@ const StimulusAnalysisController = {
       this.state.data.history = finalHistory;
       this.state.data.volume = finalVolume;
 
-      this.renderMiniCalendar();
-      this.renderHistoryLog();
-      this.renderExerciseList();
-
-      if (this.chartContainer) {
-        this.chartContainer.classList.remove("is-loading");
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (this.state.currentRenderId === renderToken) {
-              this.renderTable(); // Nova função modular
-              this.renderChart(); // Nova função modular
-            }
-          });
-        });
+      // Desvio de arquitetura visual
+      if (this.state.period === "year") {
+        this.renderAnnualView();
       } else {
-        this.renderTable();
-        this.renderChart();
+        this.renderMiniCalendar();
+        this.renderHistoryLog();
+        this.renderExerciseList();
+
+        if (this.chartContainer) {
+          this.chartContainer.classList.remove("is-loading");
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (this.state.currentRenderId === renderToken) {
+                this.renderTable(); // Nova função modular
+                this.renderChart(); // Nova função modular
+              }
+            });
+          });
+        } else {
+          this.renderTable();
+          this.renderChart();
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar dados de estímulo", error);
@@ -361,7 +676,7 @@ const StimulusAnalysisController = {
     const formattedAvg = this.formatDuration(avgMinutes);
 
     let html = `
-      <div class="history-summary-container" style="padding-left: 16px; padding-right: 16px; width: 100%; display: flex; flex-direction: column; gap: 16px;">
+      <div class="history-summary-container" style="padding-left: 18px; padding-right: 16px; width: 100%; display: flex; flex-direction: column; gap: 16px;">
         <div class="history-summary" style="display: flex; justify-content: space-between; width: 100%; font-size: 14px; color: var(--text-secondary, #666);">
           <span>Média de tempo:</span>
           <span>${formattedAvg} (${totalSessions} sessões)</span>
@@ -664,18 +979,20 @@ const StimulusAnalysisController = {
 
     const parent = this.chartCanvas.parentNode;
 
-// 6. Injeção Dinâmica: Botão de Swap
+    // 6. Injeção Dinâmica: Botão de Swap
     let chartHeader = parent.querySelector(".chart-header-toggle");
     if (!chartHeader) {
       chartHeader = document.createElement("div");
       chartHeader.className = "chart-header-toggle";
       // ADICIONADO: flex-shrink: 0 para blindar a altura
-      chartHeader.style.cssText = "width: 100%; display: flex; justify-content: flex-end; margin-bottom: 8px; padding-right: 8px; z-index: 5; position: relative; flex-shrink: 0;";
+      chartHeader.style.cssText =
+        "width: 100%; display: flex; justify-content: flex-end; margin-bottom: 8px; padding-right: 8px; z-index: 5; position: relative; flex-shrink: 0;";
       chartHeader.innerHTML = `<button class="btn-icon" style="background:none; border:none; cursor:pointer;"><span class="material-symbols-rounded">swap_horiz</span></button>`;
       parent.insertBefore(chartHeader, this.chartCanvas);
 
       chartHeader.querySelector("button").addEventListener("click", () => {
-        this.state.monthChartMode = this.state.monthChartMode === "overlap" ? "sum" : "overlap";
+        this.state.monthChartMode =
+          this.state.monthChartMode === "overlap" ? "sum" : "overlap";
         this.renderChart();
       });
     }
@@ -684,13 +1001,14 @@ const StimulusAnalysisController = {
         ? "flex"
         : "none";
 
-// 7. Injeção Dinâmica: Slider de Zoom
+    // 7. Injeção Dinâmica: Slider de Zoom
     let sliderContainer = parent.querySelector(".chart-zoom-slider");
     if (!sliderContainer) {
       sliderContainer = document.createElement("div");
       sliderContainer.className = "chart-zoom-slider";
       // ADICIONADO: flex-shrink: 0 para impedir o esmagamento
-      sliderContainer.style.cssText = "width: 100%; display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 0 8px; flex-shrink: 0;";
+      sliderContainer.style.cssText =
+        "width: 100%; display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 0 8px; flex-shrink: 0;";
       sliderContainer.innerHTML = `
         <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary, #666); white-space: nowrap;">Foco: Menores</span>
         <input type="range" min="5" max="100" value="100" style="flex: 1; cursor: pointer; accent-color: var(--primary-color, #ff6b00);">
