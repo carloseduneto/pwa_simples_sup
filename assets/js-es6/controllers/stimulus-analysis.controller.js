@@ -18,18 +18,24 @@ const CalendarFactory = {
     const startDate = new Date(start);
     const days = ["seg.", "ter.", "qua.", "qui.", "sex.", "sáb.", "dom."];
 
+    // Captura a data de hoje para comparação (sem horas)
+    const todayStr = new Date().toDateString();
+
     let html = `<div class="calendar-grid">`;
-    // Cabeçalho
     days.forEach((d) => (html += `<div class="calendar-header">${d}</div>`));
 
-    // Dias da semana (começando sempre na segunda-feira)
     for (let i = 0; i < 7; i++) {
       const currentDay = new Date(startDate);
       currentDay.setDate(startDate.getDate() + i);
 
       const dateStr = `${currentDay.getFullYear()}-${String(currentDay.getMonth() + 1).padStart(2, "0")}-${String(currentDay.getDate()).padStart(2, "0")}`;
       const isSession = activeDatesSet.has(dateStr);
-      const classes = `calendar-day ${isSession ? "has-session" : ""}`;
+      const isToday = currentDay.toDateString() === todayStr;
+
+      let classes = `calendar-day ${isSession ? "has-session" : ""}`;
+      if (isToday) {
+        classes += " calendar-day-today";
+      }
 
       html += `<div class="${classes}" ${isSession ? `data-date="${dateStr}"` : ""}>${currentDay.getDate()}</div>`;
     }
@@ -109,10 +115,14 @@ const AnnualAnalysisFactory = {
     if (mean === 0) return 0;
     const variance =
       values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+    // Retorna o Desvio Padrão Absoluto (quantidade real de séries de oscilação)
+    // return Math.sqrt(variance);
+    // Retorna a Variância Relativa (percentual de oscilação em relação à média)
     return Math.sqrt(variance) / mean;
   },
 
-  getStats(arrayData) {
+  // 2. ATUALIZAÇÃO DA FÁBRICA (Ajuste no getStats para compensar o fatiamento do array)
+  getStats(arrayData, monthOffset = 0, currentMonthIdx = 11) {
     let max = -Infinity;
     let min = Infinity;
     let maxIdx = 0;
@@ -121,32 +131,34 @@ const AnnualAnalysisFactory = {
 
     arrayData.forEach((val, idx) => {
       sum += val;
-
-      // Registra o Pico normalmente
       if (val > max) {
         max = val;
         maxIdx = idx;
       }
-
-      // REGRA CORRIGIDA: Só assume como 'mínima' se o valor for maior que ZERO
       if (val < min && val > 0) {
         min = val;
         minIdx = idx;
       }
     });
 
-    // Fallback de segurança: se o array for 100% zerado, impede que retorne 'Infinity'
     if (min === Infinity) {
       min = 0;
       minIdx = 0;
     }
 
+    const countMeses = arrayData.length;
+    const media = countMeses > 0 ? sum / countMeses : 0;
+    const atual = arrayData[arrayData.length - 1] || 0; // Último valor do array fatiado
+
     return {
       total: sum,
+      media: media,
+      atual: atual,
+      mesAtualNome: this.mesesNome[currentMonthIdx],
       pico: max,
-      mesPico: this.mesesNome[maxIdx],
+      mesPico: this.mesesNome[maxIdx + monthOffset],
       minima: min,
-      mesMinima: this.mesesNome[minIdx],
+      mesMinima: this.mesesNome[minIdx + monthOffset],
       variancia: this.calculateVariance(arrayData),
     };
   },
@@ -212,6 +224,9 @@ const StimulusAnalysisController = {
     breakdownMode: "muscle",
     monthChartMode: "overlap", // NOVO: Controle de sobreposição vs soma
     chartZoomLevel: 100, // NOVO: Controle do nível de zoom (100% = exibe todos)
+    yearRangeFilter: "all", // NOVO: Controle de range da visão anual
+    yearGroupFilter: "all",
+    yearMuscleFilter: [], // array com max 6
     chartInstance: null,
     navigateCallback: null,
     currentRenderId: null,
@@ -224,6 +239,39 @@ const StimulusAnalysisController = {
 
     this.cacheDOM();
     this.bindEvents();
+
+    if (this.state.period === "day") {
+      try {
+        const ownerId = await AuthService.getUserId();
+        if (ownerId) {
+          const { start, end } = this.getDateRange(
+            "day",
+            this.state.currentDate,
+          );
+          const todayHistory = await StimulusService.getSessionHistory(
+            ownerId,
+            start,
+            end,
+          );
+
+          if (!todayHistory || todayHistory.length === 0) {
+            const recentDateStr = await StimulusService.getAdjacentSessionDate(
+              ownerId,
+              end,
+              -1,
+            );
+            if (recentDateStr) {
+              const datePart = recentDateStr.split("T")[0];
+              const [y, m, d] = datePart.split("-").map(Number);
+              this.state.currentDate = new Date(y, m - 1, d);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão recente:", error);
+      }
+    }
+
     await this.updateDataAndRender();
   },
 
@@ -268,6 +316,7 @@ const StimulusAnalysisController = {
 
     this.state.period = e.target.dataset.period;
     this.state.chartZoomLevel = 100;
+    this.state.yearRangeFilter = "all"; // Reseta o filtro ao trocar de aba
     await this.updateDataAndRender();
   },
 
@@ -302,6 +351,7 @@ const StimulusAnalysisController = {
     await this.updateDataAndRender();
   },
 
+  // 3. ATUALIZAÇÃO DO RENDER ANUAL (Aplicação matemática do fatiamento e injeção do select)
   renderAnnualView() {
     const dadosPlano = this.state.data.volume.grafico_tabela;
 
@@ -312,11 +362,19 @@ const StimulusAnalysisController = {
     if (document.querySelector(".table-container"))
       document.querySelector(".table-container").style.display = "none";
 
-    // 1. Definição do LImite Temporal (Ocultar meses do futuro)
     const yearView = this.state.currentDate.getFullYear();
     const currentYear = new Date().getFullYear();
-    const limitMonth = yearView === currentYear ? new Date().getMonth() : 11; // 0 a 11
+    const limitMonth = yearView === currentYear ? new Date().getMonth() : 11;
 
+    let startMonth = 0;
+    if (this.state.yearRangeFilter !== "all") {
+      const range = parseInt(this.state.yearRangeFilter, 10);
+      startMonth = Math.max(0, limitMonth - range + 1);
+    }
+    const endMonth = limitMonth;
+
+    // Estruturação do Dicionário (Grupo -> Músculos)
+    const dictGrupos = {};
     const macroMap = {};
     const microMap = {};
 
@@ -326,6 +384,9 @@ const StimulusAnalysisController = {
       const mesString = row.periodo.split("-")[1];
       const monthIdx = parseInt(mesString, 10) - 1;
 
+      if (!dictGrupos[macro]) dictGrupos[macro] = new Set();
+      dictGrupos[macro].add(micro);
+
       if (!macroMap[macro]) macroMap[macro] = Array(12).fill(0);
       if (!microMap[micro]) microMap[micro] = Array(12).fill(0);
 
@@ -333,15 +394,43 @@ const StimulusAnalysisController = {
       microMap[micro][monthIdx] += row.series;
     });
 
+    this.renderAnnualFilters(dictGrupos);
+
     if (this.chartContainer) this.chartContainer.classList.remove("is-loading");
+    const parent = this.chartCanvas.parentNode;
+    if (parent.querySelector(".chart-header-toggle"))
+      parent.querySelector(".chart-header-toggle").style.display = "none";
+    if (parent.querySelector(".chart-zoom-slider"))
+      parent.querySelector(".chart-zoom-slider").style.display = "none";
 
     const mesesExibicao = AnnualAnalysisFactory.mesesNome
-      .slice(0, limitMonth + 1)
+      .slice(startMonth, endMonth + 1)
       .map((m) => `${m}./${String(yearView).slice(-2)}`);
-    const macroLabels = Object.keys(macroMap).sort();
 
-    // 2. Montagem dos Datasets (Gráfico Principal)
-    const datasets = macroLabels.map((macro, index) => {
+    const isFiltered =
+      this.state.yearGroupFilter !== "all" ||
+      this.state.yearMuscleFilter.length > 0;
+
+    // DEFINIÇÃO DO MODO (Macro x Micro)
+    let chartLabels = [];
+    let chartMap = {};
+
+    if (isFiltered) {
+      if (this.state.yearMuscleFilter.length > 0) {
+        chartLabels = this.state.yearMuscleFilter;
+      } else {
+        chartLabels = Array.from(dictGrupos[this.state.yearGroupFilter]).slice(
+          0,
+          6,
+        );
+      }
+      chartMap = microMap;
+    } else {
+      chartLabels = Object.keys(macroMap).sort();
+      chartMap = macroMap;
+    }
+
+    const datasets = chartLabels.map((labelName, index) => {
       const colors = [
         "#4285F4",
         "#EA4335",
@@ -351,42 +440,38 @@ const StimulusAnalysisController = {
         "#46BDC6",
       ];
       const cor = colors[index % colors.length];
+      const dataArray = (chartMap[labelName] || Array(12).fill(0)).slice(
+        startMonth,
+        endMonth + 1,
+      );
+
       return {
-        label: macro,
-        data: macroMap[macro].slice(0, limitMonth + 1), // Corta dados do futuro
+        label: labelName,
+        data: dataArray,
         borderColor: cor,
-        backgroundColor: cor, // Preenche a bolinha da legenda
+        backgroundColor: cor,
         tension: 0.4,
-        // cubicInterpolationMode: "monotone", // Suavização nativa do Chart.js
+        cubicInterpolationMode: "monotone",
         borderWidth: 2,
         pointRadius: 0,
         pointHitRadius: 10,
-        pointStyle: "circle", // Bolinhas em vez de quadrados na legenda
+        pointStyle: "circle",
       };
     });
 
-    const parent = this.chartCanvas.parentNode;
-    if (this.state.chartInstance) {
-      this.state.chartInstance.destroy();
-    }
-
-    const chartHeader = parent.querySelector(".chart-header-toggle");
-    if (chartHeader) chartHeader.style.display = "none";
-    const sliderContainer = parent.querySelector(".chart-zoom-slider");
-    if (sliderContainer) sliderContainer.style.display = "none";
+    if (this.state.chartInstance) this.state.chartInstance.destroy();
 
     this.chartCanvas.remove();
     const newCanvas = document.createElement("canvas");
     newCanvas.id = "stimulusRadarChart";
-    parent.appendChild(newCanvas);
+
+    const filtersContainer = parent.querySelector(".annual-filters-bar");
+    parent.insertBefore(newCanvas, filtersContainer.nextSibling);
     this.chartCanvas = newCanvas;
 
     this.state.chartInstance = new Chart(this.chartCanvas, {
       type: "line",
-      data: {
-        labels: mesesExibicao,
-        datasets: datasets,
-      },
+      data: { labels: mesesExibicao, datasets: datasets },
       options: {
         responsive: true,
         maintainAspectRatio: true,
@@ -399,105 +484,359 @@ const StimulusAnalysisController = {
         plugins: {
           legend: {
             position: "top",
-            labels: {
-              usePointStyle: true,
-              boxWidth: 8,
-              padding: 16, // Amplia o espaçamento para forçar a quebra da legenda no mobile
-            },
+            labels: { usePointStyle: true, boxWidth: 8, padding: 16 },
           },
         },
       },
     });
 
-    // 3. Preparação das Análises Granulares (Decks e Sparklines)
-    let globalMaxVolume = 0;
+    this.summaryContainer.innerHTML = "";
 
-    const statsList = Object.keys(microMap).map((musculo) => {
-      // Fatiamento obrigatório: Cortar array no limite do mês para gerar SVG sem extrapolamento
-      const dataArray = microMap[musculo].slice(0, limitMonth + 1);
-      const stats = AnnualAnalysisFactory.getStats(dataArray);
+    // RENDERIZAÇÃO DOS DADOS E SUMÁRIOS
+    if (isFiltered) {
+      // MODO MICRO (Detalhes por Músculo e Resumo Específico)
+      let html = `<div class="analysis-sections-container">`;
+      const statsFiltrados = [];
 
-      // Descobre o teto global do Y para a normalização de escala dos SVGs
-      if (stats.pico > globalMaxVolume) globalMaxVolume = stats.pico;
-
-      return { musculo, dataArray, ...stats };
-    });
-
-    const topMais = [...statsList]
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
-    const topMenos = [...statsList]
-      .filter((m) => m.total > 0)
-      .sort((a, b) => a.total - b.total)
-      .slice(0, 5);
-    const topVar = [...statsList]
-      .filter((m) => m.total > 0)
-      .sort((a, b) => b.variancia - a.variancia)
-      .slice(0, 5);
-
-    // ValKey mapeia a chave do objeto que será impressa na div de maior destaque
-    const buildDeckHtml = (
-      title,
-      icon,
-      list,
-      colorHex,
-      valKey,
-      subKeyPrefix,
-    ) => {
-      let html = `
-        <div class="analysis-deck-header">
-          <span class="material-symbols-rounded" style="font-size: 18px;">${icon}</span>
-          ${title}
-        </div>
-        <div class="analysis-deck">
-      `;
-
-      list.forEach((item, i) => {
-        // Agora reflete o Pico ou a Mínima como você solicitou na documentação
-        const displayVal =
-          valKey === "variancia" ? Math.round(item.pico) : item[valKey];
-
-        let displaySub = "";
-        if (valKey === "variancia") {
-          displaySub = `var. ${(item.variancia * 100).toFixed(0)}%`;
-        } else if (valKey === "pico") {
-          displaySub = `${subKeyPrefix} ${item.mesPico}`;
-        } else {
-          displaySub = `${subKeyPrefix} ${item.mesMinima}`;
-        }
-
-        // Envia o Teto Global para que todos usem a mesma balança Y
-        const sparklineSvg = AnnualAnalysisFactory.generateSparkline(
-          item.dataArray,
-          colorHex,
-          `${valKey}-${i}`,
-          globalMaxVolume,
+      chartLabels.forEach((musculo) => {
+        const dataArray = (microMap[musculo] || Array(12).fill(0)).slice(
+          startMonth,
+          endMonth + 1,
         );
+        const stats = AnnualAnalysisFactory.getStats(
+          dataArray,
+          startMonth,
+          endMonth,
+        );
+        statsFiltrados.push({ musculo, ...stats });
 
         html += `
-          <div class="analysis-card">
-            <div class="analysis-card-content">
-              <div class="analysis-card-title">${item.musculo}</div>
-              <div class="analysis-card-value">${displayVal}</div>
-              <div class="analysis-card-subtext">${displaySub}</div>
-            </div>
-            <div class="analysis-card-sparkline">
-              ${sparklineSvg}
+          <div class="muscle-detail-section" style="margin-bottom: 24px;">
+            <div class="analysis-deck-header">${musculo}</div>
+            <div class="analysis-deck">
+              <div class="analysis-card analysis-card--detail">
+                <div class="analysis-card-content">
+                  <div class="analysis-card-title">Atual</div>
+                  <div class="analysis-card-value">${stats.atual}</div>
+                  <div class="analysis-card-subtext">${stats.mesAtualNome}</div>
+                </div>
+              </div>
+              <div class="analysis-card analysis-card--detail">
+                <div class="analysis-card-content">
+                  <div class="analysis-card-title">Máximo</div>
+                  <div class="analysis-card-value">${stats.pico}</div>
+                  <div class="analysis-card-subtext">${stats.mesPico}</div>
+                </div>
+              </div>
+              <div class="analysis-card analysis-card--detail">
+                <div class="analysis-card-content">
+                  <div class="analysis-card-title">Mínimo</div>
+                  <div class="analysis-card-value">${stats.minima}</div>
+                  <div class="analysis-card-subtext">${stats.mesMinima}</div>
+                </div>
+              </div>
+              <div class="analysis-card analysis-card--detail">
+                <div class="analysis-card-content">
+                  <div class="analysis-card-title">Média</div>
+                  <div class="analysis-card-value">${stats.media.toFixed(1)}</div>
+                  <div class="analysis-card-subtext">período sel.</div>
+                </div>
+              </div>
             </div>
           </div>
         `;
       });
-      return html + `</div>`;
+
+      // Resumo Geral (Slider Bottom)
+      if (statsFiltrados.length > 0) {
+        const validosVar = statsFiltrados.filter((m) => m.total >= 1);
+
+        let estavel = { musculo: "-", variancia: 0 };
+        let instavel = { musculo: "-", variancia: 0 };
+        let maximaAbs = { musculo: "-", pico: 0 };
+        let minimaAbs = { musculo: "-", minima: Infinity };
+
+        if (validosVar.length > 0) {
+          validosVar.sort((a, b) => a.variancia - b.variancia);
+          estavel = validosVar[0];
+          instavel = validosVar[validosVar.length - 1];
+        }
+
+        statsFiltrados.forEach((s) => {
+          if (s.pico > maximaAbs.pico) maximaAbs = s;
+          if (s.minima < minimaAbs.minima) minimaAbs = s;
+        });
+        if (minimaAbs.minima === Infinity) minimaAbs.minima = 0;
+
+        const periodStr = `${AnnualAnalysisFactory.mesesNome[startMonth]} - ${AnnualAnalysisFactory.mesesNome[endMonth]}`;
+
+        html += `
+          <div class="analysis-deck-header" style="margin-top: 16px;">
+            <span class="material-symbols-rounded" style="font-size: 18px;">analytics</span>
+            Resumo geral
+          </div>
+          <div class="analysis-deck">
+            <div class="analysis-card">
+              <div class="analysis-card-content">
+                <div class="analysis-card-title">Estável - ${estavel.musculo}</div>
+                <div class="analysis-card-value">${(estavel.variancia * 100).toFixed(0)}%</div>
+                <div class="analysis-card-subtext">Menor oscilação relativa</div>
+              </div>
+            </div>
+            <div class="analysis-card">
+              <div class="analysis-card-content">
+                <div class="analysis-card-title">Variável - ${instavel.musculo}</div>
+                <div class="analysis-card-value">${(instavel.variancia * 100).toFixed(0)}%</div>
+                <div class="analysis-card-subtext">Maior oscilação relativa</div>
+              </div>
+            </div>
+            <div class="analysis-card">
+              <div class="analysis-card-content">
+                <div class="analysis-card-title">Máx. - ${maximaAbs.musculo}</div>
+                <div class="analysis-card-value">${maximaAbs.pico}</div>
+                <div class="analysis-card-subtext">Maior volume bruto (${periodStr})</div>
+              </div>
+            </div>
+            <div class="analysis-card">
+              <div class="analysis-card-content">
+                <div class="analysis-card-title">Mín. - ${minimaAbs.musculo}</div>
+                <div class="analysis-card-value">${minimaAbs.minima}</div>
+                <div class="analysis-card-subtext">Menor volume bruto > 0 (${periodStr})</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+      this.summaryContainer.innerHTML = html;
+    } else {
+      // MODO MACRO (Aquele que já estava pronto com Top 5 Global)
+      let globalMaxVolume = 0;
+      const statsList = Object.keys(microMap).map((musculo) => {
+        const dataArray = microMap[musculo].slice(startMonth, endMonth + 1);
+        const stats = AnnualAnalysisFactory.getStats(
+          dataArray,
+          startMonth,
+          endMonth,
+        );
+        if (stats.pico > globalMaxVolume) globalMaxVolume = stats.pico;
+        return { musculo, dataArray, ...stats };
+      });
+
+      const topMais = [...statsList]
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+      const topMenos = [...statsList]
+        .filter((m) => m.total > 0)
+        .sort((a, b) => a.total - b.total)
+        .slice(0, 5);
+      const topVar = [...statsList]
+        .filter((m) => m.total >= 15)
+        .sort((a, b) => b.variancia - a.variancia)
+        .slice(0, 5);
+
+      const buildDeckHtml = (
+        title,
+        icon,
+        list,
+        colorHex,
+        valKey,
+        subKeyPrefix,
+      ) => {
+        let h = `<div class="analysis-deck-header"><span class="material-symbols-rounded" style="font-size: 18px;">${icon}</span>${title}</div><div class="analysis-deck">`;
+        list.forEach((item, i) => {
+          const displayVal =
+            valKey === "variancia"
+              ? `${Math.round(item.minima)} - ${Math.round(item.pico)}`
+              : item[valKey];
+          let displaySub = "";
+          if (valKey === "variancia")
+            displaySub = `var. ${(item.variancia * 100).toFixed(0)}%`;
+          else if (valKey === "pico")
+            displaySub = `${subKeyPrefix} ${item.mesPico}`;
+          else displaySub = `${subKeyPrefix} ${item.mesMinima}`;
+
+          const sparklineSvg = AnnualAnalysisFactory.generateSparkline(
+            item.dataArray,
+            colorHex,
+            `${valKey}-${i}`,
+            globalMaxVolume,
+          );
+          h += `<div class="analysis-card"><div class="analysis-card-content"><div class="analysis-card-title">${item.musculo}</div><div class="analysis-card-value">${displayVal}</div><div class="analysis-card-subtext">${displaySub}</div></div><div class="analysis-card-sparkline">${sparklineSvg}</div></div>`;
+        });
+        return h + `</div>`;
+      };
+
+      this.summaryContainer.innerHTML = `
+        <div class="analysis-sections-container">
+          ${buildDeckHtml("Músculos mais ativos (top 5)", "arrow_upward", topMais, "#fba87f", "pico", "pico em")}
+          ${buildDeckHtml("Músculos menos ativos (top 5)", "arrow_downward", topMenos, "#fba87f", "minima", "mínima em")}
+          ${buildDeckHtml("Músculos maior variância (top 5)", "bar_chart", topVar, "#fba87f", "variancia", "pico em")}
+        </div>
+      `;
+    }
+  },
+
+  renderAnnualFilters(dictGrupos) {
+    const parent = this.chartCanvas.parentNode;
+    let bar = parent.querySelector(".annual-filters-bar");
+
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.className = "annual-filters-bar";
+      parent.insertBefore(bar, this.chartCanvas);
+    }
+
+    // Identifica quais músculos mostrar no dropdown baseado no Grupo selecionado
+    let musculosDisponiveis = [];
+    if (this.state.yearGroupFilter !== "all") {
+      musculosDisponiveis = Array.from(
+        dictGrupos[this.state.yearGroupFilter] || [],
+      );
+    } else {
+      musculosDisponiveis = Object.values(dictGrupos).reduce((acc, curr) => {
+        curr.forEach((m) => acc.add(m));
+        return acc;
+      }, new Set());
+      musculosDisponiveis = Array.from(musculosDisponiveis).sort();
+    }
+
+    const maxAlcancado = this.state.yearMuscleFilter.length >= 6;
+
+    let dropdownHTML = musculosDisponiveis
+      .map((m) => {
+        const isChecked = this.state.yearMuscleFilter.includes(m);
+        const disabledStr =
+          !isChecked && maxAlcancado ? 'disabled style="opacity: 0.5;"' : "";
+        return `
+        <label class="filter-checkbox-item" ${disabledStr}>
+          <input type="checkbox" value="${m}" class="muscle-cb" ${isChecked ? "checked" : ""} ${disabledStr}>
+          ${m}
+        </label>
+      `;
+      })
+      .join("");
+
+    bar.innerHTML = `
+      <div class="filter-select-wrapper" style="flex: 1 1 100%;">
+        <select id="rangeFilter" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: none; background: var(--gray-100); font-size: 14px;">
+          <option value="all" ${this.state.yearRangeFilter === "all" ? "selected" : ""}>Todos os meses</option>
+          <option value="3" ${this.state.yearRangeFilter === "3" ? "selected" : ""}>3 últimos meses</option>
+          <option value="6" ${this.state.yearRangeFilter === "6" ? "selected" : ""}>6 últimos meses</option>
+          <option value="9" ${this.state.yearRangeFilter === "9" ? "selected" : ""}>9 últimos meses</option>
+          <option value="12" ${this.state.yearRangeFilter === "12" ? "selected" : ""}>12 últimos meses</option>
+        </select>
+      </div>
+
+      <div class="filter-select-wrapper">
+        <select id="groupFilter" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: none; background: var(--gray-100); font-size: 14px;">
+          <option value="all">Grupos...</option>
+          ${Object.keys(dictGrupos)
+            .sort()
+            .map(
+              (g) =>
+                `<option value="${g}" ${this.state.yearGroupFilter === g ? "selected" : ""}>${g}</option>`,
+            )
+            .join("")}
+        </select>
+      </div>
+
+      <div class="filter-select-wrapper">
+        <button type="button" class="filter-select-btn" id="btnDropdownMuscles">
+          Músculos (${this.state.yearMuscleFilter.length}/6)
+          <span class="material-symbols-rounded" style="font-size: 16px;">arrow_drop_down</span>
+        </button>
+        <div class="filter-dropdown-menu" id="menuDropdownMuscles">
+          ${dropdownHTML}
+        </div>
+      </div>
+
+      <button type="button" class="btn-clear-filters" id="btnClearFilters">
+        <span class="material-symbols-rounded" style="font-size: 16px;">filter_alt_off</span> Limpar
+      </button>
+    `;
+
+    // Eventos
+    bar.querySelector("#rangeFilter").addEventListener("change", (e) => {
+      this.state.yearRangeFilter = e.target.value;
+      this.renderAnnualView();
+    });
+
+    bar.querySelector("#groupFilter").addEventListener("change", (e) => {
+      this.state.yearGroupFilter = e.target.value;
+      this.state.yearMuscleFilter = []; // Reseta os músculos se mudar o grupo
+      this.renderAnnualView();
+    });
+
+    const btnDrop = bar.querySelector("#btnDropdownMuscles");
+    const menuDrop = bar.querySelector("#menuDropdownMuscles");
+    let filterChanged = false;
+
+    // Função que escuta o clique fora do menu para fechar e atualizar
+    const closeDropdown = (e) => {
+      if (!menuDrop.contains(e.target) && !btnDrop.contains(e.target)) {
+        menuDrop.classList.remove("is-open");
+        document.removeEventListener("click", closeDropdown); // Evita memory leak
+        if (filterChanged) this.renderAnnualView();
+      }
     };
 
-    this.summaryContainer.innerHTML = `
-      <div class="analysis-sections-container">
-        ${buildDeckHtml("Músculos mais ativos (top 5)", "arrow_upward", topMais, "#fba87f", "pico", "pico em")}
-        ${buildDeckHtml("Músculos menos ativos (top 5)", "arrow_downward", topMenos, "#fba87f", "minima", "mínima em")}
-        ${buildDeckHtml("Músculos maior variância (top 5)", "bar_chart", topVar, "#fba87f", "variancia", "pico em")}
-      </div>
-    `;
+    // Abre e fecha pelo próprio botão
+    btnDrop.addEventListener("click", () => {
+      if (menuDrop.classList.contains("is-open")) {
+        menuDrop.classList.remove("is-open");
+        document.removeEventListener("click", closeDropdown);
+        if (filterChanged) this.renderAnnualView();
+      } else {
+        menuDrop.classList.add("is-open");
+        filterChanged = false;
+        document.addEventListener("click", closeDropdown);
+      }
+    });
+
+    // Controle em tempo real dos checkboxes sem re-renderizar a tela inteira
+    bar.querySelectorAll(".muscle-cb").forEach((cb) => {
+      cb.addEventListener("change", (e) => {
+        filterChanged = true;
+
+        if (e.target.checked) {
+          if (this.state.yearMuscleFilter.length < 6)
+            this.state.yearMuscleFilter.push(e.target.value);
+        } else {
+          this.state.yearMuscleFilter = this.state.yearMuscleFilter.filter(
+            (m) => m !== e.target.value,
+          );
+        }
+
+        // 1. Atualiza o contador no botão instantaneamente
+        btnDrop.innerHTML = `
+          Músculos (${this.state.yearMuscleFilter.length}/6)
+          <span class="material-symbols-rounded" style="font-size: 16px;">arrow_drop_down</span>
+        `;
+
+        // 2. Trava/Destrava visualmente os checkboxes restantes se bater no limite de 6
+        const maxReached = this.state.yearMuscleFilter.length >= 6;
+        bar.querySelectorAll(".muscle-cb").forEach((box) => {
+          if (!box.checked) {
+            box.disabled = maxReached;
+            // Opcional: Adicione transição no CSS do .filter-checkbox-item para ficar mais suave
+            box.parentElement.style.opacity = maxReached ? "0.4" : "1";
+            box.parentElement.style.pointerEvents = maxReached
+              ? "none"
+              : "auto";
+          }
+        });
+      });
+    });
+
+    bar.querySelector("#btnClearFilters").addEventListener("click", () => {
+      this.state.yearRangeFilter = "all";
+      this.state.yearGroupFilter = "all";
+      this.state.yearMuscleFilter = [];
+      this.renderAnnualView();
+    });
   },
+
   // FUNÇÃO DE NAVEGAÇÃO DE ATALHO (Drill-down)
   goToDayView(dateString) {
     // Atualiza o estado
@@ -933,8 +1272,13 @@ const StimulusAnalysisController = {
             );
           }),
           borderColor: "#f59e0b",
-          backgroundColor: "transparent",
-          pointBackgroundColor: "#f59e0b",
+          backgroundColor: "#f59e0b33",
+          pointBackgroundColor: "transparent", // Mantém invisível, mas ainda responde a hover
+          pointRadius: 0,
+          pointHitRadius: 15, // Mantém a área invisível ao redor para o toque/hover funcionar
+          borderWidth: 1.9,
+          tension: 0.4, // Arredonda as linhas (efeito orgânico/bolha)
+          borderJoinStyle: "round", // Tira a quina viva do traço
         },
       ];
     } else {
@@ -951,9 +1295,14 @@ const StimulusAnalysisController = {
           label: this.formatShortDate(periodo),
           data: filteredLabelsRaw.map((m) => musculosMap[m][periodo] || 0),
           borderColor: cor,
-          backgroundColor: "transparent",
-          pointBackgroundColor: cor,
+          backgroundColor: cor + "33", // Transparência de 20%
+          pointBackgroundColor: "transparent", // Mantém invisível, mas ainda responde a hover
+          pointRadius: 0,
+          pointHitRadius: 15, // Mantém a área invisível ao redor para o toque/hover funcionar
+          borderWidth: 1.9,
           hidden: isHidden, // Otimização para o Chart.js gerenciar a legenda
+          tension: 0.05, // Arredonda as linhas (efeito orgânico/bolha)
+          borderJoinStyle: "round", // Tira a quina viva do traço
         };
       });
     }
@@ -1120,6 +1469,10 @@ const StimulusAnalysisController = {
       const headerTitle = sectionBreakdown.querySelector("h2");
       if (headerTitle) headerTitle.textContent = "Músculos × Exercícios";
 
+      // Helper inline para truncar
+      const formatExName = (name) =>
+        name.length > 26 ? name.substring(0, 26) + "..." : name;
+
       this.exerciseList.innerHTML = Object.keys(grupos)
         .sort()
         .map(
@@ -1133,7 +1486,7 @@ const StimulusAnalysisController = {
             <div class="sub-group">
               <span class="sub-group-label">Principais</span>
               <div class="tags-container">
-                ${grupos[musculo].principais.map((ex) => `<span class="tag-pill">${ex.exercicio} <span class="--gray-200">(${ex.series})</span></span>`).join("")}
+                ${grupos[musculo].principais.map((ex) => `<span class="tag-pill" title="${ex.exercicio}">${formatExName(ex.exercicio)} <span class="--gray-200">(${ex.series})</span></span>`).join("")}
               </div>
             </div>
           `
@@ -1146,7 +1499,7 @@ const StimulusAnalysisController = {
             <div class="sub-group">
               <span class="sub-group-label">Secundários</span>
               <div class="tags-container">
-                ${grupos[musculo].secundarios.map((ex) => `<span class="tag-pill">${ex.exercicio} <span class="--gray-200">(${ex.series})</span></span>`).join("")}
+                ${grupos[musculo].secundarios.map((ex) => `<span class="tag-pill" title="${ex.exercicio}">${formatExName(ex.exercicio)} <span class="--gray-200">(${ex.series})</span></span>`).join("")}
               </div>
             </div>
           `
