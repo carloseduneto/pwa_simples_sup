@@ -66,7 +66,7 @@ export const WorkoutService = {
     const itensPromise = client
       .from("template_itens")
       .select(
-        "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao), series_alvo, repeticoes_alvo,tecnica_intensificacao",
+        "id, exercicios(id, nome), treino_recomendacoes(valor, detalhes, description), templates(nome, descricao, data_registro, created_at), series_alvo, repeticoes_alvo,tecnica_intensificacao",
       )
       .eq("template_id", templateId)
       .order("ordem");
