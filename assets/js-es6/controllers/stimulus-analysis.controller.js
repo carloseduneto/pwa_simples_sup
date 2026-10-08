@@ -1,6 +1,7 @@
 import { StimulusService } from "../services/stimulus.service.js";
 import { AuthService } from "../services/auth.service.js";
 
+let usarSemaforo = false;
 // --- MÓDULO DE CALENDÁRIO (Fábrica Modular) ---
 const CalendarFactory = {
   // Extrai uma lista de strings 'YYYY-MM-DD' em horário local a partir dos dados brutos
@@ -160,6 +161,101 @@ const AnnualAnalysisFactory = {
       minima: min,
       mesMinima: this.mesesNome[minIdx + monthOffset],
       variancia: this.calculateVariance(arrayData),
+    };
+  },
+
+  getMonthlyTrend(arrayData) {
+    if (arrayData.length < 2)
+      return {
+        text: "estável",
+        icon: "",
+        color: "var(--text-secondary, #666)",
+      };
+
+    const mid = Math.floor(arrayData.length / 2);
+
+    // Média da primeira metade do mês
+    const firstHalfSum = arrayData.slice(0, mid).reduce((a, b) => a + b, 0);
+    const firstHalfAvg = firstHalfSum / mid;
+
+    // Média da segunda metade do mês
+    const secondHalfSum = arrayData.slice(mid).reduce((a, b) => a + b, 0);
+    const secondHalfAvg = secondHalfSum / (arrayData.length - mid);
+
+    // Margem de 15% para classificar como aumento ou queda
+    if (secondHalfAvg > firstHalfAvg * 1.15)
+      return {
+        text: "aumento",
+        icon: "▲",
+        color: "var(--success-color, #10b981)",
+      };
+    if (secondHalfAvg < firstHalfAvg * 0.85)
+      return {
+        text: "queda",
+        icon: "▼",
+        color: "var(--danger-color, #ef4444)",
+      };
+
+    return { text: "estável", icon: "", color: "var(--text-secondary, #666)" };
+  },
+
+  getStabilityLevel(arrayData) {
+    // 1. Remove as semanas das bordas se estiverem zeradas (Burla o Efeito de Borda)
+    let validWeeks = [...arrayData];
+    if (validWeeks.length > 0 && validWeeks[0] === 0) validWeeks.shift();
+    if (validWeeks.length > 0 && validWeeks[validWeeks.length - 1] === 0)
+      validWeeks.pop();
+
+    // 2. Se sobrou apenas 1 semana completa, não há como avaliar constância
+    if (validWeeks.length < 2)
+      return {
+        text: "dados insuficientes",
+        icon: "remove",
+        color: "var(--text-secondary, #666)",
+      };
+
+    const mean = validWeeks.reduce((a, b) => a + b, 0) / validWeeks.length;
+    if (mean === 0)
+      return {
+        text: "inativo",
+        icon: "remove",
+        color: "var(--text-secondary, #666)",
+      };
+
+    // 3. Calcula o Coeficiente de Variação apenas nas semanas reais de treino
+    const variance =
+      validWeeks.reduce((a, b) => a + Math.pow(b - mean, 2), 0) /
+      validWeeks.length;
+    const cv = Math.sqrt(variance) / mean;
+
+    // TRUE = Laranja + Cores de Semáforo | FALSE = Cinza + Laranja da Marca
+    const usarSemaforo = false;
+
+    // 4. Classificação rigorosa da estabilidade
+    if (cv <= 0.25)
+      return {
+        text: "consistente",
+        icon: "check_circle",
+        color: usarSemaforo
+          ? "var(--success-color, #10b981)"
+          : "var(--primary-color, #ff6b00)",
+      };
+
+    if (cv <= 0.55)
+      return {
+        text: "oscilante",
+        icon: "warning",
+        color: usarSemaforo
+          ? "var(--warning-color, #f59e0b)"
+          : "var(--primary-color, #ff6b00)",
+      };
+
+    return {
+      text: "irregular",
+      icon: "error",
+      color: usarSemaforo
+        ? "var(--danger-color, #ef4444)"
+        : "var(--primary-color, #ff6b00)",
     };
   },
 
@@ -625,15 +721,15 @@ const StimulusAnalysisController = {
 
       const topMais = [...statsList]
         .sort((a, b) => b.total - a.total)
-        .slice(0, 5);
+        .slice(0, 6);
       const topMenos = [...statsList]
         .filter((m) => m.total > 0)
         .sort((a, b) => a.total - b.total)
-        .slice(0, 5);
+        .slice(0, 6);
       const topVar = [...statsList]
         .filter((m) => m.total >= 15)
         .sort((a, b) => b.variancia - a.variancia)
-        .slice(0, 5);
+        .slice(0, 6);
 
       const buildDeckHtml = (
         title,
@@ -677,7 +773,220 @@ const StimulusAnalysisController = {
     }
   },
 
-  renderAnnualFilters(dictGrupos) {
+  renderMonthlyTrendView() {
+    const dadosPlano = this.state.data.volume.grafico_tabela;
+
+    // Oculta tudo que não pertence a essa view (Tabelas, Exercícios, Sliders do Radar)
+    if (this.exerciseList)
+      this.exerciseList.closest(".exercise-breakdown").style.display = "none";
+    if (document.querySelector(".table-container"))
+      document.querySelector(".table-container").style.display = "none";
+
+    const parent = this.chartCanvas
+      ? this.chartCanvas.parentNode
+      : document.querySelector(".chart-container");
+    if (parent.querySelector(".chart-header-toggle"))
+      parent.querySelector(".chart-header-toggle").style.display = "none";
+    if (parent.querySelector(".chart-zoom-slider"))
+      parent.querySelector(".chart-zoom-slider").style.display = "none";
+    if (this.chartContainer) this.chartContainer.classList.remove("is-loading");
+
+    const dictGrupos = {};
+    const macroMap = {};
+    const microMap = {};
+
+    // Mapeia o eixo X com base nas semanas encontradas no mês
+    const periodosUnicos = [
+      ...new Set(dadosPlano.map((d) => d.periodo)),
+    ].sort();
+    const labelsExibicao = periodosUnicos.map((_, i) => `${i + 1}ª sem`);
+
+    dadosPlano.forEach((row) => {
+      const macro = row.grupo_muscular || "Geral";
+      const micro = row.musculo;
+      const weekIdx = periodosUnicos.indexOf(row.periodo);
+
+      if (!dictGrupos[macro]) dictGrupos[macro] = new Set();
+      dictGrupos[macro].add(micro);
+
+      if (!macroMap[macro])
+        macroMap[macro] = Array(periodosUnicos.length).fill(0);
+      if (!microMap[micro])
+        microMap[micro] = Array(periodosUnicos.length).fill(0);
+
+      macroMap[macro][weekIdx] += row.series;
+      microMap[micro][weekIdx] += row.series;
+    });
+
+    // Renderiza a barra de filtros dizendo que é modo 'month' (para ocultar o rangeFilter)
+    this.renderAnnualFilters(dictGrupos, "month");
+
+    const isFiltered =
+      this.state.yearGroupFilter !== "all" ||
+      this.state.yearMuscleFilter.length > 0;
+    let chartLabels = [];
+    let chartMap = {};
+
+    if (isFiltered) {
+      if (this.state.yearMuscleFilter.length > 0) {
+        chartLabels = this.state.yearMuscleFilter;
+      } else {
+        chartLabels = Array.from(dictGrupos[this.state.yearGroupFilter]).slice(
+          0,
+          6,
+        );
+      }
+      chartMap = microMap;
+    } else {
+      chartLabels = Object.keys(macroMap).sort();
+      chartMap = macroMap;
+    }
+
+    // Configuração das Linhas do Gráfico (Chart.js)
+    const datasets = chartLabels.map((labelName, index) => {
+      const colors = [
+        "#4285F4",
+        "#EA4335",
+        "#FBBC04",
+        "#34A853",
+        "#FF6D00",
+        "#46BDC6",
+      ];
+      const cor = colors[index % colors.length];
+      const dataArray =
+        chartMap[labelName] || Array(periodosUnicos.length).fill(0);
+
+      return {
+        label: labelName,
+        data: dataArray,
+        borderColor: cor,
+        backgroundColor: cor,
+        tension: 0.4,
+        cubicInterpolationMode: "monotone",
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHitRadius: 10,
+        pointStyle: "circle",
+      };
+    });
+
+    if (this.state.chartInstance) this.state.chartInstance.destroy();
+    if (this.chartCanvas) this.chartCanvas.remove();
+
+    const newCanvas = document.createElement("canvas");
+    newCanvas.id = "stimulusRadarChart";
+
+    const filtersContainer = parent.querySelector(".annual-filters-bar");
+    if (filtersContainer)
+      parent.insertBefore(newCanvas, filtersContainer.nextSibling);
+    else parent.appendChild(newCanvas);
+
+    this.chartCanvas = newCanvas;
+
+    this.state.chartInstance = new Chart(this.chartCanvas, {
+      type: "line",
+      data: { labels: labelsExibicao, datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.2,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: "rgba(128,128,128,0.1)" } },
+        },
+        plugins: {
+          legend: {
+            position: "top",
+            labels: { usePointStyle: true, boxWidth: 8, padding: 16 },
+          },
+        },
+      },
+    });
+
+    // --- MONTAGEM DOS CARDS DE RESUMO (Top 7) ---
+    let globalMaxVolume = 0;
+    const statsList = Object.keys(microMap).map((musculo) => {
+      const dataArray = microMap[musculo];
+      const stats = AnnualAnalysisFactory.getStats(
+        dataArray,
+        0,
+        dataArray.length - 1,
+      );
+      if (stats.pico > globalMaxVolume) globalMaxVolume = stats.pico;
+
+      // NOVA CHAMADA: Usa a estabilidade inteligente livre do efeito de borda
+      const stability = AnnualAnalysisFactory.getStabilityLevel(dataArray);
+      return { musculo, dataArray, stability, ...stats };
+    });
+
+    const topMais = [...statsList]
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 7);
+    const topMenos = [...statsList]
+      .filter((m) => m.total > 0)
+      .sort((a, b) => a.total - b.total)
+      .slice(0, 7);
+    const topVar = [...statsList]
+      .filter((m) => m.total >= 1)
+      .sort((a, b) => b.variancia - a.variancia)
+      .slice(0, 7);
+
+    const buildDeckHtml = (title, icon, list, colorHex, isVar = false) => {
+      let h = `<div class="analysis-deck-header"><span class="material-symbols-rounded" style="font-size: 18px;">${icon}</span>${title}</div><div class="analysis-deck">`;
+      list.forEach((item, i) => {
+        const displayVal = isVar
+          ? `${Math.round(item.minima)} - ${Math.round(item.pico)}`
+          : item.total;
+
+        let displaySub = "";
+        let trendColor = "var(--text-secondary, #666)";
+        let materialIcon = "";
+
+        if (isVar) {
+          displaySub = `var. ${(item.variancia * 100).toFixed(0)}%`;
+        } else {
+          // Injeta a classificação de estabilidade com o ícone correspondente
+          displaySub = item.stability.text;
+          trendColor = item.stability.color;
+          materialIcon = `<span class="material-symbols-rounded" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">${item.stability.icon}</span>`;
+        }
+
+        const sparklineSvg = AnnualAnalysisFactory.generateSparkline(
+          item.dataArray,
+          colorHex,
+          `m-${isVar}-${i}`,
+          globalMaxVolume,
+        );
+
+        h += `
+          <div class="analysis-card">
+            <div class="analysis-card-content">
+              <div class="analysis-card-title">${item.musculo}</div>
+              <div class="analysis-card-value">${displayVal}</div>
+              <div class="analysis-card-subtext" style="color: ${trendColor}; font-weight: 500; display: flex; align-items: center;">
+                ${isVar ? "" : materialIcon}${displaySub}
+              </div>
+            </div>
+            <div class="analysis-card-sparkline">${sparklineSvg}</div>
+          </div>`;
+      });
+      return h + `</div>`;
+    };
+
+    const usarSemaforo = false;
+    const sparklinkColor = usarSemaforo ? "#fba87f" : "#ccccc1"; // Laranja ou Cinza Neutro
+
+    this.summaryContainer.innerHTML = `
+      <div class="analysis-sections-container">
+        ${buildDeckHtml("Músculos mais ativos (top 7)", "arrow_upward", topMais, sparklinkColor, false)}
+        ${buildDeckHtml("Músculos menos ativos (top 7)", "arrow_downward", topMenos, sparklinkColor, false)}
+        ${buildDeckHtml("Músculos maior variância (top 7)", "bar_chart", topVar, sparklinkColor, true)}
+      </div>
+    `;
+  },
+
+  renderAnnualFilters(dictGrupos, mode = "year") {
     const parent = this.chartCanvas.parentNode;
     let bar = parent.querySelector(".annual-filters-bar");
 
@@ -717,7 +1026,14 @@ const StimulusAnalysisController = {
       })
       .join("");
 
-    bar.innerHTML = `
+    const rangeFilterStyle =
+      mode === "month" ? "display: none;" : "flex: 1 1 100%;";
+
+    // CORREÇÃO: Só cria a string HTML do select se NÃO for o modo mês
+    const rangeFilterHTML =
+      mode === "month"
+        ? ""
+        : `
       <div class="filter-select-wrapper" style="flex: 1 1 100%;">
         <select id="rangeFilter" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: none; background: var(--gray-100); font-size: 14px;">
           <option value="all" ${this.state.yearRangeFilter === "all" ? "selected" : ""}>Todos os meses</option>
@@ -727,7 +1043,11 @@ const StimulusAnalysisController = {
           <option value="12" ${this.state.yearRangeFilter === "12" ? "selected" : ""}>12 últimos meses</option>
         </select>
       </div>
+    `;
 
+    bar.innerHTML = `
+      ${rangeFilterHTML}
+      
       <div class="filter-select-wrapper">
         <select id="groupFilter" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: none; background: var(--gray-100); font-size: 14px;">
           <option value="all">Grupos...</option>
@@ -757,11 +1077,14 @@ const StimulusAnalysisController = {
     `;
 
     // Eventos
-    bar.querySelector("#rangeFilter").addEventListener("change", (e) => {
-      this.state.yearRangeFilter = e.target.value;
-      this.renderAnnualView();
-    });
-
+    const selectRange = bar.querySelector("#rangeFilter");
+    if (selectRange) {
+      // Protege o evento caso o HTML não exista na tela
+      selectRange.addEventListener("change", (e) => {
+        this.state.yearRangeFilter = e.target.value;
+        this.renderAnnualView();
+      });
+    }
     bar.querySelector("#groupFilter").addEventListener("change", (e) => {
       this.state.yearGroupFilter = e.target.value;
       this.state.yearMuscleFilter = []; // Reseta os músculos se mudar o grupo
@@ -913,7 +1236,18 @@ const StimulusAnalysisController = {
       // Desvio de arquitetura visual
       if (this.state.period === "year") {
         this.renderAnnualView();
+      } else if (this.state.period === "month") {
+        // Rota Mensal nova (Linha, Semanas e Resumos)
+        this.renderMiniCalendar();
+        this.renderHistoryLog();
+        this.renderMonthlyTrendView();
       } else {
+        // Rota Dia e Semana (Gráfico Radar e Tabela Clássica)
+
+        // CORREÇÃO: Destrói a barra de filtros ao sair das abas Ano/Mês
+        const oldFilterBar = document.querySelector(".annual-filters-bar");
+        if (oldFilterBar) oldFilterBar.remove();
+
         this.renderMiniCalendar();
         this.renderHistoryLog();
         this.renderExerciseList();
@@ -923,8 +1257,8 @@ const StimulusAnalysisController = {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               if (this.state.currentRenderId === renderToken) {
-                this.renderTable(); // Nova função modular
-                this.renderChart(); // Nova função modular
+                this.renderTable();
+                this.renderChart();
               }
             });
           });
