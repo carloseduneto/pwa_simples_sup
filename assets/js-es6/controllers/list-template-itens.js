@@ -109,9 +109,29 @@ export async function renderizarListItensTemplate(onNavigate) {
       const grupoEl = clone.querySelector(".exercise-item__group");
 
       if (nomeEl) nomeEl.innerText = exercicio.exercicios?.nome || "Exercício";
-      if (grupoEl)
-        grupoEl.innerText =
-          exercicio.exercicios?.grupo_muscular?.nome || "Sem grupo";
+      // if (grupoEl) grupoEl.innerText = exercicio.exercicios?.grupo_muscular?.nome || "Sem grupo";
+      let gruposMuscularesGranulares = exercicio.exercicios?.musculo_exercicio
+      ?.map((m) => m.musculos_granulares?.nome)
+      ?.join(" • ");
+
+      //Se passar de 30 caracteres, corta e adiciona reticências
+      if (gruposMuscularesGranulares && gruposMuscularesGranulares.length > 31) {
+        gruposMuscularesGranulares =
+          gruposMuscularesGranulares.substring(0, 31) + "...";
+      }
+
+      let seriesRepeticoes = `${exercicio.series_alvo || 0}x${exercicio.repeticoes_alvo || 0}`;
+
+      let subtext = gruposMuscularesGranulares ? `${gruposMuscularesGranulares} - ${seriesRepeticoes}` : seriesRepeticoes;
+
+
+      if (grupoEl) grupoEl.innerText = subtext || "Sem grupo";
+
+      console.log(
+        "Grupos granulares:",
+        exercicio
+        
+      );
 
       // --- Botão Editar ---
       const btnEdit = clone.querySelector(".exercise-item__btn--edit");

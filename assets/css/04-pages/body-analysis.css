@@ -1,5 +1,5 @@
 .body-analysis-page {
-  padding: 20px;
+  padding: 0px;
   background-color: #ffffff;
 }
 
@@ -157,4 +157,158 @@
   width: 100%;
   height: 320px; /* Define a altura fixa desejada */
   position: relative;
+}
+
+/* Filtros estilo Pill */
+.filter-pill {
+  transition: all 0.2s ease;
+}
+.filter-pill.active-filter {
+  background-color: #EFF6FF; /* Azul clarinho bg-blue-50 */
+  color: #1D4ED8; /* Azul forte text-blue-700 */
+  border: 1px solid #BFDBFE; /* Borda azul clara border-blue-200 */
+}
+
+/* Accordion */
+.accordion-header {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Cards de Medidas */
+.measurement-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Indicador visual ao tocar num card (para feedback de seleção tátil) */
+.measurement-card:active {
+  background-color: #F9FAFB; 
+  transform: scale(0.98);
+}
+
+/* Modificador para cards espremidos na grade de 3 colunas */
+.analysis-card--compact {
+  min-width: 0; /* Trava o vazamento do CSS Grid no mobile */
+  padding: 8px;
+}
+
+/* Proteções contra quebra de linha em telas pequenas */
+.analysis-card--compact .analysis-card-title,
+.analysis-card--compact .analysis-card-subtext {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.analysis-card--compact .analysis-card-value {
+  font-size: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Impede o ícone do Google Fonts de ser esmagado pelo Flexbox */
+.analysis-card--compact .analysis-card-subtext .material-symbols-rounded {
+  flex-shrink: 0; 
+}
+
+/* =========================================
+   GRADE DE MEDIDAS (3 COLUNAS MOBILE-FIRST)
+========================================= */
+.measurements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px; /* Espaçamento ideal para telas pequenas */
+}
+
+/* Responsividade: mais colunas em telas maiores */
+@media (min-width: 600px) {
+  .measurements-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 900px) {
+  .measurements-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* =========================================
+   CARD ESPECÍFICO DA GRADE (Evita conflito com .analysis-card)
+========================================= */
+.measurements-card {
+  min-width: 0; /* Obrigatório para o grid não estourar a tela */
+  height: 100px;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: 12px;
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--text-white, #ffffff);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.measurements-card:active {
+  transform: scale(0.98);
+  background-color: var(--gray-100, #f3f4f6);
+}
+
+.measurements-card-content {
+  position: relative;
+  z-index: 2;
+}
+
+.measurements-card-title {
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.measurements-card-title span {
+  font-size: 9px;
+  color: var(--text-secondary, #999);
+  margin-left: 2px;
+}
+
+.measurements-card-value {
+  font-size: 18px; /* Levemente reduzido para caber em 3 colunas */
+  font-weight: 700;
+  color: var(--text-primary, #111);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.measurements-card-subtext {
+  font-size: 10px;
+  color: #5987d8; /* Cor base solicitada */
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.measurements-card-subtext .material-symbols-rounded {
+  font-size: 14px;
+  margin-right: 2px;
+  flex-shrink: 0; /* Impede o ícone de esmagar */
+}
+
+.measurements-card-sparkline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  z-index: 1;
+  pointer-events: none;
 }

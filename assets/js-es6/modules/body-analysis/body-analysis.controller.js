@@ -3,6 +3,7 @@ import { UserContextService } from "../../services/user-context.service.js";
 import { BodyMetricsUtil } from "../body-assessment/body-metrics.util.js";
 import { AuthService } from "../../services/auth.service.js";
 import { BodyCompositionController } from "./body-analysis-body-composition.controller.js"; // Importação
+import { BodyMeasurementsController } from "./body-analysis-measurements.controller.js"; // Importação
 
 export class BodyAnalysisController {
   constructor() {
@@ -18,6 +19,9 @@ export class BodyAnalysisController {
     this.CACHE_TTL_MS = 1000 * 60 * 15;
 
     this.activeTab = "overview"; // Controle de estado interno
+
+    this.compositionController = new BodyCompositionController();
+    this.measurementsController = new BodyMeasurementsController(); // Instancia
   }
 
   async init() {
@@ -95,6 +99,7 @@ export class BodyAnalysisController {
   setupTabs() {
     const tabOverview = document.getElementById("tab-btn-overview");
     const tabComposition = document.getElementById("tab-btn-composition");
+    const tabMeasurements = document.getElementById("tab-btn-measurements"); // Aba da régua
 
     if (tabOverview) {
       tabOverview.addEventListener("click", () => {
@@ -111,22 +116,35 @@ export class BodyAnalysisController {
         this.renderActiveTab();
       });
     }
+
+    if (tabMeasurements) {
+      tabMeasurements.addEventListener("click", () => {
+        this.activeTab = "measurements";
+        this.updateTabUI();
+        this.renderActiveTab();
+      });
+    }
   }
 
   updateTabUI() {
-    // Ajuste visual dos botões
+    // Atualize as classes active dos botões
     document
       .getElementById("tab-btn-overview")
       .classList.toggle("active", this.activeTab === "overview");
     document
       .getElementById("tab-btn-composition")
       .classList.toggle("active", this.activeTab === "composition");
+    document
+      .getElementById("tab-btn-measurements")
+      .classList.toggle("active", this.activeTab === "measurements");
 
-    // Alterna visibilidade das sessões (usando uma classe utilitária do seu CSS como .d-none ou alterando o style)
+    // Alterna visibilidade
     document.getElementById("section-overview").style.display =
       this.activeTab === "overview" ? "block" : "none";
     document.getElementById("section-composition").style.display =
       this.activeTab === "composition" ? "block" : "none";
+    document.getElementById("section-measurements").style.display =
+      this.activeTab === "measurements" ? "block" : "none";
   }
 
   renderActiveTab() {
@@ -136,6 +154,10 @@ export class BodyAnalysisController {
       this.renderChart();
     } else if (this.activeTab === "composition") {
       this.compositionController.render(this.assessments);
+    } else if (this.activeTab === "measurements") {
+      // Injeta instâncias globais para o onclick do HTML acessar o método toggleSelection
+      window.bodyMeasurementsCtrl = this.measurementsController;
+      this.measurementsController.render(this.assessments);
     }
   }
 
