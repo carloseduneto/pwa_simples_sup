@@ -7,87 +7,134 @@
 
   <!-- Navegação de Tabs -->
   <nav class="analysis-tabs">
-    <button class="tab-item active">
-      <span class="material-symbols-rounded">accessibility_new</span>
+    <button id="tab-btn-overview" class="tab-item active">
+      <span class="material-symbols-rounded">text_snippet</span>
     </button>
-    <button class="tab-item">
+    <button id="tab-btn-composition" class="tab-item">
       <span class="material-symbols-rounded">stacked_line_chart</span>
     </button>
     <button class="tab-item">
       <span class="material-symbols-rounded">straighten</span>
     </button>
     <button class="tab-item">
-      <span class="material-symbols-rounded rounded-button--area"
-        >conditions</span
-      >
+      <span class="material-symbols-rounded rotate180">more</span>
     </button>
   </nav>
 
-  <!-- Resumo Geral -->
-  <section class="analysis-summary">
-    <h2 class="summary-title">Resumo Geral</h2>
-    <p id="summary-eval-count" class="summary-subtitle">
-      Composição corporal - -- avaliações
-    </p>
+  <div id="section-overview">
+    <!-- Resumo Geral -->
+    <section class="analysis-summary">
+      <h2 class="summary-title">Resumo Geral</h2>
+      <p id="summary-eval-count" class="summary-subtitle">
+        Composição corporal - -- avaliações
+      </p>
 
-    <div class="summary-grid">
-      <!-- BF Card -->
-      <div class="body-card body-card--gray">
-        <span class="card-label">BF% (Pollock 7)</span>
-        <div id="bf-value" class="card-value card-value--body-card--gray">
-          --%
+      <div class="summary-grid">
+        <!-- BF Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label" id="bf-method-name">BF% </span>
+          <div id="bf-value" class="card-value card-value--body-card--gray">
+            --%
+          </div>
+          <div id="bf-comparison" class="card-comparison">era -- em --</div>
         </div>
-        <div id="bf-comparison" class="card-comparison">era -- em --</div>
-      </div>
 
-      <!-- LBM Card -->
-      <div class="body-card body-card--gray">
-        <span class="card-label">Massa magra (LBM)</span>
-        <div id="lbm-value" class="card-value card-value--body-card--gray">
-          --kg
+        <!-- LBM Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label">Massa magra (LBM)</span>
+          <div id="lbm-value" class="card-value card-value--body-card--gray">
+            --kg
+          </div>
+          <div id="lbm-comparison" class="card-comparison">-- desde --</div>
         </div>
-        <div id="lbm-comparison" class="card-comparison">-- desde --</div>
-      </div>
 
-      <!-- FM Card -->
-      <div class="body-card body-card--gray">
-        <span class="card-label">Massa gorda (FM)</span>
-        <div id="fm-value" class="card-value">--kg</div>
-        <div id="fm-comparison" class="card-comparison">-- desde --</div>
-      </div>
-
-      <!-- Weight Card -->
-      <div class="body-card body-card--gray">
-        <span class="card-label">Peso total</span>
-        <div id="weight-value" class="card-value">--kg</div>
-        <div id="weight-comparison" class="card-comparison">-- desde --</div>
-      </div>
-
-      <!-- FFMI Card -->
-      <div class="body-card body-card--gray">
-        <div class="card-label">
-          FFMI
-          <span class="material-symbols-rounded icon-small">info</span>
+        <!-- FM Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label">Massa gorda (FM)</span>
+          <div id="fm-value" class="card-value">--kg</div>
+          <div id="fm-comparison" class="card-comparison">-- desde --</div>
         </div>
-        <div id="ffmi-value" class="card-value">-- kg/m²</div>
-        <div id="ffmi-comparison" class="card-comparison">-- (6 meses)</div>
+
+        <!-- Weight Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label">Peso total</span>
+          <div id="weight-value" class="card-value">--kg</div>
+          <div id="weight-comparison" class="card-comparison">-- desde --</div>
+        </div>
+
+        <!-- FFMI Card -->
+        <div class="body-card body-card--gray">
+          <div class="card-label">
+            FFMI
+            <span class="material-symbols-rounded icon-small">info</span>
+          </div>
+          <div id="ffmi-value" class="card-value">-- kg/m²</div>
+          <div id="ffmi-comparison" class="card-comparison">-- (6 meses)</div>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Gráfico -->
-  <section class="analysis-chart-section">
-    <h3 class="chart-title">Evolução composição corporal</h3>
-    <div class="chart-container">
-      <canvas id="bodyCompChart" width="400" height="250"></canvas>
-    </div>
+    <!-- Gráfico -->
+    <section class="analysis-chart-section">
+      <h3 class="chart-title">Evolução composição corporal</h3>
+      <div class="chart-container">
+        <canvas id="bodyCompChart" width="400" height="250"></canvas>
+      </div>
 
-    <!-- Gráfico FFMI -->
-  <section class="analysis-chart-section">
-    <h3 class="chart-title">Evolução do FFMI</h3>
-    <div class="chart-container">
-      <canvas id="ffmiChart" width="400" height="250"></canvas>
-    </div>
-  </section>
-  </section>
+      <!-- Gráfico FFMI -->
+      <section class="analysis-chart-section">
+        <h3 class="chart-title">Evolução do FFMI</h3>
+        <div class="chart-container">
+          <canvas id="ffmiChart" width="400" height="250"></canvas>
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- TAB 2: COMPOSIÇÃO CORPORAL (Oculto)   -->
+  <!-- ======================================= -->
+  <div id="section-composition" style="display: none">
+    <h2 class="summary-title mb-6">Avaliação composição corporal</h2>
+
+    <!-- Gráfico 1 -->
+    <section class="analysis-chart-section mb-8">
+      <h3 class="chart-title text-sm">Evolução composição corporal (área)</h3>
+      <div class="chart-container">
+        <canvas id="compositionAreaChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Gráfico 2 -->
+    <section class="analysis-chart-section mb-8">
+      <h3 class="chart-title text-sm">Variação peso</h3>
+      <div class="chart-container">
+        <canvas id="weightVariationChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Gráfico 3 -->
+    <section class="analysis-chart-section mb-8">
+      <h3 class="chart-title text-sm">Variação peso magro e gordo</h3>
+      <div class="chart-container">
+        <canvas id="compVariationChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Gráfico 4 -->
+    <section class="analysis-chart-section mb-8">
+      <h3 class="chart-title text-sm">Acumulado peso</h3>
+      <div class="chart-container">
+        <canvas id="accumulatedWeightChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Gráfico 5 -->
+    <section class="analysis-chart-section mb-8">
+      <h3 class="chart-title text-sm">Acumulado peso magro e gordo</h3>
+      <div class="chart-container">
+        <canvas id="accumulatedCompChart"></canvas>
+      </div>
+    </section>
+  </div>
 </div>

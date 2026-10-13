@@ -2,6 +2,7 @@ import { BodyAvaliacoesService } from "../body-assessment/body-avaliacoes.servic
 import { UserContextService } from "../../services/user-context.service.js";
 import { BodyMetricsUtil } from "../body-assessment/body-metrics.util.js";
 import { AuthService } from "../../services/auth.service.js";
+import { BodyCompositionController } from "./body-analysis-body-composition.controller.js"; // Importação
 
 export class BodyAnalysisController {
   constructor() {
@@ -9,6 +10,14 @@ export class BodyAnalysisController {
     this.userContext = null;
     this.chartInstance = null;
     this.ffmiChartInstance = null;
+
+    // Instancia o sub-controller
+    this.compositionController = new BodyCompositionController();
+
+    this.CACHE_PREFIX = "body_analysis_";
+    this.CACHE_TTL_MS = 1000 * 60 * 15;
+
+    this.activeTab = "overview"; // Controle de estado interno
   }
 
   async init() {
@@ -22,24 +31,111 @@ export class BodyAnalysisController {
         return;
       }
 
-      // Busca os dados do usuário usando o ID dinâmico da sessão
+      const cacheKey = `${this.CACHE_PREFIX}${userId}`;
+      const cachedDataString = localStorage.getItem(cacheKey);
+
+      // 1. Tenta carregar os dados do Local Storage
+      if (cachedDataString) {
+        try {
+          const cachedData = JSON.parse(cachedDataString);
+          const isExpired =
+            Date.now() - cachedData.timestamp > this.CACHE_TTL_MS;
+
+          // Se o cache é válido, carrega e encerra a execução (evita o banco)
+          if (!isExpired) {
+            console.log("Análise carregada via cache local.");
+            this.userContext = cachedData.userContext;
+            this.processAndRender(cachedData.rawAssessments);
+            return;
+          }
+        } catch (e) {
+          console.warn("Cache corrompido, buscando dados frescos...", e);
+          localStorage.removeItem(cacheKey);
+        }
+      }
+
+      // 2. Busca os dados no banco (caso não tenha cache ou esteja expirado)
+      console.log("Buscando dados frescos do banco...");
       this.userContext = await UserContextService.getUserData(userId);
 
       // O Supabase filtra automaticamente os registros do usuário via RLS
       const rawAssessments = await BodyAvaliacoesService.getAll();
 
-      this.assessments = rawAssessments
-        .map((req) => BodyMetricsUtil.processAssessment(req, this.userContext))
-        // Filtro de normalização: descarta dados incompletos ou imputados manualmente
-        .filter((a) => a.metrics.origem_bf === "pollock_7")
-        .sort((a, b) => new Date(a.data_registro) - new Date(b.data_registro));
+      // 3. Salva os novos dados no Local Storage
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          userContext: this.userContext,
+          rawAssessments: rawAssessments,
+          timestamp: Date.now(),
+        }),
+      );
 
-      
-
-      this.renderSummary();
-      this.renderChart();
+      // 4. Processa e renderiza a tela
+      this.processAndRender(rawAssessments);
     } catch (error) {
       console.error("Falha ao inicializar análise", error);
+    }
+  }
+
+  // Novo método para evitar repetição de código
+  processAndRender(rawAssessments) {
+    this.assessments = rawAssessments
+      .map((req) => BodyMetricsUtil.processAssessment(req, this.userContext))
+      // Filtro de normalização: descarta dados incompletos ou imputados manualmente
+      .filter((a) => a.metrics.origem_bf === "calculado")
+      .sort((a, b) => new Date(a.data_registro) - new Date(b.data_registro));
+
+    // this.renderSummary();
+    // this.renderChart();
+    this.setupTabs(); // Inicia os listeners de abas
+    this.renderActiveTab();
+  }
+
+  setupTabs() {
+    const tabOverview = document.getElementById("tab-btn-overview");
+    const tabComposition = document.getElementById("tab-btn-composition");
+
+    if (tabOverview) {
+      tabOverview.addEventListener("click", () => {
+        this.activeTab = "overview";
+        this.updateTabUI();
+        this.renderActiveTab();
+      });
+    }
+
+    if (tabComposition) {
+      tabComposition.addEventListener("click", () => {
+        this.activeTab = "composition";
+        this.updateTabUI();
+        this.renderActiveTab();
+      });
+    }
+  }
+
+  updateTabUI() {
+    // Ajuste visual dos botões
+    document
+      .getElementById("tab-btn-overview")
+      .classList.toggle("active", this.activeTab === "overview");
+    document
+      .getElementById("tab-btn-composition")
+      .classList.toggle("active", this.activeTab === "composition");
+
+    // Alterna visibilidade das sessões (usando uma classe utilitária do seu CSS como .d-none ou alterando o style)
+    document.getElementById("section-overview").style.display =
+      this.activeTab === "overview" ? "block" : "none";
+    document.getElementById("section-composition").style.display =
+      this.activeTab === "composition" ? "block" : "none";
+  }
+
+  renderActiveTab() {
+    // Renderiza apenas os gráficos da aba visível para evitar erro de dimensões do Canvas no Chart.js
+    if (this.activeTab === "overview") {
+      this.renderSummary();
+      this.renderChart();
+    } else if (this.activeTab === "composition") {
+      this.compositionController.render(this.assessments);
     }
   }
 
@@ -84,7 +180,8 @@ export class BodyAnalysisController {
     document.getElementById("summary-eval-count").innerText =
       `Composição corporal - ${this.assessments.length} avaliações`;
 
-    // 2. Preencher Valores Atuais
+    document.getElementById("bf-method-name").innerText =
+      "BF% (" + (current.metodo_bf || "Método desconhecido") + ")";
     bfElement.innerText = `${current.bf.toFixed(2)}%`;
     document.getElementById("lbm-value").innerText =
       `${current.lbm.toFixed(1)}kg`;
@@ -129,27 +226,26 @@ export class BodyAnalysisController {
     }
   }
 
-renderChart(retries = 5) {
-    const barCanvas = document.getElementById('bodyCompChart');
-    const ffmiCanvas = document.getElementById('ffmiChart');
-    
-    // Aguarda ambos os elementos existirem no DOM
+  renderChart(retries = 5) {
+    const barCanvas = document.getElementById("bodyCompChart");
+    const ffmiCanvas = document.getElementById("ffmiChart");
+
     if (!barCanvas || !ffmiCanvas) {
       if (retries > 0) setTimeout(() => this.renderChart(retries - 1), 50);
       return;
     }
 
-    const barCtx = barCanvas.getContext('2d');
-    const ffmiCtx = ffmiCanvas.getContext('2d');
-    
-    const labels = this.assessments.map(a => {
+    const barCtx = barCanvas.getContext("2d");
+    const ffmiCtx = ffmiCanvas.getContext("2d");
+
+    const labels = this.assessments.map((a) => {
       const d = new Date(a.data_registro);
-      return `${d.toLocaleString('pt-BR', { month: 'short' })}/${d.getFullYear().toString().slice(-2)}`;
+      return `${d.toLocaleString("pt-BR", { month: "short" })}/${d.getFullYear().toString().slice(-2)}`;
     });
 
-    const lbmData = this.assessments.map(a => a.metrics.lbm.toFixed(1));
-    const fmData = this.assessments.map(a => a.metrics.fm.toFixed(1));
-    const ffmiData = this.assessments.map(a => a.metrics.ffmi.toFixed(1));
+    const lbmData = this.assessments.map((a) => a.metrics.lbm.toFixed(1));
+    const fmData = this.assessments.map((a) => a.metrics.fm.toFixed(1));
+    const ffmiData = this.assessments.map((a) => a.metrics.ffmi.toFixed(1));
 
     // Destrói instâncias anteriores para evitar sobreposição ao recarregar
     if (this.chartInstance) this.chartInstance.destroy();
@@ -157,69 +253,63 @@ renderChart(retries = 5) {
 
     // 1. Gráfico de Barras: Composição Corporal
     this.chartInstance = new Chart(barCtx, {
-      type: 'bar',
+      type: "bar",
       data: {
         labels: labels,
         datasets: [
           {
-            label: 'LBM (kg)',
+            label: "LBM (kg)",
             data: lbmData,
-            backgroundColor: '#4AA079',
+            backgroundColor: "#4AA079",
             barPercentage: 0.6,
           },
           {
-            label: 'Massa gorda (kg)',
+            label: "Massa gorda (kg)",
             data: fmData,
-            backgroundColor: '#EE8888',
+            backgroundColor: "#EE8888",
             barPercentage: 0.6,
-          }
-        ]
+          },
+        ],
       },
       options: {
         responsive: true,
+        // maintainAspectRatio: false,
         scales: {
           x: { stacked: false, grid: { display: false } },
-          y: { stacked: false, beginAtZero: true } // Removido o max: 90 fixo para se adaptar aos dados reais
+          y: { stacked: false, beginAtZero: true },
         },
-        plugins: {
-          legend: { position: 'top' }
-        }
-      }
+        plugins: { legend: { position: "top" } },
+      },
     });
 
     // 2. Gráfico de Linhas: FFMI
     this.ffmiChartInstance = new Chart(ffmiCtx, {
-      type: 'line',
+      type: "line",
       data: {
         labels: labels,
         datasets: [
           {
-            label: 'FFMI (kg/m²)',
+            label: "FFMI (kg/m²)",
             data: ffmiData,
-            borderColor: '#3B7242', // Verde escuro seguindo a identidade
-            backgroundColor: 'rgba(59, 114, 66, 0.1)', // Fundo translúcido abaixo da linha
+            borderColor: "#3B7242",
+            backgroundColor: "rgba(59, 114, 66, 0.1)",
             borderWidth: 2,
-            pointBackgroundColor: '#3B7242',
+            pointBackgroundColor: "#3B7242",
             pointRadius: 4,
             fill: true,
-            tension: 0.3 // Deixa a linha suavemente curvada
-          }
-        ]
+            tension: 0.3,
+          },
+        ],
       },
       options: {
         responsive: true,
+        // maintainAspectRatio: false,
         scales: {
           x: { grid: { display: false } },
-          y: { 
-            // Não iniciamos no zero para que pequenas variações no FFMI fiquem mais visíveis
-            beginAtZero: false 
-          }
+          y: { beginAtZero: false },
         },
-        plugins: {
-          legend: { position: 'top' }
-        }
-      }
+        plugins: { legend: { position: "top" } },
+      },
     });
   }
 }
-
