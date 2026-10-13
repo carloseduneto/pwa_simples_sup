@@ -1,0 +1,158 @@
+.body-analysis-page {
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+/* Header */
+.analysis-header {
+  margin-bottom: 24px;
+}
+
+.analysis-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.analysis-header__title-row h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #111111;
+}
+
+.analysis-header__title-row button {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0;
+  color: #111111;
+}
+
+.analysis-header__date-range p {
+  font-size: 14px;
+  color: #111111;
+  margin: 0 0 2px 0;
+}
+
+.analysis-header__date-range span {
+  font-size: 12px;
+  color: #888888;
+}
+
+/* Navegação (Tabs) */
+.analysis-tabs {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #E5E5E5;
+  margin-bottom: 24px;
+  padding-bottom: 8px;
+}
+
+.analysis-tabs .tab-item {
+  flex: 1;
+  background: none;
+  border: none;
+  text-align: center;
+  color: #888888;
+  padding-bottom: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+.analysis-tabs .tab-item.active {
+  color: #111111;
+}
+
+.analysis-tabs .tab-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background-color: #111111;
+  border-radius: 4px;
+}
+
+/* Resumo Geral */
+.summary-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.summary-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111111;
+  margin-bottom: 16px;
+}
+
+/* Grid de Cartões */
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.body-card {
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.body-card--green {
+  background-color: #F7FAF6;
+  border: 1px solid #6E9770;
+}
+
+.body-card--gray {
+  background-color: #F5F5F5;
+  border: 1px solid transparent;
+}
+
+.card-label {
+  font-size: 12px;
+  color: #666666;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-label .icon-small {
+  font-size: 16px;
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111111;
+}
+
+.card-value--green {
+  color: #3B7242;
+}
+
+.card-comparison {
+  font-size: 11px;
+  color: #888888;
+}
+
+/* Seção do Gráfico */
+.chart-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.chart-container {
+  width: 100%;
+  position: relative;
+}

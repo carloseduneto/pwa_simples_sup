@@ -15,11 +15,15 @@ import { initBodyAssessmentDetail } from "./modules/body-assessment/detail-body-
 import { initBodyAssessmentCompare } from "./modules/body-assessment/compare-body-assessment.controller.js";
 import { initStimulusAnalysis } from "./controllers/stimulus-analysis.controller.js";
 
+
 //Exercícios 
 import { initExerciseIntensityVolume } from "./modules/exercises/exercise-intensity-volume.controller.js";
 
 //Configurações
 import { initConfigController } from "./controllers/config.js";
+
+// Análise Corporal
+import { BodyAnalysisController } from "./modules/body-analysis/body-analysis.controller.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -288,6 +292,20 @@ const rotasConfig = {
       initBodyAssessmentCompare((rota, param) => {
         roteador(rota, param);
       });
+    },
+  },
+  bodyAnalysis: {
+    idDiv: "screen-body-analysis",
+    html: "assets/js-es6/modules/body-analysis/body-analysis.html",
+    tipoHeader: "alternativo",
+    voltarPara: "templates",
+    bottomNav: "none",
+    tema: "havelock-blue",
+    titulo: "Análise física",
+    onLoad: (id) => {
+      // AQUI É A MUDANÇA:
+      const controller = new BodyAnalysisController();
+      controller.init();
     },
   },
 };
