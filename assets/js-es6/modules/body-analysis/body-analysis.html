@@ -16,7 +16,7 @@
     <button id="tab-btn-measurements" class="tab-item">
       <span class="material-symbols-rounded">straighten</span>
     </button>
-    <button class="tab-item">
+    <button id="tab-btn-more" class="tab-item">
       <span class="material-symbols-rounded rotate180">more</span>
     </button>
   </nav>
@@ -208,7 +208,77 @@
         </div>
       </div>
     </div>
-
-    
   </div>
+
+  <!-- ======================================= -->
+  <!-- TAB 4: MAIS INFORMAÇÕES (Oculto)        -->
+  <!-- ======================================= -->
+  <div id="section-more" style="display: none">
+    <section class="analysis-summary">
+      <h2 class="summary-title">Mais informações</h2>
+
+      <div class="summary-grid">
+        <!-- Pollock 7 Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label">BF% (Pollock 7)</span>
+          <div id="more-bf-pollock" class="card-value">--%</div>
+          <div id="more-bf-pollock-comp" class="card-comparison">era -- em --</div>
+        </div>
+
+        <!-- Faulkner Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label">BF% (Faulkner)</span>
+          <div id="more-bf-faulkner" class="card-value">--%</div>
+          <div id="more-bf-faulkner-comp" class="card-comparison">era -- em --</div>
+        </div>
+
+        <!-- Evans 7 Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label">BF% (Evans 7)</span>
+          <div id="more-bf-evans" class="card-value">--%</div>
+          <div id="more-bf-evans-comp" class="card-comparison">era -- em --</div>
+        </div>
+
+        <!-- Somatório Dobras Card -->
+        <div class="body-card body-card--gray">
+          <span class="card-label">Somatório Dobras (7)</span>
+          <div id="more-sum-dobras" class="card-value">-- mm</div>
+          <div id="more-sum-dobras-comp" class="card-comparison">--</div>
+        </div>
+      </div>
+    </section>
+
+<!-- Gráfico: Simetria Estrutural (IAD) -->
+    <section class="analysis-chart-section">
+      <h3 class="chart-title">Simetria Bilateral (IAD %)</h3>
+      <div class="chart-container">
+        <canvas id="symmetryRadarChart"></canvas>
+      </div>
+      <p class="chart-caption">
+        Índice de Assimetria Direcional (% de diferença E/D). Linha tracejada: limite aceitável (3%).
+      </p>
+    </section>
+
+    <!-- Tabela: Rollup de Variação Regional -->
+    <section class="regional-rollup-section">
+      <div class="regional-rollup-header">
+        <h3 class="chart-title">Rollup de Variação Regional</h3>
+        <p id="rollup-period-subtitle" class="summary-subtitle">-- vs. Baseline</p>
+      </div>
+
+      <table class="regional-rollup-table">
+        <thead>
+          <tr>
+            <th>REGIÃO</th>
+            <th>PERÍMETRO</th>
+            <th>DOBRA</th>
+          </tr>
+        </thead>
+        <tbody id="regional-rollup-body">
+          <!-- Linhas injetadas via JS -->
+        </tbody>
+      </table>
+    </section>
+  </div>
+
 </div>

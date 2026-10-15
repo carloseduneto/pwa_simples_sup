@@ -229,7 +229,7 @@
 }
 @media (min-width: 900px) {
   .measurements-grid {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -311,4 +311,73 @@
   height: 60%;
   z-index: 1;
   pointer-events: none;
+}
+
+/* =========================================
+   TAB 4: MAIS INFORMAÇÕES (SIMETRIA E ROLLUP)
+========================================= */
+.chart-caption {
+  font-size: 12px;
+  color: #666666;
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 32px;
+}
+
+.regional-rollup-section {
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.regional-rollup-header .chart-title {
+  margin-bottom: 2px;
+}
+
+.regional-rollup-header .summary-subtitle {
+  color: #666666;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.regional-rollup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.regional-rollup-table thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #888888;
+  text-transform: uppercase;
+  padding: 10px 8px;
+  border-top: 1px solid #E5E5E5;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.regional-rollup-table tbody td {
+  padding: 14px 8px;
+  border-bottom: 1px solid #E5E5E5;
+  font-variant-numeric: tabular-nums;
+}
+
+.rollup-region {
+  font-weight: 600;
+  color: #111111;
+}
+
+.rollup-val--neutral {
+  color: #888888;
+  font-weight: 500;
+}
+
+.rollup-val--red {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+.rollup-val--blue {
+  color: #2563EB;
+  font-weight: 600;
 }

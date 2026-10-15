@@ -1765,6 +1765,21 @@ const StimulusAnalysisController = {
       (m) =>
         this.state.chartZoomLevel === 100 || maxVolumePerMuscle[m] <= threshold,
     );
+
+    // ORDENAÇÃO GLOBAL: Do maior para o menor volume total no período exibido
+    filteredLabelsRaw.sort((a, b) => {
+      const volA = periodosExibicao.reduce(
+        (sum, p) => sum + (musculosMap[a][p] || 0),
+        0,
+      );
+      const volB = periodosExibicao.reduce(
+        (sum, p) => sum + (musculosMap[b][p] || 0),
+        0,
+      );
+      return volB - volA; // Ordem decrescente
+    });
+
+    // Agora o Chart.js receberá as etiquetas já na ordem correta
     const labels = filteredLabelsRaw.map((nome) => this.formatChartLabel(nome));
 
     // 3. Geração dos Datasets
@@ -1784,12 +1799,12 @@ const StimulusAnalysisController = {
           }),
           borderColor: "#f59e0b",
           backgroundColor: "#f59e0b33",
-          pointBackgroundColor: "transparent", // Mantém invisível, mas ainda responde a hover
+          pointBackgroundColor: "transparent",
           pointRadius: 0,
-          pointHitRadius: 15, // Mantém a área invisível ao redor para o toque/hover funcionar
+          pointHitRadius: 15,
           borderWidth: 1.9,
-          tension: 0.4, // Arredonda as linhas (efeito orgânico/bolha)
-          borderJoinStyle: "round", // Tira a quina viva do traço
+          tension: 0.4,
+          borderJoinStyle: "round",
         },
       ];
     } else {
@@ -1802,18 +1817,20 @@ const StimulusAnalysisController = {
         const isHidden =
           this.state.period === "year" && index < periodosExibicao.length - 4;
 
+        // AQUI NÃO PRECISA MAIS ORDENAR.
+        // O map já vai varrer o filteredLabelsRaw na ordem decrescente global que definimos acima.
         return {
           label: this.formatShortDate(periodo),
           data: filteredLabelsRaw.map((m) => musculosMap[m][periodo] || 0),
           borderColor: cor,
-          backgroundColor: cor + "33", // Transparência de 20%
-          pointBackgroundColor: "transparent", // Mantém invisível, mas ainda responde a hover
+          backgroundColor: cor + "33",
+          pointBackgroundColor: "transparent",
           pointRadius: 0,
-          pointHitRadius: 15, // Mantém a área invisível ao redor para o toque/hover funcionar
+          pointHitRadius: 15,
           borderWidth: 1.9,
-          hidden: isHidden, // Otimização para o Chart.js gerenciar a legenda
-          tension: 0.05, // Arredonda as linhas (efeito orgânico/bolha)
-          borderJoinStyle: "round", // Tira a quina viva do traço
+          hidden: isHidden,
+          tension: 0.05,
+          borderJoinStyle: "round",
         };
       });
     }

@@ -4,6 +4,7 @@ import { BodyMetricsUtil } from "../body-assessment/body-metrics.util.js";
 import { AuthService } from "../../services/auth.service.js";
 import { BodyCompositionController } from "./body-analysis-body-composition.controller.js"; // Importação
 import { BodyMeasurementsController } from "./body-analysis-measurements.controller.js"; // Importação
+import { BodyMoreController } from "./body-analysis-more.controller.js";
 
 export class BodyAnalysisController {
   constructor() {
@@ -22,6 +23,7 @@ export class BodyAnalysisController {
 
     this.compositionController = new BodyCompositionController();
     this.measurementsController = new BodyMeasurementsController(); // Instancia
+    this.moreController = new BodyMoreController();
   }
 
   async init() {
@@ -99,7 +101,8 @@ export class BodyAnalysisController {
   setupTabs() {
     const tabOverview = document.getElementById("tab-btn-overview");
     const tabComposition = document.getElementById("tab-btn-composition");
-    const tabMeasurements = document.getElementById("tab-btn-measurements"); // Aba da régua
+    const tabMeasurements = document.getElementById("tab-btn-measurements");
+    const tabMore = document.getElementById("tab-btn-more"); // Quarta aba
 
     if (tabOverview) {
       tabOverview.addEventListener("click", () => {
@@ -124,6 +127,14 @@ export class BodyAnalysisController {
         this.renderActiveTab();
       });
     }
+
+    if (tabMore) {
+      tabMore.addEventListener("click", () => {
+        this.activeTab = "more";
+        this.updateTabUI();
+        this.renderActiveTab();
+      });
+    }
   }
 
   updateTabUI() {
@@ -137,6 +148,9 @@ export class BodyAnalysisController {
     document
       .getElementById("tab-btn-measurements")
       .classList.toggle("active", this.activeTab === "measurements");
+    document
+      .getElementById("tab-btn-more")
+      .classList.toggle("active", this.activeTab === "more");
 
     // Alterna visibilidade
     document.getElementById("section-overview").style.display =
@@ -145,6 +159,8 @@ export class BodyAnalysisController {
       this.activeTab === "composition" ? "block" : "none";
     document.getElementById("section-measurements").style.display =
       this.activeTab === "measurements" ? "block" : "none";
+    document.getElementById("section-more").style.display =
+      this.activeTab === "more" ? "block" : "none";
   }
 
   renderActiveTab() {
@@ -158,6 +174,8 @@ export class BodyAnalysisController {
       // Injeta instâncias globais para o onclick do HTML acessar o método toggleSelection
       window.bodyMeasurementsCtrl = this.measurementsController;
       this.measurementsController.render(this.assessments);
+    } else if (this.activeTab === "more") {
+      this.moreController.render(this.assessments, this.userContext);
     }
   }
 
