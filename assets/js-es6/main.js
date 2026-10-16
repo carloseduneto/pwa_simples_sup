@@ -87,7 +87,7 @@ import { BodySchemaService } from "./modules/body-assessment/body-schema.service
 (async () => {
   try {
     const schemas = await BodySchemaService.getAll();
-    console.log("Esquemas corporais:", schemas);
+    // console.log("Esquemas corporais:", schemas);
   } catch (error) {
     console.error("Erro ao buscar esquemas corporais:", error);
   }
@@ -99,7 +99,7 @@ import { BodyAvaliacoesService } from "./modules/body-assessment/body-avaliacoes
 (async () => {
   try {
     const avaliacoes = await BodyAvaliacoesService.getLastRegistered();
-    console.log("Avaliações corporais:", avaliacoes);
+    // console.log("Avaliações corporais:", avaliacoes);
   } catch (error) {
     console.error("Erro ao buscar avaliações corporais:", error);
   }

@@ -127,11 +127,7 @@ export async function renderizarListItensTemplate(onNavigate) {
 
       if (grupoEl) grupoEl.innerText = subtext || "Sem grupo";
 
-      console.log(
-        "Grupos granulares:",
-        exercicio
-        
-      );
+
 
       // --- Botão Editar ---
       const btnEdit = clone.querySelector(".exercise-item__btn--edit");
@@ -451,6 +447,11 @@ function renderizarGraficoRadar(dados) {
           pointBorderColor: "#fff",
           pointHoverBackgroundColor: "#fff",
           pointHoverBorderColor: "#ff6314",
+          // pointBackgroundColor: "transparent",
+          // pointRadius: 0,
+          pointHitRadius: 15,
+          tension: 0.05,
+          // borderJoinStyle: "round",
         },
       ],
     },

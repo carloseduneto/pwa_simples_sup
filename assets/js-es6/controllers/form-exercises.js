@@ -103,10 +103,7 @@ export async function initExerciseForm(onNavigate) {
         selectMainMuscle.appendChild(optMain);
 
         const label = document.createElement("label");
-        label.style.display = "flex";
-        label.style.alignItems = "center";
-        label.style.gap = "8px";
-        label.style.fontSize = "1rem";
+        label.className = "default-form-checkbox-item";
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";

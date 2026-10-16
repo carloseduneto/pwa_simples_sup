@@ -80,3 +80,38 @@
     background-color: var(--light-background-color-2);
 
 }
+
+/* Container da lista de checkboxes */
+.default-form-checkbox-list {
+    height: 150px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 15px;
+    /* background-color: var(--input-bg); */
+    border-radius: 13px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Item individual (Label + Checkbox) */
+.default-form-checkbox-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    margin: 0;
+    color: var(--text-main);
+}
+
+/* Força o checkbox a não herdar larguras de 100% de outros inputs globais */
+.default-form-checkbox-item input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    flex-shrink: 0;
+}
