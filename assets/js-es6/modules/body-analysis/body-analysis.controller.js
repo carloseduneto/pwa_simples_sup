@@ -2,27 +2,25 @@ import { BodyAvaliacoesService } from "../body-assessment/body-avaliacoes.servic
 import { UserContextService } from "../../services/user-context.service.js";
 import { BodyMetricsUtil } from "../body-assessment/body-metrics.util.js";
 import { AuthService } from "../../services/auth.service.js";
-import { BodyCompositionController } from "./body-analysis-body-composition.controller.js"; // Importação
-import { BodyMeasurementsController } from "./body-analysis-measurements.controller.js"; // Importação
+import { BodyCompositionController } from "./body-analysis-body-composition.controller.js";
+import { BodyMeasurementsController } from "./body-analysis-measurements.controller.js";
 import { BodyMoreController } from "./body-analysis-more.controller.js";
 
 export class BodyAnalysisController {
   constructor() {
-    this.assessments = [];
+    this.allProcessedAssessments = []; // Base inalterável com todo o histórico
+    this.assessments = []; // Recorte filtrado que alimenta as telas
     this.userContext = null;
     this.chartInstance = null;
     this.ffmiChartInstance = null;
 
-    // Instancia o sub-controller
-    this.compositionController = new BodyCompositionController();
-
     this.CACHE_PREFIX = "body_analysis_";
     this.CACHE_TTL_MS = 1000 * 60 * 15;
 
-    this.activeTab = "overview"; // Controle de estado interno
+    this.activeTab = "overview";
 
     this.compositionController = new BodyCompositionController();
-    this.measurementsController = new BodyMeasurementsController(); // Instancia
+    this.measurementsController = new BodyMeasurementsController();
     this.moreController = new BodyMoreController();
   }
 
@@ -40,14 +38,12 @@ export class BodyAnalysisController {
       const cacheKey = `${this.CACHE_PREFIX}${userId}`;
       const cachedDataString = localStorage.getItem(cacheKey);
 
-      // 1. Tenta carregar os dados do Local Storage
       if (cachedDataString) {
         try {
           const cachedData = JSON.parse(cachedDataString);
           const isExpired =
             Date.now() - cachedData.timestamp > this.CACHE_TTL_MS;
 
-          // Se o cache é válido, carrega e encerra a execução (evita o banco)
           if (!isExpired) {
             console.log("Análise carregada via cache local.");
             this.userContext = cachedData.userContext;
@@ -60,14 +56,10 @@ export class BodyAnalysisController {
         }
       }
 
-      // 2. Busca os dados no banco (caso não tenha cache ou esteja expirado)
       console.log("Buscando dados frescos do banco...");
       this.userContext = await UserContextService.getUserData(userId);
-
-      // O Supabase filtra automaticamente os registros do usuário via RLS
       const rawAssessments = await BodyAvaliacoesService.getAll();
 
-      // 3. Salva os novos dados no Local Storage
       localStorage.setItem(
         cacheKey,
         JSON.stringify({
@@ -77,32 +69,147 @@ export class BodyAnalysisController {
         }),
       );
 
-      // 4. Processa e renderiza a tela
       this.processAndRender(rawAssessments);
     } catch (error) {
       console.error("Falha ao inicializar análise", error);
     }
   }
 
-  // Novo método para evitar repetição de código
   processAndRender(rawAssessments) {
-    this.assessments = rawAssessments
+    // 1. Processa, limpa e ordena o histórico completo (do mais antigo para o mais novo)
+    this.allProcessedAssessments = rawAssessments
       .map((req) => BodyMetricsUtil.processAssessment(req, this.userContext))
-      // Filtro de normalização: descarta dados incompletos ou imputados manualmente
       .filter((a) => a.metrics.origem_bf === "calculado")
       .sort((a, b) => new Date(a.data_registro) - new Date(b.data_registro));
 
-    // this.renderSummary();
-    // this.renderChart();
-    this.setupTabs(); // Inicia os listeners de abas
+    this.assessments = [...this.allProcessedAssessments]; // Começa exibindo tudo
+
+    this.setupGlobalFilters(); // Inicia os filtros de data do header
+    this.setupTabs();
     this.renderActiveTab();
+  }
+
+  // --- LÓGICA DO FILTRO GLOBAL NO HEADER ---
+  setupGlobalFilters() {
+    const filterSelect = document.getElementById("global-period-filter");
+    const customContainer = document.getElementById("custom-date-selectors");
+    const startSelect = document.getElementById("custom-start-date");
+    const endSelect = document.getElementById("custom-end-date");
+
+    if (!filterSelect || this.allProcessedAssessments.length === 0) return;
+
+    // Popula as opções com as datas reais, ordenadas da mais nova para a mais antiga
+    const datesDesc = [...this.allProcessedAssessments].reverse();
+    const optionsHTML = datesDesc
+      .map((a) => {
+        const d = new Date(a.data_registro);
+        const label = d.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+        return `<option value="${a.data_registro}">${label}</option>`;
+      })
+      .join("");
+
+    startSelect.innerHTML = optionsHTML;
+    endSelect.innerHTML = optionsHTML;
+
+    // Default: Início (A mais antiga), Fim (A mais nova)
+    startSelect.value = datesDesc[datesDesc.length - 1].data_registro;
+    endSelect.value = datesDesc[0].data_registro;
+
+    // Regra que bloqueia sobreposição/inconsistência nas datas
+    const enforceDateLogic = () => {
+      const startDate = new Date(startSelect.value);
+      const endDate = new Date(endSelect.value);
+
+      Array.from(endSelect.options).forEach((opt) => {
+        opt.disabled = new Date(opt.value) < startDate;
+      });
+      Array.from(startSelect.options).forEach((opt) => {
+        opt.disabled = new Date(opt.value) > endDate;
+      });
+
+      if (startDate > endDate) {
+        endSelect.value = startSelect.value;
+      }
+    };
+
+    // Aplica o filtro selecionado e re-renderiza o painel
+    const applyFilter = () => {
+      const val = filterSelect.value;
+
+      if (val === "custom") {
+        customContainer.classList.remove("hidden");
+        const sDate = new Date(startSelect.value);
+        const eDate = new Date(endSelect.value);
+
+        this.assessments = this.allProcessedAssessments.filter((a) => {
+          const d = new Date(a.data_registro);
+          return d >= sDate && d <= eDate;
+        });
+      } else {
+        customContainer.classList.add("hidden");
+        if (val === "all") {
+          this.assessments = [...this.allProcessedAssessments];
+        } else {
+          const count = parseInt(val, 10);
+          this.assessments = this.allProcessedAssessments.slice(-count);
+        }
+      }
+
+      // Proteção contra filtros vazios acidentais
+      if (this.assessments.length === 0) {
+        this.assessments = [...this.allProcessedAssessments];
+      }
+
+      this.updateGlobalHeaderDates();
+      this.renderActiveTab(); // Atualiza apenas a aba que o usuário está olhando
+    };
+
+    filterSelect.addEventListener("change", applyFilter);
+    startSelect.addEventListener("change", () => {
+      enforceDateLogic();
+      applyFilter();
+    });
+    endSelect.addEventListener("change", () => {
+      enforceDateLogic();
+      applyFilter();
+    });
+
+    enforceDateLogic();
+    this.updateGlobalHeaderDates(); // Injeta o texto inicial no Header
+  }
+
+  // Atualiza as strings descritivas de data independentemente da aba ativa
+  updateGlobalHeaderDates() {
+    if (this.assessments.length === 0) return;
+
+    const firstAssessment = this.assessments[0];
+    const currentAssessment = this.assessments[this.assessments.length - 1];
+
+    const d1 = new Date(firstAssessment.data_registro);
+    const d2 = new Date(currentAssessment.data_registro);
+
+    const formatDate = (date) => date.toLocaleDateString("pt-BR");
+    const monthDiff =
+      (d2.getFullYear() - d1.getFullYear()) * 12 +
+      (d2.getMonth() - d1.getMonth());
+    const msPerWeek = 1000 * 60 * 60 * 24 * 7;
+    const weeksDiff = Math.round((d2 - d1) / msPerWeek);
+
+    document.getElementById("header-date-range").innerText =
+      `${formatDate(d1)} - ${formatDate(d2)}`;
+    document.getElementById("header-date-duration").innerText =
+      `${Math.max(monthDiff, 0)} meses • ${Math.max(weeksDiff, 0)} semanas`;
   }
 
   setupTabs() {
     const tabOverview = document.getElementById("tab-btn-overview");
     const tabComposition = document.getElementById("tab-btn-composition");
     const tabMeasurements = document.getElementById("tab-btn-measurements");
-    const tabMore = document.getElementById("tab-btn-more"); // Quarta aba
+    const tabMore = document.getElementById("tab-btn-more");
 
     if (tabOverview) {
       tabOverview.addEventListener("click", () => {
@@ -138,7 +245,6 @@ export class BodyAnalysisController {
   }
 
   updateTabUI() {
-    // Atualize as classes active dos botões
     document
       .getElementById("tab-btn-overview")
       .classList.toggle("active", this.activeTab === "overview");
@@ -199,24 +305,15 @@ export class BodyAnalysisController {
     const d1 = new Date(firstAssessment.data_registro);
     const d2 = new Date(currentAssessment.data_registro);
 
-    // Formatação de datas
-    const formatDate = (date) => date.toLocaleDateString("pt-BR");
     const getMonthYear = (date) =>
       `${date.toLocaleString("pt-BR", { month: "short" })}/${date.getFullYear()}`;
     const baselineMonthYear = getMonthYear(d1);
 
-    // Cálculos de tempo
+    // Cálculos de tempo (usado apenas no card do FFMI agora)
     const monthDiff =
       (d2.getFullYear() - d1.getFullYear()) * 12 +
       (d2.getMonth() - d1.getMonth());
-    const msPerWeek = 1000 * 60 * 60 * 24 * 7;
-    const weeksDiff = Math.round((d2 - d1) / msPerWeek);
 
-    // 1. Atualizar Header e Título
-    document.getElementById("header-date-range").innerText =
-      `${formatDate(d1)} - ${formatDate(d2)}`;
-    document.getElementById("header-date-duration").innerText =
-      `${Math.max(monthDiff, 0)} meses • ${Math.max(weeksDiff, 0)} semanas`;
     document.getElementById("summary-eval-count").innerText =
       `Composição corporal - ${this.assessments.length} avaliações`;
 

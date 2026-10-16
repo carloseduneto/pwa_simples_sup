@@ -1,5 +1,28 @@
 <div class="body-analysis-page">
-  <!-- Header -->
+<!-- Header: Filtro Global de Período -->
+  <div class="analysis-header-controls">
+    <select id="global-period-filter" class="header-select">
+      <option value="all">Todos registros</option>
+      <option value="3">3 últimos</option>
+      <option value="6">6 últimos</option>
+      <option value="9">9 últimos</option>
+      <option value="12">12 últimos</option>
+      <option value="custom">Selecionar período</option>
+    </select>
+
+    <div id="custom-date-selectors" class="header-custom-dates hidden">
+      <div class="custom-date-field">
+        <span class="material-symbols-rounded">calendar_today</span>
+        <select id="custom-start-date" class="header-select-inner"></select>
+      </div>
+      <div class="custom-date-field">
+        <span class="material-symbols-rounded">calendar_today</span>
+        <select id="custom-end-date" class="header-select-inner"></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header: Datas Dinâmicas (Controladas pelo JS) -->
   <div class="analysis-header__date-range">
     <p id="header-date-range">--/--/---- - --/--/----</p>
     <span id="header-date-duration">-- meses • -- semanas</span>
