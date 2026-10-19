@@ -26,15 +26,27 @@ export class BodyCompositionController {
     }
   }
 
-  // 1. Evolução composição corporal (área)
+  // 1. Evolução composição corporal (Área + Linhas)
   renderAreaChart(assessments, labels) {
     this.destroyChart("areaChart");
-    const ctx = document
-      .getElementById("compositionAreaChart")
-      .getContext("2d");
+    const canvas = document.getElementById("compositionAreaChart");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
 
     const lbmData = assessments.map((a) => a.metrics.lbm.toFixed(1));
     const fmData = assessments.map((a) => a.metrics.fm.toFixed(1));
+    const weightData = assessments.map((a) => a.metrics.weight.toFixed(1));
+    const bfData = assessments.map((a) => a.metrics.bf.toFixed(1));
+
+    // Degradê clarinho inferior para a série de Peso Total (Fúcsia)
+    const weightGradient = ctx.createLinearGradient(
+      0,
+      0,
+      0,
+      canvas.parentElement.clientHeight || 300,
+    );
+    weightGradient.addColorStop(0, "rgba(217, 70, 239, 0.15)"); // Fúcsia com 15% de opacidade
+    weightGradient.addColorStop(1, "rgba(217, 70, 239, 0.0)");
 
     this.charts["areaChart"] = new Chart(ctx, {
       type: "line",
@@ -48,6 +60,9 @@ export class BodyCompositionController {
             backgroundColor: "#93C5FD",
             fill: true,
             tension: 0.1,
+            stack: "composition", // Agrupa com Massa Gorda
+            yAxisID: "y",
+            order: 2, // Renderiza atrás das linhas
           },
           {
             label: "Massa gorda (kg)",
@@ -56,19 +71,51 @@ export class BodyCompositionController {
             backgroundColor: "#FEF08A",
             fill: true,
             tension: 0.1,
+            stack: "composition", // Agrupa com Massa Magra
+            yAxisID: "y",
+            order: 3, // Renderiza atrás das linhas
+          },
+          {
+            label: "Peso Total (kg)",
+            data: weightData,
+            borderColor: "#D946EF", // Fúcsia
+            backgroundColor: weightGradient,
+            fill: true,
+            tension: 0.1,
+            stack: "weight", // Grupo isolado para não empilhar sobre os anteriores
+            yAxisID: "y",
+            order: 4, // Renderiza sobre as áreas
+          },
+          {
+            label: "% Gordura",
+            data: bfData,
+            borderColor: "#F97316", // Laranja
+            backgroundColor: "transparent",
+            fill: false,
+            tension: 0.1,
+            yAxisID: "y", // Usa o eixo principal, acompanhando os outros valores
+            order: 1, // Linha renderizada mais acima
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false }, // Exibe o tooltip de todos juntos ao tocar
         scales: {
           x: { display: true },
           y: {
             stacked: true,
             beginAtZero: true,
-            //max: 100
+            position: "left",
+            title: {
+              display: true,
+              text: "Valores Absolutos",
+              color: "#9ca3af",
+              font: { size: 10 },
+            },
           },
+          // Eixo y1 removido para unificar todas as métricas no eixo principal
         },
         plugins: { legend: { position: "top" } },
       },

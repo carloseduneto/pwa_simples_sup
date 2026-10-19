@@ -224,9 +224,7 @@ export class BodyMeasurementsController {
           (parseFloat(v.dobra_abdominal) || 0) +
           (parseFloat(v.dobra_peitoral) || 0) +
           (parseFloat(v.dobra_axilar_media) || 0) +
-          (parseFloat(v.dobra_coxa) || 0) +
-          (parseFloat(v.dobra_bicipital) || 0) +
-          (parseFloat(v.dobra_panturrilha) || 0)
+          (parseFloat(v.dobra_coxa) || 0)
         );
       });
 

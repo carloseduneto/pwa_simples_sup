@@ -10,7 +10,7 @@ export class BodyMoreController {
     this.radarChart = null;
     this.THRESHOLD_PERIMETER = 0.5;
     this.THRESHOLD_SKINFOLD = 1.0;
-    this.MAX_ACCEPTABLE_IAD = 4.0; // 3% de assimetria máxima aceitável
+    this.MAX_ACCEPTABLE_IAD = 4.0; // 4% de assimetria máxima aceitável
   }
 
   render(assessments, userContext) {
@@ -287,12 +287,17 @@ export class BodyMoreController {
       diffEsq > 0 ? `+${diffEsq.toFixed(1)}` : `${diffEsq.toFixed(1)}`;
     const strDir =
       diffDir > 0 ? `+${diffDir.toFixed(1)}` : `${diffDir.toFixed(1)}`;
+
+    // Fusão visual caso a variação de E e D seja idêntica
+    const isIdentical = strEsq === strDir;
+    const displayValue = isIdentical ? strEsq : `${strEsq}/${strDir}`;
+
     const meanDiff = (diffEsq + diffDir) / 2;
     const maxAbs = Math.max(Math.abs(diffEsq), Math.abs(diffDir));
 
     if (maxAbs <= threshold) {
       return {
-        text: `${strEsq}/${strDir} ${unit}`,
+        text: `${displayValue} ${unit}`,
         cssClass: "rollup-val--neutral",
       };
     }
@@ -301,7 +306,7 @@ export class BodyMoreController {
     const colorClass = meanDiff > 0 ? "rollup-val--blue" : "rollup-val--red";
 
     return {
-      text: `${arrow} ${strEsq}/${strDir} ${unit}`,
+      text: `${arrow} ${displayValue} ${unit}`,
       cssClass: colorClass,
     };
   }
