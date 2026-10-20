@@ -244,6 +244,10 @@
 .accordion-header {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  margin-top: 20px;
 }
 
 /* Cards de Medidas */

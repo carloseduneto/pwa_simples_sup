@@ -188,15 +188,26 @@ export class BodyMeasurementsController {
     const skinCount =
       this.activeCategory === "skinfold" ? this.selectedItems.length : 0;
 
-    document.getElementById("badge-perimetros").innerText = `(${periCount}/6)`;
-    document.getElementById("badge-dobras").innerText = `(${skinCount}/6)`;
+      //Se for mais que zero exibe o badge, caso contrário, esconde o badge
+      if (periCount > 0) {
+        document.getElementById("badge-perimetros").innerText =
+          `(${periCount}/6)`;
+      } else {
+        document.getElementById("badge-perimetros").innerText = "";
+      }
 
-    document
-      .getElementById("filter-perimetros")
-      .classList.toggle("active-filter", periCount > 0);
-    document
-      .getElementById("filter-dobras")
-      .classList.toggle("active-filter", skinCount > 0);
+      if (skinCount > 0) {
+        document.getElementById("badge-dobras").innerText = `(${skinCount}/6)`;
+      } else {
+        document.getElementById("badge-dobras").innerText = "";
+      }
+
+    // document
+    //   .getElementById("filter-perimetros")
+    //   .classList.toggle("active-filter", periCount > 0);
+    // document
+    //   .getElementById("filter-dobras")
+    //   .classList.toggle("active-filter", skinCount > 0);
   }
 
   // --- GRÁFICO PRINCIPAL ---
