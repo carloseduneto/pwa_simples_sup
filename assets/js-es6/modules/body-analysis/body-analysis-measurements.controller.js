@@ -24,7 +24,7 @@ export class BodyMeasurementsController {
     this.setupAccordions();
   }
 
-  // --- LÓGICA DE STATUS E ESTATÍSTICA ---
+  // --- LÓGICA DE STATUS E ESTATÍSTICA CORRIGIDA ---
   calculateStatus(values, category) {
     const validValues = values.filter((v) => v !== null && !isNaN(v));
     const n = validValues.length;
@@ -38,52 +38,39 @@ export class BodyMeasurementsController {
       };
     }
 
-    const deltas = [];
-    for (let i = 1; i < n; i++) {
-      deltas.push(validValues[i] - validValues[i - 1]);
-    }
-
-    const d1 = deltas[deltas.length - 2];
-    const d2 = deltas[deltas.length - 1];
     const threshold =
       category === "perimeter"
         ? this.THRESHOLD_PERIMETER
         : this.THRESHOLD_SKINFOLD;
 
-    // Regras Estritas baseadas no Prompt
-    const isMostlyPositive = d1 + d2 > threshold && d2 > 0;
-    const isMostlyNegative = d1 + d2 < -threshold && d2 < 0;
+    // 1. Visão Macro: Variação total (Fim vs Início)
+    const firstValue = validValues[0];
+    const lastValue = validValues[n - 1];
+    const overallDelta = lastValue - firstValue;
 
-    if (isMostlyPositive)
-      return {
-        id: "aumento",
-        label: "aumento",
-        icon: "trending_up",
-        colorClass: "text-blue-500",
-      };
-    if (isMostlyNegative)
-      return {
-        id: "queda",
-        label: "queda",
-        icon: "trending_down",
-        colorClass: "text-blue-500",
-      };
+    // 2. Visão Micro: Avalia a volatilidade (Picos e Vales)
+    let reversals = 0;
+    let maxVolatility = 0;
 
-    if (n >= 4) {
-      const d3 = deltas[deltas.length - 3];
-      const maxVar = Math.max(Math.abs(d1), Math.abs(d2), Math.abs(d3));
-
-      if (maxVar <= threshold) {
-        return {
-          id: "estavel",
-          label: "estável",
-          icon: "horizontal_rule",
-          colorClass: "text-blue-500",
-        };
+    for (let i = 1; i < n; i++) {
+      const diff = validValues[i] - validValues[i - 1];
+      if (Math.abs(diff) > maxVolatility) {
+        maxVolatility = Math.abs(diff);
       }
 
-      const hasReversal = d1 * d2 < 0 || d2 * d3 < 0;
-      if (hasReversal && maxVar > threshold) {
+      // Conta quantas vezes a linha inverteu de direção (formou um "V" ou um "^")
+      if (i > 1) {
+        const prevDiff = validValues[i - 1] - validValues[i - 2];
+        if (diff * prevDiff < 0) reversals++;
+      }
+    }
+
+    // --- REGRAS DE CLASSIFICAÇÃO BASEADAS NA CURVA REAL ---
+
+    // A. Se a variação total desde o início não superou a margem de erro técnico:
+    if (Math.abs(overallDelta) <= threshold) {
+      // Se estiver zigue-zagueando muito, é oscilante
+      if (reversals >= n / 3 && maxVolatility > threshold) {
         return {
           id: "oscilando",
           label: "oscilando",
@@ -91,8 +78,36 @@ export class BodyMeasurementsController {
           colorClass: "text-blue-500",
         };
       }
+      // Caso contrário, é apenas uma linha plana/estável
+      return {
+        id: "estavel",
+        label: "estável",
+        icon: "horizontal_rule",
+        colorClass: "text-blue-500",
+      };
     }
 
+    // B. Se a variação total indica crescimento real além do ruído:
+    if (overallDelta > threshold) {
+      return {
+        id: "aumento",
+        label: "aumento",
+        icon: "arrow_drop_up",
+        colorClass: "text-blue-500",
+      };
+    }
+
+    // C. Se a variação total indica perda real além do ruído:
+    if (overallDelta < -threshold) {
+      return {
+        id: "queda",
+        label: "queda",
+        icon: "arrow_drop_down",
+        colorClass: "text-blue-500",
+      };
+    }
+
+    // Fallback de segurança
     return {
       id: "atencao",
       label: "atenção",
@@ -188,19 +203,19 @@ export class BodyMeasurementsController {
     const skinCount =
       this.activeCategory === "skinfold" ? this.selectedItems.length : 0;
 
-      //Se for mais que zero exibe o badge, caso contrário, esconde o badge
-      if (periCount > 0) {
-        document.getElementById("badge-perimetros").innerText =
-          `(${periCount}/6)`;
-      } else {
-        document.getElementById("badge-perimetros").innerText = "";
-      }
+    //Se for mais que zero exibe o badge, caso contrário, esconde o badge
+    if (periCount > 0) {
+      document.getElementById("badge-perimetros").innerText =
+        `(${periCount}/6)`;
+    } else {
+      document.getElementById("badge-perimetros").innerText = "";
+    }
 
-      if (skinCount > 0) {
-        document.getElementById("badge-dobras").innerText = `(${skinCount}/6)`;
-      } else {
-        document.getElementById("badge-dobras").innerText = "";
-      }
+    if (skinCount > 0) {
+      document.getElementById("badge-dobras").innerText = `(${skinCount}/6)`;
+    } else {
+      document.getElementById("badge-dobras").innerText = "";
+    }
 
     // document
     //   .getElementById("filter-perimetros")
