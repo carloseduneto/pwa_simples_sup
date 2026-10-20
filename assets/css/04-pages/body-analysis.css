@@ -363,13 +363,21 @@
 
 .measurements-card-subtext {
   font-size: 10px;
-  color: #5987d8; /* Cor base solicitada */
+  /* color: #5987d8; Cor base solicitada */
   margin-top: 2px;
   display: flex;
   align-items: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.text-gray-500 {
+  color: var(--text-gray-500, #888);
+}
+
+.text-blue-500 {
+  color: var(--text-blue-500, #2563eb);
 }
 
 .measurements-card-subtext .material-symbols-rounded {

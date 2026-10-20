@@ -32,7 +32,7 @@ export class BodyMeasurementsController {
     if (n < 3) {
       return {
         id: "poucos_dados",
-        label: "- poucos dados",
+        label: "poucos dados",
         icon: "horizontal_rule",
         colorClass: "text-gray-500",
       };
@@ -43,23 +43,36 @@ export class BodyMeasurementsController {
         ? this.THRESHOLD_PERIMETER
         : this.THRESHOLD_SKINFOLD;
 
-    // 1. Visão Macro: Variação total (Fim vs Início)
-    const firstValue = validValues[0];
-    const lastValue = validValues[n - 1];
-    const overallDelta = lastValue - firstValue;
+    // 1. Visão Macro: Tendência da série inteira (reta de regressão linear)
+    const meanX = (n - 1) / 2;
+    const meanY = validValues.reduce((acc, v) => acc + v, 0) / n;
 
-    // 2. Visão Micro: Avalia a volatilidade (Picos e Vales)
+    let num = 0;
+    let den = 0;
+    for (let i = 0; i < n; i++) {
+      num += (i - meanX) * (validValues[i] - meanY);
+      den += (i - meanX) ** 2;
+    }
+
+    const slope = num / den;
+    const intercept = meanY - slope * meanX;
+
+    // Variação total ao longo da reta (início -> fim), imune a picos isolados nas pontas
+    const overallDelta = slope * (n - 1);
+
+    // 2. Visão Micro: Avalia a volatilidade em torno da tendência (Picos e Vales)
     let reversals = 0;
-    let maxVolatility = 0;
+    let maxResidual = 0;
 
-    for (let i = 1; i < n; i++) {
-      const diff = validValues[i] - validValues[i - 1];
-      if (Math.abs(diff) > maxVolatility) {
-        maxVolatility = Math.abs(diff);
+    for (let i = 0; i < n; i++) {
+      const residual = Math.abs(validValues[i] - (intercept + slope * i));
+      if (residual > maxResidual) {
+        maxResidual = residual;
       }
 
       // Conta quantas vezes a linha inverteu de direção (formou um "V" ou um "^")
       if (i > 1) {
+        const diff = validValues[i] - validValues[i - 1];
         const prevDiff = validValues[i - 1] - validValues[i - 2];
         if (diff * prevDiff < 0) reversals++;
       }
@@ -67,10 +80,10 @@ export class BodyMeasurementsController {
 
     // --- REGRAS DE CLASSIFICAÇÃO BASEADAS NA CURVA REAL ---
 
-    // A. Se a variação total desde o início não superou a margem de erro técnico:
+    // A. Se a tendência da série não superou a margem de erro técnico:
     if (Math.abs(overallDelta) <= threshold) {
-      // Se estiver zigue-zagueando muito, é oscilante
-      if (reversals >= n / 3 && maxVolatility > threshold) {
+      // Se estiver zigue-zagueando além do ruído em torno da reta, é oscilante
+      if (reversals >= n / 3 && maxResidual > threshold) {
         return {
           id: "oscilando",
           label: "oscilando",
@@ -87,7 +100,7 @@ export class BodyMeasurementsController {
       };
     }
 
-    // B. Se a variação total indica crescimento real além do ruído:
+    // B. Se a tendência indica crescimento real além do ruído:
     if (overallDelta > threshold) {
       return {
         id: "aumento",
@@ -97,7 +110,7 @@ export class BodyMeasurementsController {
       };
     }
 
-    // C. Se a variação total indica perda real além do ruído:
+    // C. Se a tendência indica perda real além do ruído:
     if (overallDelta < -threshold) {
       return {
         id: "queda",
@@ -462,7 +475,7 @@ export class BodyMeasurementsController {
               ${deltaText ? `<span>(${deltaText})</span>` : ""}
             </div>
             <div class="measurements-card-value">${currentValue}</div>
-            <div class="measurements-card-subtext">
+            <div class="measurements-card-subtext ${statusInfo.colorClass}">
               <span class="material-symbols-rounded">${statusInfo.icon}</span>
               ${statusInfo.label}
             </div>

@@ -161,6 +161,8 @@
   --text-white: var(--color-white);
   --text-black: var(--color-black);
 
+  --text-blue-500: var(--color-havelock-blue-500);
+
   --switch-active-bg: var(--color-havelock-blue-500);
   --switch-active-knob: var(--color-white);
 
@@ -245,6 +247,7 @@
   /* Ajustado para var do Dove */
   --gray-100: var(--color-dove-gray-100);
   --gray-200: var(--color-dove-gray-200); 
+  --text-gray-500: var(--color-dove-gray-500);
 
   --bg-main: var(--color-dove-gray-50);
   --bg-surface: var(--color-white);
@@ -281,6 +284,7 @@
 /* TESTE: Dove Gray - Modo Claro */
 [data-theme-gray="color-lynch-light"] {
   --text-muted: var(--color-lynch-400);
+  --text-gray-500: var(--color-lynch-500);
   /* Ajustado para var do Dove */
 
   --bg-main: var(--color-lynch-50);
@@ -338,6 +342,8 @@
   --font-color-dark: var(--text-main);
   --font-color-light: var(--text-on-brand);
   --font-color-secondary: var(--text-secondary);
+
+  
 
   /* UI Elements */
   --unselected-background-color: var(--input-bg);
