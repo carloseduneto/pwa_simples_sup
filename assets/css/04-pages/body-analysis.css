@@ -218,16 +218,28 @@
 }
 
 /* Seção do Gráfico */
+.analysis-chart-section{
+  margin-top: 32px;
+}
+
 .chart-title {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 16px;
 }
 
-.chart-container {
+.chart-container, .chart-container--lower{
   width: 100%;
-  height: 320px; /* Define a altura fixa desejada */
   position: relative;
+  margin-bottom: 50px;
+}
+
+.chart-container {
+  height: 280px; /* Define a altura fixa desejada */
+}
+
+.chart-container--lower {
+  height: 260px; /* Altura menor para gráficos secundários */
 }
 
 /* Filtros estilo Pill */

@@ -207,6 +207,7 @@ export class BodyMoreController {
             borderWidth: 2,
             pointBackgroundColor: "#3B82F6",
             pointRadius: 3,
+            pointHitRadius: 15,
           },
           {
             label: "Limite Aceitável (4%)",

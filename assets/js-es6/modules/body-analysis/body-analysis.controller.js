@@ -384,6 +384,12 @@ export class BodyAnalysisController {
     const fmData = this.assessments.map((a) => a.metrics.fm.toFixed(1));
     const ffmiData = this.assessments.map((a) => a.metrics.ffmi.toFixed(1));
 
+    // Cálculo do menor valor de FFMI para criar o respiro no eixo Y
+    const ffmiRawValues = this.assessments.map((a) => a.metrics.ffmi);
+    const minFfmi = Math.min(...ffmiRawValues);
+    // Subtrai 2 pontos inteiros do valor mínimo (garantindo que não fique negativo)
+    const suggestedMinFfmi = Math.max(0, Math.floor(minFfmi) - 0.5);
+
     // Destrói instâncias anteriores para evitar sobreposição ao recarregar
     if (this.chartInstance) this.chartInstance.destroy();
     if (this.ffmiChartInstance) this.ffmiChartInstance.destroy();
@@ -410,7 +416,7 @@ export class BodyAnalysisController {
       },
       options: {
         responsive: true,
-        // maintainAspectRatio: false,
+        maintainAspectRatio: false,
         scales: {
           x: { stacked: false, grid: { display: false } },
           y: { stacked: false, beginAtZero: true },
@@ -433,6 +439,7 @@ export class BodyAnalysisController {
             borderWidth: 2,
             pointBackgroundColor: "#3B7242",
             pointRadius: 4,
+            pointHitRadius: 15,
             fill: true,
             tension: 0.3,
           },
@@ -440,10 +447,13 @@ export class BodyAnalysisController {
       },
       options: {
         responsive: true,
-        // maintainAspectRatio: false,
+        maintainAspectRatio: false,
         scales: {
           x: { grid: { display: false } },
-          y: { beginAtZero: false },
+          y: {
+            suggestedMin: suggestedMinFfmi,
+            beginAtZero: false,
+          },
         },
         plugins: { legend: { position: "top" } },
       },
