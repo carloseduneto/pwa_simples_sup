@@ -1,0 +1,89 @@
+<main class="page-stimulus">
+  <!-- Navegação de Período -->
+  <section class="period-navigation">
+    <div class="tabs-container" id="periodTabs">
+      <button class="tab-btn active" data-period="day">Dia</button>
+      <button class="tab-btn" data-period="week">Sem.</button>
+      <button class="tab-btn" data-period="month">Mês</button>
+      <button class="tab-btn" data-period="year">Ano</button>
+    </div>
+
+    <div class="date-selector">
+      <button class="btn-nav-date" id="btnPrevDate">
+        <span class="material-symbols-rounded"> chevron_left </span>
+      </button>
+      <span id="currentDateDisplay"></span>
+      <button class="btn-nav-date" id="btnNextDate">
+        <span class="material-symbols-rounded"> chevron_right </span>
+      </button>
+    </div>
+    <div id="miniCalendarContainer" class="mini-calendar-wrapper" style="display: none;"></div>
+  </section>
+
+  <!-- Histórico de Semanas (Exibido apenas na visão Mês, acima do gráfico) -->
+  <section class="summary-info" id="monthHistorySection" style="display: none;"></section>
+
+  <!-- Container do Gráfico e Filtros (Mês / Ano) -->
+  <section class="chart-container" id="chartContainer">
+    <div class="skeleton-chart"></div>
+
+    <div class="annual-filters-bar" id="annualFiltersBar" style="display: none;">
+      <div class="filter-select-wrapper" id="rangeFilterWrapper" style="flex: 1 1 100%;">
+        <select id="rangeFilter" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: none; background: var(--gray-100); font-size: 14px;">
+          <option value="all">Todos os meses</option>
+          <option value="3">3 últimos meses</option>
+          <option value="6">6 últimos meses</option>
+          <option value="9">9 últimos meses</option>
+          <option value="12">12 últimos meses</option>
+        </select>
+      </div>
+
+      <div class="filter-select-wrapper">
+        <select id="groupFilter" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: none; background: var(--gray-100); font-size: 14px;">
+          <option value="all">Grupos...</option>
+        </select>
+      </div>
+
+      <div class="filter-select-wrapper">
+        <button type="button" class="filter-select-btn" id="btnDropdownMuscles">
+          <span id="dropdownMusclesLabel">Músculos (0/6)</span>
+          <span class="material-symbols-rounded" style="font-size: 16px;">arrow_drop_down</span>
+        </button>
+        <div class="filter-dropdown-menu" id="menuDropdownMuscles"></div>
+      </div>
+
+      <button type="button" class="btn-clear-filters" id="btnClearFilters">
+        <span class="material-symbols-rounded" style="font-size: 16px;">filter_alt_off</span> Limpar
+      </button>
+    </div>
+
+    <canvas id="stimulusRadarChart"></canvas>
+  </section>
+  
+  <!-- Resumo -->
+  <section class="summary-info" id="summaryContainer"></section>
+
+  <!-- Tabela de Volume -->
+  <section class="table-container" id="tableSection">
+    <table class="data-table">
+      <thead>
+        <tr id="muscleTableHeadRow">
+          <th>Músculo</th>
+          <th>Séries</th>
+        </tr>
+      </thead>
+      <tbody id="muscleTableBody"></tbody>
+    </table>
+  </section>
+
+  <!-- Lista de Exercícios Detalhada -->
+  <section class="exercise-breakdown" id="exerciseBreakdownSection">
+    <div class="breakdown-header">
+      <h2 id="breakdownHeaderTitle">Músculos × Exercícios</h2>
+      <button class="btn-icon" id="btnToggleBreakdown">
+        <span class="material-symbols-rounded"> swap_horiz </span>
+      </button>
+    </div>
+    <div id="exerciseListContainer" class="exercise-list"></div>
+  </section>
+</main>

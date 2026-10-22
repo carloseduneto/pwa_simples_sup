@@ -1,0 +1,36 @@
+### Githardpull
+git config --global alias.hardpull '!git fetch --all && git reset --hard origin/$(git branch --show-current)' 
+git hardpull 
+
+### Vite config
+npm install vite --save-dev  
+npm run dev  
+
+### vite.config.js
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  server: {
+    port: 3000,
+    watch: {
+      usePolling: true,
+    },
+  },
+  plugins: [
+    {
+      name: "html-force-reload",
+      handleHotUpdate({ file, server }) {
+        if (file.endsWith(".html")) {
+          server.ws.send({ type: "full-reload", path: "*" });
+        }
+      },
+    },
+  ],
+});
+
+
+### VS Config
+Ctrl + ,
+explorer.fileNesting.enabled
+Item: *.html
+Value: ${capture}.controller.js, ${capture}-*.controller.js

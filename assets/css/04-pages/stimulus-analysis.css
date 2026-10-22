@@ -65,6 +65,21 @@
   color: var(--text-secondary);
 }
 
+.breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  width: 98%;
+}
+.breakdown-header .btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 50px;
+  aspect-ratio: 1 / 1;
+}
+
 /* Tabela */
 
 .data-table {
@@ -492,7 +507,7 @@
   background: #fff;
   border: 1px solid var(--gray-200, #e5e7eb);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 100;
   display: none;
   flex-direction: column;
