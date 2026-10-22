@@ -13,7 +13,7 @@ import { initBodyAssessmentList } from "./modules/body-assessment/list-body-asse
 import { initBodyAssessmentForm } from "./modules/body-assessment/form-body-assessment.controller.js";
 import { initBodyAssessmentDetail } from "./modules/body-assessment/detail-body-assessment.controller.js";
 import { initBodyAssessmentCompare } from "./modules/body-assessment/compare-body-assessment.controller.js";
-import { initStimulusAnalysis } from "./controllers/stimulus-analysis.controller.js";
+import { initStimulusAnalysis } from "./modules/stimulus-analysis/stimulus-analysis.controller.js";
 
 
 //Exercícios 
@@ -87,7 +87,7 @@ const rotasConfig = {
   // --- TELAS NOVAS ---
   stimulusAnalysis: {
     idDiv: "screen-stimulus-analysis",
-    html: "assets/screens/stimulus-analysis.html",
+    html: "assets/js-es6/modules/stimulus-analysis/stimulus-analysis.html",
     tipoHeader: "alternativo",
     bottomNav: "none",
     titulo: "Análise de Estímulo",
