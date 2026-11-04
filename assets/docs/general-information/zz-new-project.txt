@@ -29,6 +29,20 @@ export default defineConfig({
 });
 
 
+package.json
+{
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.3.5"
+  }
+}
+
+
 ### VS Config
 Ctrl + ,
 explorer.fileNesting.enabled

@@ -1,0 +1,44 @@
+<div class="form-centralize">
+  <form id="form-weight-tracking-container" class="warper-screen assessment-form exercise-form wt-form">
+    
+    <div class="wt-form__fields">
+      <!-- Linha 1: Data e Hora lado a lado -->
+      <div class="wt-form__datetime-row">
+        <input 
+          type="date" 
+          id="wt-input-date" 
+          name="data" 
+          class="input-grouped-form__input wt-input wt-input--date" 
+          required 
+        />
+        <input 
+          type="time" 
+          id="wt-input-time" 
+          name="hora" 
+          class="input-grouped-form__input wt-input wt-input--time" 
+          required 
+        />
+      </div>
+
+      <!-- Linha 2: Peso (kg) -->
+      <div class="wt-form__weight-row">
+        <input 
+          type="text" 
+          id="wt-input-peso" 
+          name="peso" 
+          inputmode="decimal" 
+          placeholder="Peso (kg)" 
+          class="input-grouped-form__input wt-input mask-decimal" 
+          required 
+        />
+      </div>
+    </div>
+
+    <button type="submit" class="default-form-button default-form-button--save">
+      Salvar
+    </button>
+    <button type="button" class="default-form-button default-form-button--cancel" data-route="weightTrackingList">
+      Cancelar
+    </button>
+  </form>
+</div>
