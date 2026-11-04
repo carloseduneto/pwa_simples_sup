@@ -24,6 +24,9 @@ import { initConfigController } from "./controllers/config.js";
 
 // Análise Corporal
 import { BodyAnalysisController } from "./modules/body-analysis/body-analysis.controller.js";
+
+//Avaliação peso
+import {  initWeightTrackingList } from "./modules/weight-tracking/wt-list.controller.js"
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -305,6 +308,20 @@ const rotasConfig = {
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
       const controller = new BodyAnalysisController();
+      controller.init();
+    },
+  },
+  weightTrackingList: {
+    idDiv: "weight-tracking-list",
+    html: "assets/js-es6/modules/weight-tracking/wt-list.html",
+    tipoHeader: "alternativo",
+    voltarPara: "templates",
+    bottomNav: "none",
+    tema: "havelock-blue",
+    titulo: "Análise física",
+    onLoad: (id) => {
+      // AQUI É A MUDANÇA:
+      const controller = initWeightTrackingList();
       controller.init();
     },
   },

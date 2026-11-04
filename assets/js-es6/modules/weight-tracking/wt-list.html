@@ -1,0 +1,26 @@
+<div class="warper-screen wt-screen">
+  <!-- Filtro de Período -->
+  <div class="wt-filter-bar">
+    <select id="wt-period-filter" class="wt-filter-select">
+      <option value="all">Todos registros</option>
+      <option value="30">Últimos 30 dias</option>
+      <option value="90">Últimos 90 dias</option>
+    </select>
+  </div>
+
+  <!-- Seção do Gráfico de Evolução -->
+  <section class="wt-chart-section">
+    <h2 class="wt-section-title">Evolução peso (geral)</h2>
+    <div id="wt-chart-container" class="wt-chart-box">
+      <canvas id="wt-evolution-chart"></canvas>
+    </div>
+  </section>
+
+  <!-- Container da Lista de Pesagens -->
+  <div id="weight-tracking-container" class="list-container"></div>
+</div>
+
+<!-- Botão Flutuante de Adicionar -->
+<button id="btn-create-weight-tracking" type="button" class="primary-button primary-button--add" data-route="weightTrackingForm">
+  <span class="material-symbols-rounded">add_2</span>
+</button>

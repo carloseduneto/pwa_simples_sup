@@ -1,0 +1,60 @@
+.wt-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Pill Select ("Todos registros") */
+.wt-filter-bar {
+  display: flex;
+  align-items: center;
+}
+
+.wt-filter-select {
+  appearance: none;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 2.2rem 0.5rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1rem;
+}
+
+/* Área do Gráfico */
+.wt-chart-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.wt-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.wt-chart-box {
+  width: 100%;
+  min-height: 200px;
+  position: relative;
+}
+
+/* Estados de Feedback */
+.wt-empty-state {
+  text-align: center;
+  opacity: 0.6;
+  padding: 2rem 0;
+}
+
+.wt-error-state {
+  text-align: center;
+  color: #d32f2f;
+  padding: 2rem 0;
+}
