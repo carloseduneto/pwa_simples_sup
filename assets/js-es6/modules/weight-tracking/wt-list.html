@@ -3,14 +3,16 @@
   <div class="wt-filter-bar">
     <select id="wt-period-filter" class="wt-filter-select">
       <option value="all">Todos registros</option>
-      <option value="30">Últimos 30 dias</option>
-      <option value="90">Últimos 90 dias</option>
+      <option value="30d">30 dias</option>
+      <option value="3m">3 meses</option>
+      <option value="6m">6 meses</option>
+      <option value="12m">12 meses</option>
     </select>
   </div>
 
   <!-- Seção do Gráfico de Evolução -->
   <section class="wt-chart-section">
-    <h2 class="wt-section-title">Evolução peso (geral)</h2>
+    <h2 class="wt-section-title">Evolução peso</h2>
     <div id="wt-chart-container" class="wt-chart-box">
       <canvas id="wt-evolution-chart"></canvas>
     </div>
@@ -21,6 +23,11 @@
 </div>
 
 <!-- Botão Flutuante de Adicionar -->
-<button id="btn-create-weight-tracking" type="button" class="primary-button primary-button--add" data-route="weightTrackingForm">
+<button
+  id="btn-create-weight-tracking"
+  type="button"
+  class="primary-button primary-button--add"
+  data-route="weightTrackingForm"
+>
   <span class="material-symbols-rounded">add_2</span>
 </button>

@@ -27,6 +27,7 @@ import { BodyAnalysisController } from "./modules/body-analysis/body-analysis.co
 
 //Avaliação peso
 import {  initWeightTrackingList } from "./modules/weight-tracking/wt-list.controller.js"
+import {initWeightTrackingForm } from "./modules/weight-tracking/wt-form.controller.js"
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -318,11 +319,28 @@ const rotasConfig = {
     voltarPara: "templates",
     bottomNav: "none",
     tema: "havelock-blue",
-    titulo: "Análise física",
+    titulo: "Todos os peso",
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
-      const controller = initWeightTrackingList();
-      controller.init();
+      initWeightTrackingList((rota, param) => {
+        roteador(rota, param);
+      }, id);
+    },
+  },
+
+  weightTrackingForm: {
+    idDiv: "weight-tracking-form",
+    html: "assets/js-es6/modules/weight-tracking/wt-form.html",
+    tipoHeader: "alternativo",
+    voltarPara: "weightTrackingList",
+    bottomNav: "none",
+    tema: "havelock-blue",
+    titulo: "",
+    onLoad: (id) => {
+      // AQUI É A MUDANÇA:
+      initWeightTrackingForm((rota, param) => {
+        roteador(rota, param);
+      }, id);
     },
   },
 };

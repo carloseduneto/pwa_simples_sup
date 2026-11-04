@@ -42,7 +42,7 @@
 
 .wt-chart-box {
   width: 100%;
-  min-height: 200px;
+  height: 240px;
   position: relative;
 }
 
@@ -57,4 +57,53 @@
   text-align: center;
   color: #d32f2f;
   padding: 2rem 0;
+}
+
+/* Container dos campos do formulário de Peso */
+.wt-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.wt-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 80%;
+  margin-bottom: 0.5rem;
+}
+
+/* Linha 1: Data (maior) + Hora (menor) lado a lado */
+.wt-form__datetime-row {
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.wt-form__weight-row {
+  width: 100%;
+}
+
+/* Estilo dos inputs conforme o mockup */
+.wt-input {
+  width: 100%;
+  background-color: #eeeeee;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  color: #111111;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.wt-input::placeholder {
+  color: #777777;
+}
+
+.wt-input--time {
+  text-align: center;
 }
