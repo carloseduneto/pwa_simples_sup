@@ -97,6 +97,7 @@
 
 /* Comportamento de Marca no Tema Claro (Padrão) */
 :root[data-theme="orange"] {
+  --main-brand-color: var(--color-orange-500);
   --bg-brand-light: var(--color-orange-50);
   --text-on-brand: var(--color-white);
   --text-brand: var(--color-orange-600);
@@ -152,6 +153,7 @@
 }
 
 :root[data-theme="havelock-blue"] {
+  --main-brand-color: var(--color-havelock-blue-500);
   --bg-brand-light: var(--color-havelock-blue-50);
   --text-on-brand: var(--color-white);
   --text-brand: var(--color-havelock-blue-600);
@@ -188,6 +190,7 @@
 }
 
 :root[data-theme="emerald"] {
+  --main-brand-color: var(--color-emerald-500);
   --bg-brand-light: var(--color-emerald-50);
   --text-on-brand: var(--color-white);
   --text-brand: var(--color-emerald-600);

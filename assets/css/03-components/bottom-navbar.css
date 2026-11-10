@@ -37,6 +37,16 @@
   font-family: sans-serif;
 }
 
+/* Remove o destaque azul ao clicar em dispositivos móveis (Webkit/Safari/Chrome) */
+.nav-item{
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove a borda azul/foco padrão ao selecionar elementos via teclado ou clique */
+.nav-item:focus {
+    outline: none;
+}
+
 /* Estilo para quando o item estiver ativo */
 .nav-item.active {
   /* background-color: var(--faded-color); */

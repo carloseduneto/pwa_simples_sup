@@ -13,6 +13,16 @@ export const BottomNavComponent = {
       if (resposta.ok) {
         container.innerHTML = await resposta.text();
         this.foiRenderizado = true;
+        
+        //Se for depois das 18h, remove boxshadow de .bottom-nav
+        const horaAtual = new Date().getHours();
+        if (horaAtual >= 18) {
+          const bottomNav = container.querySelector(".bottom-nav");
+          if (bottomNav) {
+            bottomNav.style.boxShadow = "none";
+          }
+        }
+
       }
     } catch (erro) {
       console.error("Erro ao carregar Bottom Nav:", erro);

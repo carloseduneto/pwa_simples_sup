@@ -70,9 +70,19 @@ const rotasConfig = {
     html: "assets/screens/config.html",
     tipoHeader: "padrao",
     tema: "havelock-blue",
-    bottomNav: "templates",
+    bottomNav: "none",
     titulo: "Configurações",
     onLoad: initConfigController,
+  },
+
+  bodyAssessmentMain: {
+    idDiv: "screen-body-assessment-main",
+    html: "assets/js-es6/modules/body-assessment-main/body-assessment-main.html",
+    tipoHeader: "padrao",
+    tema: "havelock-blue",
+    bottomNav: "bodyAssessmentHome",
+    titulo: "Avaliações Físicas",
+    onLoad: null,
   },
 
   // --- TELAS NOVAS ---
@@ -244,6 +254,7 @@ const rotasConfig = {
     bottomNav: "none",
     tema: "havelock-blue",
     titulo: "Avaliações Físicas",
+    voltarPara: "bodyAssessmentMain",
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
       initBodyAssessmentList((rota, param) => {
@@ -276,6 +287,7 @@ const rotasConfig = {
     tema: "havelock-blue",
     // titulo: "Add/Editar Avaliação Corporal",
     titulo: "Detalhes avaliação",
+    voltarPara: "bodyAssessmentList",
     onLoad: (id) => {
       // AQUI É A MUDANÇA:
       initBodyAssessmentDetail((rota, param) => {
@@ -303,7 +315,7 @@ const rotasConfig = {
     idDiv: "screen-body-analysis",
     html: "assets/js-es6/modules/body-analysis/body-analysis.html",
     tipoHeader: "alternativo",
-    voltarPara: "templates",
+    voltarPara: "bodyAssessmentMain",
     bottomNav: "none",
     tema: "havelock-blue",
     titulo: "Análise física",
@@ -317,7 +329,7 @@ const rotasConfig = {
     idDiv: "weight-tracking-list",
     html: "assets/js-es6/modules/weight-tracking/wt-list.html",
     tipoHeader: "alternativo",
-    voltarPara: "templates",
+    voltarPara: "bodyAssessmentMain",
     bottomNav: "none",
     tema: "havelock-blue",
     titulo: "Todos os peso",

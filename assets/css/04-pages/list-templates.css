@@ -6,7 +6,7 @@
   align-items: center;
   width: 100%;
   justify-content: space-between;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .template-header--actions--lonely{
@@ -14,6 +14,7 @@
   align-items: center;
   width: 100%;
   justify-content: flex-end;
+  /* display: none; */
 }
 
 

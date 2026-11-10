@@ -1,0 +1,28 @@
+.body-assessment-main-area{
+    margin-top: 6vh;
+}
+
+.body-assessment-main-card{
+  width: 100%;
+  min-height: 60px;
+  height: auto;
+  background-color: var(--card-background);
+  color: var(--card-title);
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  box-sizing: border-box;
+  transition: transform 0.2s;
+  gap: 10px;
+  font-weight: 600;
+  margin-top: 10px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-weight: 600;
+}
+
