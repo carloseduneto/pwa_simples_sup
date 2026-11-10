@@ -43,7 +43,7 @@ button {
 .primary-button--add {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   position: fixed;
-  bottom: 20px;
+  bottom: 95px;
   right: 20px;
   background-color: var(--primary-color);
   border-radius: 13px;

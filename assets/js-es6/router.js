@@ -53,7 +53,7 @@ const rotasConfig = {
     html: "assets/screens/list-templates.html", // <-- NOVO
     tipoHeader: "padrao",
     tema: "orange",
-    // bottomNav: "workout", // <--- Exibe no contexto de Treino
+    bottomNav: "templates", // <--- Exibe no contexto de Treino
     titulo: "Templates",
     onLoad: (id) => {
       // 1. CARREGA O SELETOR DE SEMANAS (Recomendações)
@@ -69,7 +69,8 @@ const rotasConfig = {
     idDiv: "screen-config",
     html: "assets/screens/config.html",
     tipoHeader: "padrao",
-    bottomNav: "none",
+    tema: "havelock-blue",
+    bottomNav: "templates",
     titulo: "Configurações",
     onLoad: initConfigController,
   },

@@ -1,20 +1,24 @@
 .bottom-nav {
   position: fixed;
-  bottom: 20px;               /* Distância do fim da tela */
+  bottom: 20px; /* Distância do fim da tela */
   left: 50%;
   transform: translateX(-50%); /* Centraliza a barra na tela */
-  
   display: flex;
   align-items: center;
   justify-content: space-around;
+  /* background-color: white; */
   
-  background-color: white;
-  width: 40%;                 /* Largura da barra */
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+  
+  width: 35%; /* Largura da barra */
   max-width: 400px;
-  height: 80px;
-  border-radius: 50px;        /* Formato de pílula */
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Sombra suave */
-  padding: 0 10px;
+  height: 60px;
+  border-radius: 50px; /* Formato de pílula */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  padding: 0 4px;
   z-index: 1000;
 }
 
@@ -35,8 +39,11 @@
 
 /* Estilo para quando o item estiver ativo */
 .nav-item.active {
-  background-color: var(--faded-color);
+  /* background-color: var(--faded-color); */
+  background-color: color-mix(in srgb, var(--faded-color) 70%, transparent);
   color: var(--primary-color);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .nav-icon {
