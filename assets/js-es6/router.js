@@ -15,8 +15,7 @@ import { initBodyAssessmentDetail } from "./modules/body-assessment/detail-body-
 import { initBodyAssessmentCompare } from "./modules/body-assessment/compare-body-assessment.controller.js";
 import { initStimulusAnalysis } from "./modules/stimulus-analysis/stimulus-analysis.controller.js";
 
-
-//Exercícios 
+//Exercícios
 import { initExerciseIntensityVolume } from "./modules/exercises/exercise-intensity-volume.controller.js";
 
 //Configurações
@@ -26,8 +25,8 @@ import { initConfigController } from "./controllers/config.js";
 import { BodyAnalysisController } from "./modules/body-analysis/body-analysis.controller.js";
 
 //Avaliação peso
-import {  initWeightTrackingList } from "./modules/weight-tracking/wt-list.controller.js"
-import {initWeightTrackingForm } from "./modules/weight-tracking/wt-form.controller.js"
+import { initWeightTrackingList } from "./modules/weight-tracking/wt-list.controller.js";
+import { initWeightTrackingForm } from "./modules/weight-tracking/wt-form.controller.js";
 // ============================================================================
 // 1. CONFIGURAÇÃO MESTRE (O "Cérebro" do App)
 // ============================================================================
@@ -539,6 +538,21 @@ export async function roteador(
   BottomNavComponent.atualizarEstado(nomeRota, config.bottomNav);
   // APLICA O TEMA NA RAIZ DO DOCUMENTO
   document.documentElement.setAttribute("data-theme", config.tema || "orange");
+
+  // 4.2 ATUALIZA A BARRA DE STATUS DINAMICAMENTE
+  const corTema = getComputedStyle(document.documentElement)
+    .getPropertyValue("--main-brand-color")
+    .trim();
+
+  if (corTema) {
+    let metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (!metaTheme) {
+      metaTheme = document.createElement("meta");
+      metaTheme.name = "theme-color";
+      document.head.appendChild(metaTheme);
+    }
+    metaTheme.setAttribute("content", corTema);
+  }
 
   // 5. Oculta telas antigas
   Object.values(rotasConfig).forEach((rotaItem) => {
