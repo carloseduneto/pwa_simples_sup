@@ -1074,6 +1074,8 @@ function atualizarEstatisticas() {
       document.getElementById("est-hora-fim").textContent = `${fimH}:${fimM}`;
     } else {
       document.getElementById("est-hora-fim").textContent = "--:--";
+      //Para o timer quando não há mais séries restantes
+      stopTimer();
     }
   }
 }
