@@ -4,9 +4,11 @@ import { GlobalLoader } from "../ui/global-loader.js";
 
 export async function initConfigController() {
   const form = document.querySelector('form[action="user-preferences"]');
-  const select = document.getElementById("week-register");
+  const weekRegister = document.getElementById("week-register");
+  const weightSmoothing = document.getElementById("weight_smoothing");
+  const skinfoldProtocol = document.getElementById("bf_method_calculate");
 
-  if (!form || !select) return;
+  if (!form || !weekRegister || !weightSmoothing || !skinfoldProtocol) return;
 
   try {
     const userId = await AuthService.getUserId();
@@ -15,7 +17,15 @@ export async function initConfigController() {
 
     // Preenche o valor salvo
     const currentMode = userData?.preferences?.["week-register"] || "manual";
-    select.value = currentMode;
+    weekRegister.value = currentMode;
+
+    const currentWeightSmoothing =
+      userData?.preferences?.["weight_smoothing"] || "ewma";
+    weightSmoothing.value = currentWeightSmoothing;
+
+    const currentSkinfoldProtocol =
+      userData?.preferences?.["bf_method_calculate"] || "pollock_7";
+    skinfoldProtocol.value = currentSkinfoldProtocol;
 
     // Submissão do formulário
     form.addEventListener("submit", async (e) => {
@@ -28,7 +38,9 @@ export async function initConfigController() {
         btn.disabled = true;
 
         const newPreferences = {
-          "week-register": select.value,
+          "week-register": weekRegister.value,
+          weight_smoothing: weightSmoothing.value,
+          bf_method_calculate: skinfoldProtocol.value,
         };
 
         await UserContextService.updateUserPreferences(userId, newPreferences);

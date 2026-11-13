@@ -4,13 +4,35 @@
 <p class="testConfig">Aqui você pode editar seus dados...</p>
 <div class="testConfig">Um teste de config</div>
 
-<br>
+<br />
 
-<form action="user-preferences">
+<form action="user-preferences" class="config-options">
+  <div class="config-options--item">
     <label for="week-register">Registro da semana:</label>
     <select name="week-register" id="week-register">
-        <option value="manual">Manual</option>
-        <option value="automatic">Automático</option>
+      <option value="manual">Manual</option>
+      <option value="automatic">Automático</option>
     </select>
-    <button type="submit">Salvar</button>
+  </div>
+
+  <div class="config-options--item">
+    <label for="weight_smoothing">Peso (método de suavização):</label>
+    <select name="weight_smoothing" id="weight_smoothing">
+      <option value="ewma">EWMA</option>
+      <option value="kalman">Kalman</option>
+    </select>
+  </div>
+
+  <div class="config-options--item">
+    <label for="bf_method_calculate">Protocolo de avaliação física: </label>
+    <select name="bf_method_calculate" id="bf_method_calculate">
+      <option value="evans_7">Evans 7</option>
+      <option value="evans_3">Evans 3</option>
+      <option value="faulkner">Faulkner</option>
+      <option value="pollock_3">Pollock 3</option>
+      <option value="pollock_7">Pollock 7</option>
+    </select>
+  </div>
+
+  <button type="submit">Salvar</button>
 </form>

@@ -34,7 +34,8 @@ export class BodyAnalysisController {
         );
         return;
       }
-
+      this.userContext = await UserContextService.getUserData(userId);
+      
       const cacheKey = `${this.CACHE_PREFIX}${userId}`;
       const cachedDataString = localStorage.getItem(cacheKey);
 
@@ -46,7 +47,7 @@ export class BodyAnalysisController {
 
           if (!isExpired) {
             console.log("Análise carregada via cache local.");
-            this.userContext = cachedData.userContext;
+            // this.userContext = cachedData.userContext;
             this.processAndRender(cachedData.rawAssessments);
             return;
           }
@@ -57,13 +58,13 @@ export class BodyAnalysisController {
       }
 
       console.log("Buscando dados frescos do banco...");
-      this.userContext = await UserContextService.getUserData(userId);
+      // this.userContext = await UserContextService.getUserData(userId);
       const rawAssessments = await BodyAvaliacoesService.getAll();
 
       localStorage.setItem(
         cacheKey,
         JSON.stringify({
-          userContext: this.userContext,
+          // userContext: this.userContext,
           rawAssessments: rawAssessments,
           timestamp: Date.now(),
         }),

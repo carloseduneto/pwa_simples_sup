@@ -1,10 +1,13 @@
 import { GlobalLoader } from "../../ui/global-loader.js";
 import { WeightTrackingService } from "./wt.service.js";
 import { gerarListItem } from "../../components/list-item.js";
+import { AuthService } from "../../services/auth.service.js";
+import { UserContextService } from "../../services/user-context.service.js";
 
 // Estado local do módulo e referência da instância do Chart.js
 let allRecords = [];
 let weightChartInstance = null;
+let currentSmoothingMode = "ewma"; // Armazena a preferência para uso global no módulo
 
 export async function initWeightTrackingList(onNavigate) {
   const container = document.getElementById("weight-tracking-container");
@@ -15,7 +18,17 @@ export async function initWeightTrackingList(onNavigate) {
   container.innerHTML = GlobalLoader.getSimple();
 
   try {
-    allRecords = await WeightTrackingService.getAll();
+    const userId = await AuthService.getUserId();
+
+    // Busca Todos registros de peso e Preferências em paralelo
+    const [records, userPrefs] = await Promise.all([
+      WeightTrackingService.getAll(),
+      UserContextService.getUserDataByIdPreferences(userId),
+    ]);
+
+    allRecords = records;
+    currentSmoothingMode =
+      userPrefs?.preferences?.["weight_smoothing"] || "ewma";
 
     if (!allRecords || allRecords.length === 0) {
       container.innerHTML =
@@ -23,6 +36,7 @@ export async function initWeightTrackingList(onNavigate) {
       renderChart([]);
       return;
     }
+
 
     renderView(allRecords, container);
     setupEventListeners(container, filterSelect, onNavigate);
@@ -34,7 +48,7 @@ export async function initWeightTrackingList(onNavigate) {
 }
 
 /**
- * Renderiza a lista e atualiza a visualização do gráfico combinado (EWMA + Scatter)
+ * Renderiza a lista e atualiza a visualização do gráfico combinado
  */
 function renderView(records, container) {
   renderChart(records);
@@ -67,25 +81,97 @@ function renderView(records, container) {
 }
 
 /**
- * Calcula a Média Móvel Exponencialmente Ponderada (EWMA)
- * @param {number[]} values - Array de pesos em ordem cronológica
- * @param {number} alpha - Fator de suavização (0.25 equilibra resposta e filtro de ruído)
+ * Calcula a Média Móvel Exponencialmente Ponderada (Time-Aware)
+ * @param {Array} records - Array de objetos { peso, data_registro } ordenado cronologicamente
+ * @param {number} halfLifeDays - Quantos dias leva para o peso antigo perder metade da relevância (padrão: 7 dias)
  */
-function calculateEWMA(values, alpha = 0.25) {
-  if (!values.length) return [];
-  const ewma = [values[0]];
-  for (let i = 1; i < values.length; i++) {
-    const prev = ewma[i - 1];
-    const current = alpha * values[i] + (1 - alpha) * prev;
-    ewma.push(Number(current.toFixed(2)));
+function calculateEWMA(records, halfLifeDays = 7) {
+  if (!records.length) return [];
+
+  const ewma = [Number(records[0].peso)];
+  let prevDate = new Date(records[0].data_registro).getTime();
+
+  for (let i = 1; i < records.length; i++) {
+    const currentWeight = Number(records[i].peso);
+    const currentDate = new Date(records[i].data_registro).getTime();
+
+    // Calcula os dias passados desde a última medição
+    const diffDays = (currentDate - prevDate) / (1000 * 60 * 60 * 24);
+
+    // Se no mesmo dia (ou horas de diferença), mantém o peso
+    if (diffDays <= 0) {
+      ewma.push(ewma[i - 1]);
+      continue;
+    }
+
+    // Calcula o decaimento: exp(-ln(2) * dias / meia-vida)
+    // Se passaram 7 dias (meia-vida), weight_decay será 0.5
+    // Se passaram 60 dias, weight_decay será próximo de 0 (peso antigo não importa)
+    const weightDecay = Math.exp((-Math.LN2 * diffDays) / halfLifeDays);
+    const alpha = 1 - weightDecay;
+
+    const currentEwma = alpha * currentWeight + weightDecay * ewma[i - 1];
+
+    ewma.push(Number(currentEwma.toFixed(2)));
+    prevDate = currentDate;
   }
+
   return ewma;
 }
 
 /**
- * Renderiza o gráfico combinado utilizando Chart.js com separação visual de anos:
- * Dataset 1: Dispersão (Peso Bruto) em #ff6314
- * Dataset 2: Linha Suavizada (EWMA) em #4a89f3
+ * Calcula a suavização utilizando um Filtro de Kalman (1D) Sensível ao Tempo
+ * @param {Array} records - Array de objetos { peso, data_registro } ordenado cronologicamente
+ */
+function calculateKalman(records) {
+  if (!records.length) return [];
+
+  const kalman = [];
+
+  let estimate = Number(records[0].peso);
+  let errorEstimate = 1.0;
+  const errorMeasure = 1.5; // Ruído da balança (estático, ex: roupas, flutuação hídrica)
+  const qPerDay = 0.1; // Ruído do processo por dia (o corpo muda cerca de 100g/dia de verdade)
+
+  let prevDate = new Date(records[0].data_registro).getTime();
+
+  for (let i = 0; i < records.length; i++) {
+    const measurement = Number(records[i].peso);
+    const currentDate = new Date(records[i].data_registro).getTime();
+
+    // Se for o primeiro registro, apenas salva a estimativa inicial
+    if (i === 0) {
+      kalman.push(Number(estimate.toFixed(2)));
+      continue;
+    }
+
+    const diffDays = Math.max(
+      0,
+      (currentDate - prevDate) / (1000 * 60 * 60 * 24),
+    );
+
+    // O ruído do processo escala com o tempo. Um buraco de 60 dias soma uma incerteza de 6kg (60 * 0.1)
+    const q = diffDays * qPerDay;
+
+    // 1. Predição
+    let prediction = estimate;
+    let errorPrediction = errorEstimate + q;
+
+    // 2. Atualização
+    let kalmanGain = errorPrediction / (errorPrediction + errorMeasure);
+
+    estimate = prediction + kalmanGain * (measurement - prediction);
+    errorEstimate = (1 - kalmanGain) * errorPrediction;
+
+    kalman.push(Number(estimate.toFixed(2)));
+    prevDate = currentDate;
+  }
+
+  return kalman;
+}
+
+/**
+ * Renderiza o gráfico combinado utilizando Chart.js
  */
 function renderChart(records) {
   const canvas = document.getElementById("wt-evolution-chart");
@@ -122,54 +208,23 @@ function renderChart(records) {
     );
   });
 
-  // Identifica os índices exatos onde ocorre mudança de ano para desenhar divisórias
-  const yearBoundaries = [];
-  for (let i = 1; i < chronological.length; i++) {
-    const prevYear = new Date(chronological[i - 1].data_registro).getFullYear();
-    const currYear = new Date(chronological[i].data_registro).getFullYear();
-    if (currYear !== prevYear) {
-      yearBoundaries.push({ index: i, year: currYear });
-    }
-  }
-
-  // Plugin customizado do Chart.js para desenhar uma linha vertical a cada novo ano
-  const yearSeparatorPlugin = {
-    id: "yearSeparator",
-    afterDraw(chart) {
-      if (!yearBoundaries.length) return;
-      const {
-        ctx,
-        chartArea: { top, bottom },
-        scales: { x },
-      } = chart;
-
-      ctx.save();
-      yearBoundaries.forEach(({ index, year }) => {
-        const xPos = x.getPixelForValue(index);
-
-        // Linha vertical tracejada separando os anos
-        ctx.beginPath();
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.22)";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
-        ctx.moveTo(xPos, top);
-        ctx.lineTo(xPos, bottom);
-        ctx.stroke();
-
-        // Rótulo do novo ano no topo da divisória
-        ctx.fillStyle = "#555555";
-        ctx.font = "bold 10px sans-serif";
-        ctx.textAlign = "left";
-        ctx.fillText(year.toString(), xPos + 4, top + 10);
-      });
-      ctx.restore();
-    },
-  };
-
   const rawWeights = chronological.map((r) => Number(r.peso));
-  const ewmaWeights = calculateEWMA(rawWeights, 0.25);
 
-  const allValues = [...rawWeights, ...ewmaWeights];
+  // Roteamento estruturado da suavização com base na preferência do usuário
+  let smoothedWeights = [];
+  let smoothingLabel = "";
+
+if (currentSmoothingMode === "kalman") {
+  // Passa o array completo para o Kalman ler o tempo
+  smoothedWeights = calculateKalman(chronological);
+  smoothingLabel = "Tendência (Kalman)";
+} else {
+  // Passa o array completo para o EWMA ler o tempo
+  smoothedWeights = calculateEWMA(chronological);
+  smoothingLabel = "Tendência (EWMA)";
+}
+
+  const allValues = [...rawWeights, ...smoothedWeights];
   const minVal = Math.min(...allValues);
   const maxVal = Math.max(...allValues);
   const yMinSuggested = Math.floor(minVal * 0.985);
@@ -181,7 +236,6 @@ function renderChart(records) {
 
   weightChartInstance = new Chart(ctx, {
     type: "line",
-    // plugins: [yearSeparatorPlugin],
     data: {
       labels,
       datasets: [
@@ -198,8 +252,8 @@ function renderChart(records) {
           order: 1,
         },
         {
-          label: "Tendência (EWMA)",
-          data: ewmaWeights,
+          label: smoothingLabel, // A legenda agora reflete dinamicamente a matemática usada
+          data: smoothedWeights,
           fill: true,
           backgroundColor: gradient,
           borderColor: "#4a89f3",
@@ -273,7 +327,7 @@ function renderChart(records) {
           },
           ticks: {
             autoSkip: true,
-            maxTicksLimit: 10, // Evita poluição de datas quando há muitos registros (2023-2026)
+            maxTicksLimit: 10,
             maxRotation: 45,
             minRotation: 45,
             font: { size: 10 },
@@ -303,8 +357,6 @@ function renderChart(records) {
     },
   });
 }
-
-
 
 /**
  * Formata o número para o padrão brasileiro (ex: 88.9 -> 88,90)
